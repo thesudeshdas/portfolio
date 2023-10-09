@@ -1,3 +1,81 @@
 {
-  "extends": "next/core-web-vitals"
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@next/next/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    // ? - Because React is imported directly in main.tsx
+    "react/react-in-jsx-scope": "off",
+
+    // ? - Because single quotes >>> double quotes
+    "jsx-quotes": ["error", "prefer-single"],
+
+    // ? - To allow escaping characters and template literals
+    "quotes": [
+      2,
+      "single",
+      { "avoidEscape": true, "allowTemplateLiterals": true }
+    ],
+
+    // ? - This is basically a nuisance and does not help
+    "react/jsx-props-no-spreading": "off",
+
+    // ? - Because we do not use prop.types
+    "react/prop-types": "off",
+    "react/require-default-props": "off",
+
+    // ? - Because we have utils which are better as named exports
+    "import/prefer-default-export": "off",
+
+    // ? - This won't allow one component to be called via barrel exports
+    "import/no-cycle": "off",
+
+    // ? - Otherwise asks for imports to have file extension. This is nuisance in the barrel exports
+    "import/extensions": "off",
+
+    // ? - Otherwise won't let us chain the ternary operator in the JSX
+    "no-nested-ternary": "off",
+
+    // ? Immer state uses direct reassignment to state
+    "no-param-reassign": "off",
+
+    // ? - This won't allow conversion of JSON to form data
+    "no-restricted-syntax": "off",
+    "no-prototype-builtins": "off",
+
+    // ? Because JS has default value for Radix
+    "radix": "off",
+
+    // ? - PDF Previewer breaks down due to package code (most probably)
+    "react/jsx-no-bind": "off",
+
+    // ? - To open links and navigate, we need to make it warning
+    "@typescript-eslint/no-unused-expressions": "warn",
+
+    "no-console": "error",
+
+    "@typescript-eslint/no-explicit-any": "off",
+
+    "@typescript-eslint/no-implied-eval": "off"
+  },
+  "ignorePatterns": [
+    "**/*.json",
+    "node_modules",
+    "public",
+    "styles",
+    "coverage",
+    "dist",
+    ".turbo",
+    "vite.config.ts"
+  ]
 }

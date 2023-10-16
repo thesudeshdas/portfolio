@@ -3,6 +3,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 
+// import components
+import AppNav from '@/components/AppNav/AppNav';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -24,7 +27,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className='flex flex-col min-h-screen max-w-[1200px] mx-auto'>
+            <AppNav />
+
+            <div className='flex-col items-center px-4'>{children}</div>
+          </div>
         </ThemeProvider>
       </body>
     </html>

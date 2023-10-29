@@ -13,7 +13,7 @@ export default function ActiveLink({ link, text }: IActiveLinkProps) {
 
   return (
     <Link href={link}>
-      <div className='flex-col group'>
+      <div className='group'>
         <p className={pathname === link ? 'font-bold' : ''}>{text}</p>
 
         <div

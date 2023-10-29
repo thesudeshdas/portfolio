@@ -1,5 +1,5 @@
 'use client';
 
-export default function Work() {
+export default function Dev() {
   return <h1>Hello, Next.js!</h1>;
 }

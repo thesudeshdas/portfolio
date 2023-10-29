@@ -27,7 +27,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className='flex flex-col min-h-screen max-w-[1200px] mx-auto'>
+          <div className='flex flex-col min-h-screen max-w-[1000px] mx-auto'>
             <AppNav />
 
             <div className='flex-col items-center px-4'>{children}</div>

@@ -1,6 +1,6 @@
 'use client';
 
-// import nextjs
+// import nextjs components
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -18,7 +18,7 @@ import { appNavLinks } from './appNav.data';
 
 export default function AppNav() {
   return (
-    <nav className='h-14  flex justify-between items-center px-4'>
+    <nav className='h-14  flex justify-between items-center px-4 sticky top-0 z-10 '>
       <Link href='/'>
         <div className='flex items-center gap-1'>
           <div className='h-8 w-8 relative'>
@@ -26,6 +26,7 @@ export default function AppNav() {
               src='/dash-white.png'
               alt='Brand'
               fill
+              className='invert dark:invert-0'
             />
           </div>
 

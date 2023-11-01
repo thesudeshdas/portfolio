@@ -3,4 +3,5 @@ export interface ITechStackLogo {
   name: string;
   logo: any;
   color: string;
+  colorName: string;
 }

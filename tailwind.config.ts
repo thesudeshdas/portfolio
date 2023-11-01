@@ -49,7 +49,11 @@ module.exports = {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
-        }
+        },
+        react: '#61DAFB',
+        black: '#000000',
+        chakra: '#319795',
+        git: '#F05032'
       },
       borderRadius: {
         lg: 'var(--radius)',

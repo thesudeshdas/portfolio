@@ -86,20 +86,12 @@ export default function Journey() {
                     </div>
 
                     <ul className='flex flex-row flex-wrap flex-shrink-0 gap-3 md:w-[300px] '>
-                      {techStack?.map((tech) => {
-                        console.log({ tech });
-
-                        return (
-                          <div
-                            key={tech.id}
-                            className={`text-[${tech.color}]`}
-                          >
-                            <tech.logo
-                              className={`w-[1.2rem] h-[1.2rem] md:w-[3rem] md:h-[3rem]`}
-                            />
-                          </div>
-                        );
-                      })}
+                      {techStack?.map((tech) => (
+                        <tech.logo
+                          key={tech.id}
+                          className={`w-[1.2rem] h-[1.2rem] md:w-[1.6rem] md:h-[1.6rem] hover:text-${tech.colorName}`}
+                        />
+                      ))}
                     </ul>
                   </div>
                 </AccordionContent>

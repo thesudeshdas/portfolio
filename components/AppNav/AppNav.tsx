@@ -34,7 +34,21 @@ export default function AppNav() {
         </div>
       </Link>
 
-      <div className='flex items-center gap-4'>
+      <div className='flex items-center gap-1 lg:gap-2'>
+        {/* Nav links for laptops & desktops */}
+        <ul className='hidden lg:flex gap-4'>
+          {appNavLinks.map(({ id, link, text }) => (
+            <li key={id}>
+              <ActiveLink
+                link={link}
+                text={text}
+              />
+            </li>
+          ))}
+        </ul>
+
+        <ModeToggle />
+
         <div className='lg:hidden'>
           <Sheet>
             <SheetTrigger
@@ -61,20 +75,6 @@ export default function AppNav() {
             </SheetContent>
           </Sheet>
         </div>
-
-        {/* Nav links for laptops & desktops */}
-        <ul className='hidden lg:flex gap-4'>
-          {appNavLinks.map(({ id, link, text }) => (
-            <li key={id}>
-              <ActiveLink
-                link={link}
-                text={text}
-              />
-            </li>
-          ))}
-        </ul>
-
-        <ModeToggle />
       </div>
     </nav>
   );

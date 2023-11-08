@@ -9,7 +9,26 @@ import talentplaceLogo from '../../../assets/images/talentplace-white.svg';
 import neoGLogo from '../../../assets/images/neog-white.svg';
 
 // import icons
-import { ChakraUI, Git, ReactJS } from '@/data/icons/icons.data';
+import {
+  ApacheECharts,
+  Axios,
+  ChakraUI,
+  Django,
+  ESLint,
+  Git,
+  GitLab,
+  Lodash,
+  Postman,
+  Prettier,
+  Python,
+  ReactHookForm,
+  ReactJS,
+  ReactRouter,
+  ReactTable,
+  ReduxToolkit,
+  Turborepo,
+  Vite
+} from '@/data/icons/icons.data';
 
 export const journey: IJourneyListItem[] = [
   {
@@ -35,7 +54,26 @@ export const journey: IJourneyListItem[] = [
         text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, laboriosam.'
       }
     ],
-    techStack: [ReactJS, ChakraUI, Git]
+    techStack: [
+      ReactJS,
+      ChakraUI,
+      Git,
+      GitLab,
+      Turborepo,
+      ReactHookForm,
+      ReactTable,
+      ReactRouter,
+      Axios,
+      Vite,
+      ESLint,
+      Prettier,
+      Lodash,
+      ReduxToolkit,
+      ApacheECharts,
+      Python,
+      Django,
+      Postman
+    ]
   },
   {
     id: uuidv4(),
@@ -43,7 +81,21 @@ export const journey: IJourneyListItem[] = [
     endDate: 'August 2023',
     startDate: 'Feb 2023',
     organisation: 'Talentplace.ai',
-    organisationLogo: talentplaceLogo
+    organisationLogo: talentplaceLogo,
+    techStack: [
+      ReactJS,
+      ChakraUI,
+      Git,
+      GitLab,
+      ReactHookForm,
+      ReactRouter,
+      Axios,
+      Vite,
+      ESLint,
+      Prettier,
+      ReduxToolkit,
+      Postman
+    ]
   },
   {
     id: uuidv4(),
@@ -62,3 +114,5 @@ export const journey: IJourneyListItem[] = [
     organisationLogo: neoGLogo
   }
 ];
+
+// missing => react-beautiful-dnd, yup, formik

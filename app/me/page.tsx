@@ -20,7 +20,7 @@ export default function Me() {
               src='/gojo-compressed.png'
               alt='Sudesh Das'
               fill
-              objectFit='cover'
+              className='object-cover'
             />
           </div>
 

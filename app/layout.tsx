@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 
 // import components
-import AppNav from '@/components/AppNav/AppNav';
+import { AppNav, Footer } from '@/components/index';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,8 +31,10 @@ export default function RootLayout({
 
           <AppNav />
 
-          <div className='flex flex-col min-h-screen max-w-[1000px] mx-auto'>
+          <div className='flex flex-col  max-w-[1000px] mx-auto'>
             <div className='flex-col items-center px-4'>{children}</div>
+
+            <Footer />
           </div>
         </ThemeProvider>
       </body>

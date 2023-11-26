@@ -2,12 +2,8 @@
 
 import Image from 'next/image';
 
-import {
-  LinkedInLogoIcon,
-  GitHubLogoIcon,
-  TwitterLogoIcon,
-  EnvelopeClosedIcon
-} from '@radix-ui/react-icons';
+import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+
 import Journey from './sections/journey';
 
 export default function Me() {
@@ -46,13 +42,11 @@ export default function Me() {
           </p>
 
           <div className='flex gap-4'>
-            <LinkedInLogoIcon className='h-[1.2rem] w-[1.2rem]' />
+            <FiGithub className='h-[1.2rem] w-[1.2rem]' />
 
-            <GitHubLogoIcon className='h-[1.2rem] w-[1.2rem]' />
+            <FiLinkedin className='h-[1.2rem] w-[1.2rem]' />
 
-            <TwitterLogoIcon className='h-[1.2rem] w-[1.2rem]' />
-
-            <EnvelopeClosedIcon className='h-[1.2rem] w-[1.2rem]' />
+            <FiMail className='h-[1.2rem] w-[1.2rem]' />
           </div>
         </div>
       </div>

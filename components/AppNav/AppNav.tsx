@@ -15,26 +15,8 @@ import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 
 // import data
 import { appNavLinks } from './appNav.data';
-import { useEffect, useState } from 'react';
 
 export default function AppNav() {
-  const [scrolled, setScrolled] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 50;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [scrolled]);
-
   return (
     <nav
       className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 bg-opacity-60 dark:bg-opacity-60 backdrop-blur-sm`}

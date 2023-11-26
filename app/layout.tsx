@@ -27,11 +27,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className='fixed inset-0 z-[-2] bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-800 from-zinc-300 to-white'></div>
+          <div className='fixed inset-0 z-[-2] bg-gradient-to-br dark:from-zinc-900 dark:to-zinc-900 from-zinc-50 to-zinc-50'></div>
 
-          <div className='flex flex-col min-h-screen max-w-[1000px] mx-auto '>
-            <AppNav />
+          <AppNav />
 
+          <div className='flex flex-col min-h-screen max-w-[1000px] mx-auto'>
             <div className='flex-col items-center px-4'>{children}</div>
           </div>
         </ThemeProvider>

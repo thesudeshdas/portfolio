@@ -79,7 +79,7 @@ export default function DevProjectCard({
               className='flex-grow'
             >
               <Button className='w-full'>
-                Go Live
+                Live
                 <ExternalLinkIcon className='ml-1 w-4 h-4' />
               </Button>
             </Link>
@@ -95,7 +95,7 @@ export default function DevProjectCard({
                 variant='secondary'
                 className='border-[1px] border-foreground w-full'
               >
-                Source Code
+                Source
                 <CodeIcon className='ml-1 w-4 h-4' />
               </Button>
             </Link>

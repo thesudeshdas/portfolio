@@ -42,11 +42,25 @@ export default function Me() {
           </p>
 
           <div className='flex gap-4'>
-            <FiGithub className='h-[1.2rem] w-[1.2rem]' />
+            <a
+              href='https://github.com/thesudeshdas'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            </a>
 
-            <FiLinkedin className='h-[1.2rem] w-[1.2rem]' />
+            <a
+              href='https://www.linkedin.com/in/thesudeshdas'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            </a>
 
-            <FiMail className='h-[1.2rem] w-[1.2rem]' />
+            <a href='mailto:sudeshkumardas7@gmail.com'>
+              <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            </a>
           </div>
         </div>
       </div>

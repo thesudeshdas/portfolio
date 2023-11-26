@@ -12,7 +12,7 @@ import { NextJS, TailwindCSS } from '@/data/icons/icons.data';
 
 export default function Footer() {
   return (
-    <div className='flex flex-col sm:flex-row justify-between items-center mx-4 py-4 border-t-[1px] border-black gap-8 '>
+    <div className='flex flex-col sm:flex-row justify-between items-center mx-4 py-4 border-t-[1px] border-zinc-400 dark:border-zinc-500 gap-8 '>
       <div className='flex flex-col items-center sm:items-start gap-2'>
         <Link href='/'>
           <div className='flex items-center gap-1'>

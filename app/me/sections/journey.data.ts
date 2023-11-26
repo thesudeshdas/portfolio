@@ -36,7 +36,7 @@ export const journey: IJourneyListItem[] = [
     designation: 'Fullstack Developer',
     endDate: 'Present',
     startDate: 'September 2023',
-    organisation: 'Talentplace.ai',
+    organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     summary:
       'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, laboriosam.',
@@ -80,7 +80,7 @@ export const journey: IJourneyListItem[] = [
     designation: 'Frontend Developer',
     endDate: 'August 2023',
     startDate: 'Feb 2023',
-    organisation: 'Talentplace.ai',
+    organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     techStack: [
       ReactJS,

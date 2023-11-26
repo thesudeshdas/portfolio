@@ -58,8 +58,8 @@ export default function Journey() {
                 value={`item-${index}`}
                 className='border-none'
               >
-                <AccordionTrigger className='data-[state=open]:bg-foreground data-[state=open]:text-background p-4 pl-2 text-left :no-underline hover:no-underline relative group'>
-                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground'></div>
+                <AccordionTrigger className='data-[state=open]:bg-foreground data-[state=open]:text-background p-4 pl-2 text-left :no-underline hover:no-underline relative group rounded-lg'>
+                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground rounded-md'></div>
 
                   <div className='flex flex-col gap-2'>
                     <h3 className='text-xs'>

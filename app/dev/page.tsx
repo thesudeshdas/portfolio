@@ -45,7 +45,7 @@ export default function Dev() {
   }, [activeBadges]);
 
   return (
-    <div className='py-12 flex flex-col gap-12'>
+    <div className='py-12 flex flex-col gap-4'>
       <div className='flex flex-col gap-4'>
         <h2 className='font-bold text-4xl'>Creation</h2>
 

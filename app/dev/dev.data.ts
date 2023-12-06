@@ -68,7 +68,8 @@ export const devProjectList: IDevProjectListItem[] = [
     live: 'https://dashtra.netlify.app/',
     techStack: [ReactJS, JavaScript, ContextAPI, Express, NodeJS, MongoDB],
     title: 'Dashtra',
-    sourceCode: 'https://github.com/thesudeshdas/dashtra'
+    sourceCode: 'https://github.com/thesudeshdas/dashtra',
+    featured: true
   },
   {
     id: uuidv4(),

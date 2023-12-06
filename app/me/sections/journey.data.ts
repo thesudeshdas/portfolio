@@ -12,12 +12,22 @@ import neoGLogo from '../../../assets/images/neog-white.svg';
 import {
   ApacheECharts,
   Axios,
+  CSS3,
   ChakraUI,
   Django,
   ESLint,
+  Express,
   Git,
+  GitHub,
   GitLab,
+  HTML5,
+  JavaScript,
+  Jest,
   Lodash,
+  MongoDB,
+  Mongoose,
+  NextJS,
+  NodeJS,
   Postman,
   Prettier,
   Python,
@@ -27,19 +37,20 @@ import {
   ReactTable,
   ReduxToolkit,
   Turborepo,
+  TypeScript,
   Vite
 } from '@/data/icons/icons.data';
 
 export const journey: IJourneyListItem[] = [
   {
     id: uuidv4(),
-    designation: 'Fullstack Developer',
+    designation: 'Frontend Developer',
     endDate: 'Present',
-    startDate: 'September 2023',
+    startDate: 'Feb 2023',
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     summary:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, laboriosam.',
+      'Successfully led a team of 7 developers building three production ready web apps',
     achievements: [
       {
         id: uuidv4(),
@@ -77,41 +88,51 @@ export const journey: IJourneyListItem[] = [
   },
   {
     id: uuidv4(),
-    designation: 'Frontend Developer',
-    endDate: 'August 2023',
-    startDate: 'Feb 2023',
-    organisation: 'TalentPlace.ai',
-    organisationLogo: talentplaceLogo,
+    designation: 'Teaching Assistant',
+    endDate: 'July 2022',
+    startDate: 'January 2022',
+    organisation: 'NeoG',
+    organisationLogo: neoGLogo,
     techStack: [
-      ReactJS,
+      NextJS,
       ChakraUI,
+      Express,
+      NodeJS,
+      Postman,
       Git,
-      GitLab,
-      ReactHookForm,
-      ReactRouter,
-      Axios,
-      Vite,
-      ESLint,
-      Prettier,
+      GitHub,
+      HTML5,
+      CSS3,
+      JavaScript,
+      TypeScript,
       ReduxToolkit,
-      Postman
+      MongoDB,
+      Mongoose
     ]
   },
   {
     id: uuidv4(),
-    designation: 'Teaching Assistant',
-    endDate: 'January 2022',
-    startDate: 'July 2022',
-    organisation: 'NeoG',
-    organisationLogo: neoGLogo
-  },
-  {
-    id: uuidv4(),
     designation: 'Team Captain',
-    endDate: 'February 2021',
-    startDate: 'December 2021',
+    endDate: 'December 2021',
+    startDate: 'February 2021',
     organisation: 'NeoG',
-    organisationLogo: neoGLogo
+    organisationLogo: neoGLogo,
+    techStack: [
+      ReactJS,
+      HTML5,
+      CSS3,
+      JavaScript,
+      TypeScript,
+      Jest,
+      Postman,
+      GitHub,
+      Git,
+      Express,
+      NodeJS,
+      MongoDB,
+      Mongoose,
+      ReduxToolkit
+    ]
   }
 ];
 

@@ -39,7 +39,7 @@ export default function DevProjectFilter({
   };
 
   return (
-    <ul className='sticky top-14 z-10 flex flex-row flex-wrap flex-shrink-0 gap-2 bg-zinc-50 dark:bg-zinc-900 px-2 py-4'>
+    <ul className='sticky top-14 z-10 flex flex-row flex-wrap flex-shrink-0 gap-2 bg-zinc-50 dark:bg-zinc-900 py-4'>
       {devFiltersBadgesOptions
         ?.filter((badge) => activeBadges.includes(badge.label))
         ?.map((option) => (

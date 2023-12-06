@@ -18,9 +18,7 @@ import { appNavLinks } from './appNav.data';
 
 export default function AppNav() {
   return (
-    <nav
-      className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 bg-opacity-60 dark:bg-opacity-60 backdrop-blur-sm`}
-    >
+    <nav className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900`}>
       <div
         className={`h-full w-full flex justify-between items-center px-4 max-w-[1000px] mx-auto `}
       >
@@ -85,3 +83,5 @@ export default function AppNav() {
     </nav>
   );
 }
+
+// For transparent navbar - bg-opacity-60 dark:bg-opacity-60 backdrop-blur-sm

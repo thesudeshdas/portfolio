@@ -1,9 +1,12 @@
 'use client';
 
+// import next components
 import Image from 'next/image';
 
+// import icons
 import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 
+// import components
 import Journey from './sections/journey';
 
 export default function Me() {
@@ -34,7 +37,7 @@ export default function Me() {
 
           <h3>Fullstack Developer @ Talentplace.ai</h3>
 
-          <p className='text my-4 text-justify'>
+          <p className='my-4 text-justify'>
             Lorem ipsum dolor, sit amet consectetur adipisicing elit. Autem
             necessitatibus sapiente temporibus minima quod vitae, consectetur
             accusantium porro animi veniam architecto magnam omnis tenetur rem

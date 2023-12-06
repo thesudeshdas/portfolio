@@ -58,10 +58,10 @@ export default function Journey() {
                 value={`item-${index}`}
                 className='border-none'
               >
-                <AccordionTrigger className='data-[state=open]:bg-foreground data-[state=open]:text-background p-4 pl-2 text-left :no-underline hover:no-underline relative group rounded-lg'>
-                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground rounded-md'></div>
+                <AccordionTrigger className='data-[state=open]:bg-zinc-200 data-[state=open]:dark:bg-zinc-800 p-4 pl-2 text-left :no-underline hover:no-underline relative group'>
+                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground rounded-md '></div>
 
-                  <div className='flex flex-col gap-2'>
+                  <div className='flex flex-col gap-2 text-zinc-500 dark:text-zinc-400 group-data-[state=open]:text-foreground'>
                     <h3 className='text-xs'>
                       {startDate} - {endDate}
                     </h3>
@@ -72,13 +72,13 @@ export default function Journey() {
                       src={organisationLogo}
                       alt={organisation}
                       height={24}
-                      className='group-data-[state=open]:invert-0 invert group-data-[state=open]:dark:invert dark:invert-0'
+                      className='invert dark:invert-0 opacity-50 group-data-[state=open]:opacity-100'
                     />
                   </div>
                 </AccordionTrigger>
 
-                <AccordionContent className='p-4 pl-2'>
-                  <div className='flex flex-col md:flex-row gap-4 md:gap-12 md:items-start'>
+                <AccordionContent className='p-4 pl-2 pt-0 bg-zinc-200 dark:bg-zinc-800 '>
+                  <div className='pt-4 flex flex-col md:flex-row gap-4 md:gap-12 md:items-start  border-t-[1px] border-zinc-950 dark:border-zinc-50'>
                     <div className='flex flex-col gap-4'>
                       {summary && <p>{summary}</p>}
 

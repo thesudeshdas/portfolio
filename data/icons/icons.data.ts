@@ -36,7 +36,8 @@ import {
   SiFirebase,
   SiDjango,
   SiPython,
-  SiBootstrap
+  SiBootstrap,
+  SiJest
 } from 'react-icons/si';
 
 // import types
@@ -148,6 +149,12 @@ export const JavaScript: ITechStackLogo = {
   id: uuidv4(),
   name: 'JavaScript',
   logo: SiJavascript
+};
+
+export const Jest: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Jest',
+  logo: SiJest
 };
 
 export const Lodash: ITechStackLogo = {

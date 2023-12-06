@@ -37,7 +37,8 @@ export const devProjectList: IDevProjectListItem[] = [
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
-    title: 'Job Portal'
+    title: 'Job Portal',
+    featured: true
   },
   {
     id: uuidv4(),
@@ -47,7 +48,8 @@ export const devProjectList: IDevProjectListItem[] = [
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
-    title: 'Resume Builder'
+    title: 'Resume Builder',
+    featured: true
   },
   {
     id: uuidv4(),
@@ -56,7 +58,8 @@ export const devProjectList: IDevProjectListItem[] = [
     live: 'https://catalyst-react.netlify.app/',
     techStack: [ReactJS, TypeScript, ChakraUI, Express, NodeJS, MongoDB],
     title: 'Catalyst',
-    sourceCode: 'https://github.com/thesudeshdas/catalyst'
+    sourceCode: 'https://github.com/thesudeshdas/catalyst',
+    featured: true
   },
   {
     id: uuidv4(),

@@ -11,4 +11,10 @@ export interface IDevProjectListItem {
   techStack: ITechStackLogo[];
   live: string;
   sourceCode?: string;
+  featured?: boolean;
+}
+
+export interface IDevFilterBadgeOptionItem {
+  id: string;
+  label: string;
 }

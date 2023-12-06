@@ -62,7 +62,7 @@ export default function DevProjectCard({
           {techStack?.map((tech) => (
             <Badge
               key={tech.id}
-              className='py-1 bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 hover:dark:bg-zinc-800'
+              className='py-1 bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 hover:dark:bg-zinc-700'
             >
               {tech.name}
             </Badge>

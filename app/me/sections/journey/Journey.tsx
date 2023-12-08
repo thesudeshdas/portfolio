@@ -1,3 +1,5 @@
+'use client';
+
 // import nextJs components
 import Image from 'next/image';
 
@@ -22,7 +24,7 @@ import { journey } from './journey.data';
 export default function Journey() {
   return (
     <div className='flex flex-col gap-6'>
-      <h2 className='font-bold text-3xl'>My journey</h2>
+      <h2 className='font-bold text-3xl'>Journey</h2>
 
       <div className='flex'>
         <div className='w-8 flex justify-center flex-shrink-0'>

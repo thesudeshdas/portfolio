@@ -13,7 +13,6 @@ import {
   Bootstrap,
   CSS3,
   ChakraUI,
-  ContextAPI,
   Express,
   HTML5,
   JavaScript,
@@ -66,7 +65,7 @@ export const devProjectList: IDevProjectListItem[] = [
     description: `E-commerce store for selling fitness & football accessories. Built to showcase the fundamental knowledge of a full stack web app building`,
     image: '/gojo-compressed.png',
     live: 'https://dashtra.netlify.app/',
-    techStack: [ReactJS, JavaScript, ContextAPI, Express, NodeJS, MongoDB],
+    techStack: [ReactJS, JavaScript, Express, NodeJS, MongoDB],
     title: 'Dashtra',
     sourceCode: 'https://github.com/thesudeshdas/dashtra',
     featured: true

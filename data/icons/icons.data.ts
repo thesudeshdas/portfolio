@@ -37,7 +37,12 @@ import {
   SiDjango,
   SiPython,
   SiBootstrap,
-  SiJest
+  SiJest,
+  SiSass,
+  SiMysql,
+  SiFigma,
+  SiFramer,
+  SiCanva
 } from 'react-icons/si';
 
 // import types
@@ -67,16 +72,16 @@ export const Bootstrap: ITechStackLogo = {
   logo: SiBootstrap
 };
 
+export const Canva: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Canva',
+  logo: SiCanva
+};
+
 export const ChakraUI: ITechStackLogo = {
   id: uuidv4(),
   name: 'Chakra UI',
   logo: SiChakraui
-};
-
-export const ContextAPI: ITechStackLogo = {
-  id: uuidv4(),
-  name: 'Context API',
-  logo: undefined
 };
 
 export const CreateReactApp: ITechStackLogo = {
@@ -109,10 +114,22 @@ export const Express: ITechStackLogo = {
   logo: SiExpress
 };
 
+export const Figma: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Figma',
+  logo: SiFigma
+};
+
 export const Firebase: ITechStackLogo = {
   id: uuidv4(),
   name: 'Firebase',
   logo: SiFirebase
+};
+
+export const Framer: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Framer',
+  logo: SiFramer
 };
 
 export const GitHub: ITechStackLogo = {
@@ -175,6 +192,12 @@ export const Mongoose: ITechStackLogo = {
   logo: SiMongoose
 };
 
+export const MySQL: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'MySQL',
+  logo: SiMysql
+};
+
 export const NextJS: ITechStackLogo = {
   id: uuidv4(),
   name: 'Next.js',
@@ -185,6 +208,12 @@ export const NodeJS: ITechStackLogo = {
   id: uuidv4(),
   name: 'NodeJS',
   logo: SiNodedotjs
+};
+
+export const Postman: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Postman',
+  logo: SiPostman
 };
 
 export const Prettier: ITechStackLogo = {
@@ -207,7 +236,7 @@ export const ReactHookForm: ITechStackLogo = {
 
 export const ReactJS: ITechStackLogo = {
   id: uuidv4(),
-  name: 'React',
+  name: 'ReactJS',
   logo: SiReact
 };
 
@@ -229,10 +258,10 @@ export const ReduxToolkit: ITechStackLogo = {
   logo: SiRedux
 };
 
-export const Postman: ITechStackLogo = {
+export const SASS: ITechStackLogo = {
   id: uuidv4(),
-  name: 'Postman',
-  logo: SiPostman
+  name: 'SASS',
+  logo: SiSass
 };
 
 export const TailwindCSS: ITechStackLogo = {

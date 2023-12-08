@@ -1,13 +1,12 @@
 'use client';
 
+// import next components
 import Image from 'next/image';
 
-import {
-  LinkedInLogoIcon,
-  GitHubLogoIcon,
-  TwitterLogoIcon,
-  EnvelopeClosedIcon
-} from '@radix-ui/react-icons';
+// import icons
+import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+
+// import components
 import Journey from './sections/journey';
 
 export default function Me() {
@@ -20,7 +19,7 @@ export default function Me() {
               src='/gojo-compressed.png'
               alt='Sudesh Das'
               fill
-              objectFit='cover'
+              className='object-cover rounded-lg'
             />
           </div>
 
@@ -38,7 +37,7 @@ export default function Me() {
 
           <h3>Fullstack Developer @ Talentplace.ai</h3>
 
-          <p className='text my-4 text-justify'>
+          <p className='my-4 text-justify'>
             Lorem ipsum dolor, sit amet consectetur adipisicing elit. Autem
             necessitatibus sapiente temporibus minima quod vitae, consectetur
             accusantium porro animi veniam architecto magnam omnis tenetur rem
@@ -46,13 +45,25 @@ export default function Me() {
           </p>
 
           <div className='flex gap-4'>
-            <LinkedInLogoIcon className='h-[1.2rem] w-[1.2rem]' />
+            <a
+              href='https://github.com/thesudeshdas'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            </a>
 
-            <GitHubLogoIcon className='h-[1.2rem] w-[1.2rem]' />
+            <a
+              href='https://www.linkedin.com/in/thesudeshdas'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            </a>
 
-            <TwitterLogoIcon className='h-[1.2rem] w-[1.2rem]' />
-
-            <EnvelopeClosedIcon className='h-[1.2rem] w-[1.2rem]' />
+            <a href='mailto:sudeshkumardas7@gmail.com'>
+              <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            </a>
           </div>
         </div>
       </div>

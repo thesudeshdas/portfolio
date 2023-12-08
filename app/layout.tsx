@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 
 // import components
-import AppNav from '@/components/AppNav/AppNav';
+import { AppNav, Footer } from '@/components/index';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,10 +27,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className='flex flex-col min-h-screen max-w-[1000px] mx-auto'>
-            <AppNav />
+          <div className='fixed inset-0 z-[-2] bg-gradient-to-br dark:from-zinc-900 dark:to-zinc-900 from-zinc-50 to-zinc-50'></div>
 
+          <AppNav />
+
+          <div className='flex flex-col  max-w-[1000px] mx-auto'>
             <div className='flex-col items-center px-4'>{children}</div>
+
+            <Footer />
           </div>
         </ThemeProvider>
       </body>

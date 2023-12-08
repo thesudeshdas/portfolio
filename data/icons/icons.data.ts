@@ -7,48 +7,254 @@ import {
   SiNextdotjs,
   SiExpress,
   SiChakraui,
-  SiGit
+  SiGit,
+  SiCreatereactapp,
+  SiReactrouter,
+  SiReacthookform,
+  SiReacttable,
+  SiHtml5,
+  SiCss3,
+  SiJavascript,
+  SiTypescript,
+  SiPostman,
+  SiGithub,
+  SiGitlab,
+  SiMongodb,
+  SiMongoose,
+  SiGraphql,
+  SiApollographql,
+  SiRedux,
+  SiTurborepo,
+  SiAxios,
+  SiVite,
+  SiEslint,
+  SiPrettier,
+  SiLodash,
+  SiApacheecharts,
+  SiTailwindcss,
+  SiNodedotjs,
+  SiFirebase,
+  SiDjango,
+  SiPython,
+  SiBootstrap,
+  SiJest
 } from 'react-icons/si';
 
 // import types
 import { ITechStackLogo } from '@/types/icons/icons.types';
 
-export const ReactJS: ITechStackLogo = {
+export const ApolloGraphQL: ITechStackLogo = {
   id: uuidv4(),
-  name: 'React',
-  logo: SiReact,
-  color: '#61DAFB',
-  colorName: 'react'
+  name: 'Apollo GraphQL',
+  logo: SiApollographql
 };
 
-export const NextJS: ITechStackLogo = {
+export const Axios: ITechStackLogo = {
   id: uuidv4(),
-  name: 'Next.js',
-  logo: SiNextdotjs,
-  color: '#000000',
-  colorName: 'black'
+  name: 'Axios',
+  logo: SiAxios
 };
 
-export const Express: ITechStackLogo = {
+export const ApacheECharts: ITechStackLogo = {
   id: uuidv4(),
-  name: 'Express',
-  logo: SiExpress,
-  color: '#000000',
-  colorName: 'black'
+  name: 'Apache ECharts',
+  logo: SiApacheecharts
+};
+
+export const Bootstrap: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'BootStrap',
+  logo: SiBootstrap
 };
 
 export const ChakraUI: ITechStackLogo = {
   id: uuidv4(),
   name: 'Chakra UI',
-  logo: SiChakraui,
-  color: '#319795',
-  colorName: 'chakra'
+  logo: SiChakraui
+};
+
+export const ContextAPI: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Context API',
+  logo: undefined
+};
+
+export const CreateReactApp: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Create React App',
+  logo: SiCreatereactapp
+};
+
+export const CSS3: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'CSS3',
+  logo: SiCss3
+};
+
+export const Django: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Django',
+  logo: SiDjango
+};
+
+export const ESLint: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'ESLint',
+  logo: SiEslint
+};
+
+export const Express: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Express',
+  logo: SiExpress
+};
+
+export const Firebase: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Firebase',
+  logo: SiFirebase
+};
+
+export const GitHub: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'GitHub',
+  logo: SiGithub
 };
 
 export const Git: ITechStackLogo = {
   id: uuidv4(),
   name: 'Git',
-  logo: SiGit,
-  color: '#F05032',
-  colorName: 'git'
+  logo: SiGit
+};
+
+export const GitLab: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'GitLab',
+  logo: SiGitlab
+};
+
+export const GraphQL: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'GraphQL',
+  logo: SiGraphql
+};
+
+export const HTML5: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'HTML5',
+  logo: SiHtml5
+};
+
+export const JavaScript: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'JavaScript',
+  logo: SiJavascript
+};
+
+export const Jest: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Jest',
+  logo: SiJest
+};
+
+export const Lodash: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Lodash',
+  logo: SiLodash
+};
+
+export const MongoDB: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'MongoDB',
+  logo: SiMongodb
+};
+
+export const Mongoose: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Mongoose',
+  logo: SiMongoose
+};
+
+export const NextJS: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Next.js',
+  logo: SiNextdotjs
+};
+
+export const NodeJS: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'NodeJS',
+  logo: SiNodedotjs
+};
+
+export const Prettier: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Prettier',
+  logo: SiPrettier
+};
+
+export const Python: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Python',
+  logo: SiPython
+};
+
+export const ReactHookForm: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'React Hook Form',
+  logo: SiReacthookform
+};
+
+export const ReactJS: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'React',
+  logo: SiReact
+};
+
+export const ReactRouter: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'React Router',
+  logo: SiReactrouter
+};
+
+export const ReactTable: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'React Table',
+  logo: SiReacttable
+};
+
+export const ReduxToolkit: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Redux Toolkit',
+  logo: SiRedux
+};
+
+export const Postman: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Postman',
+  logo: SiPostman
+};
+
+export const TailwindCSS: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'TailwindCSS',
+  logo: SiTailwindcss
+};
+
+export const TypeScript: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'TypeScript',
+  logo: SiTypescript
+};
+
+export const Turborepo: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Turborepo',
+  logo: SiTurborepo
+};
+
+export const Vite: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'Vite',
+  logo: SiVite
 };

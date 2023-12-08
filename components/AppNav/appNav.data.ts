@@ -11,11 +11,6 @@ export const appNavLinks: IAppNavLink[] = [
   },
   {
     id: uuidv4(),
-    link: '/design',
-    text: 'Design'
-  },
-  {
-    id: uuidv4(),
     link: '/blogs',
     text: 'Blogs'
   },

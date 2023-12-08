@@ -9,6 +9,12 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import { Separator } from '@radix-ui/react-separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 
 // import assets
 import { journey } from './journey.data';
@@ -18,8 +24,8 @@ export default function Journey() {
     <div className='flex flex-col gap-6'>
       <h2 className='font-bold text-3xl'>My journey</h2>
 
-      <div className='flex '>
-        <div className='w-8 flex justify-center'>
+      <div className='flex'>
+        <div className='w-8 flex justify-center flex-shrink-0'>
           <Separator
             orientation='vertical'
             className='w-[2px] bg-foreground h-full mt-[18px]'
@@ -29,7 +35,7 @@ export default function Journey() {
         <Accordion
           type='single'
           collapsible
-          className='w-[80vw]'
+          className='w-full'
           defaultValue='item-0'
         >
           {journey.map(
@@ -52,10 +58,10 @@ export default function Journey() {
                 value={`item-${index}`}
                 className='border-none'
               >
-                <AccordionTrigger className='data-[state=open]:bg-foreground data-[state=open]:text-background p-4 pl-2 text-left data-[state=open]:no-underline hover:no-underline relative group'>
-                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground'></div>
+                <AccordionTrigger className='data-[state=open]:bg-zinc-200 data-[state=open]:dark:bg-zinc-800 p-4 pl-2 text-left :no-underline hover:no-underline relative group'>
+                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground rounded-md '></div>
 
-                  <div className='flex flex-col gap-2'>
+                  <div className='flex flex-col gap-2 text-zinc-500 dark:text-zinc-400 group-data-[state=open]:text-foreground'>
                     <h3 className='text-xs'>
                       {startDate} - {endDate}
                     </h3>
@@ -66,13 +72,13 @@ export default function Journey() {
                       src={organisationLogo}
                       alt={organisation}
                       height={24}
-                      className='group-data-[state=open]:invert-0 invert group-data-[state=open]:dark:invert dark:invert-0'
+                      className='invert dark:invert-0 opacity-50 group-data-[state=open]:opacity-100'
                     />
                   </div>
                 </AccordionTrigger>
 
-                <AccordionContent className='p-4 pl-2'>
-                  <div className='flex flex-col md:flex-row gap-4 md:gap-12 md:items-start'>
+                <AccordionContent className='p-4 pl-2 pt-0 bg-zinc-200 dark:bg-zinc-800 '>
+                  <div className='pt-4 flex flex-col md:flex-row gap-4 md:gap-12 md:items-start  border-t-[1px] border-zinc-950 dark:border-zinc-50'>
                     <div className='flex flex-col gap-4'>
                       {summary && <p>{summary}</p>}
 
@@ -85,12 +91,26 @@ export default function Journey() {
                       )}
                     </div>
 
-                    <ul className='flex flex-row flex-wrap flex-shrink-0 gap-3 md:w-[300px] '>
+                    <ul className='flex flex-row flex-wrap flex-shrink-0 gap-3 md:w-[300px]'>
                       {techStack?.map((tech) => (
-                        <tech.logo
+                        <TooltipProvider
                           key={tech.id}
-                          className={`w-[1.2rem] h-[1.2rem] md:w-[1.6rem] md:h-[1.6rem] hover:text-${tech.colorName}`}
-                        />
+                          delayDuration={0}
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <tech.logo
+                                  className={`w-[1.2rem] h-[1.2rem] md:w-[1.6rem] md:h-[1.6rem]`}
+                                />
+                              </div>
+                            </TooltipTrigger>
+
+                            <TooltipContent>
+                              <p>{tech.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       ))}
                     </ul>
                   </div>

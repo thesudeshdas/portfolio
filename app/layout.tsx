@@ -19,23 +19,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
-      <body className={inter.className}>
+    <html
+      lang='en'
+      className='h-full'
+    >
+      <body className={`${inter.className} flex flex-col items-stretch h-full`}>
         <ThemeProvider
           attribute='class'
           defaultTheme='system'
           enableSystem
           disableTransitionOnChange
         >
-          <div className='fixed inset-0 z-[-2] bg-gradient-to-br dark:from-zinc-900 dark:to-zinc-900 from-zinc-50 to-zinc-50'></div>
+          <div className='fixed inset-0 z-[-2] bg-gradient-to-b from-30% dark:from-zinc-900 dark:to-zinc-800 from-zinc-50 to-zinc-100'></div>
 
           <AppNav />
 
-          <div className='flex flex-col  max-w-[1000px] mx-auto'>
+          <div className='flex flex-col max-w-[1000px] mx-auto flex-grow  w-full'>
             <div className='flex-col items-center px-4'>{children}</div>
-
-            <Footer />
           </div>
+
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

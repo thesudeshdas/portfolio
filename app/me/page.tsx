@@ -6,8 +6,9 @@ import Image from 'next/image';
 // import icons
 import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 
-// import components
-import Journey from './sections/journey';
+// import sections
+import Journey from './sections/journey/Journey';
+import SkillBank from './sections/skillBank/SkillBank';
 
 export default function Me() {
   return (
@@ -35,13 +36,11 @@ export default function Me() {
             Sudesh Das <span className='text-sm font-medium'>( Dash )</span>
           </h2>
 
-          <h3>Fullstack Developer @ Talentplace.ai</h3>
+          <h3>Frontend Developer @ Talentplace.ai</h3>
 
-          <p className='my-4 text-justify'>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Autem
-            necessitatibus sapiente temporibus minima quod vitae, consectetur
-            accusantium porro animi veniam architecto magnam omnis tenetur rem
-            totam esse! Dignissimos, quasi eos.
+          <p className='my-4'>
+            Passionate about building from scratch, fullstack developer eager
+            about continuous learning and growth
           </p>
 
           <div className='flex gap-4'>
@@ -67,6 +66,8 @@ export default function Me() {
           </div>
         </div>
       </div>
+
+      <SkillBank />
 
       <Journey />
     </div>

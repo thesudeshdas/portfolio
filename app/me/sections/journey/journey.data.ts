@@ -165,8 +165,8 @@ export const journey: IJourneyListItem[] = [
   {
     id: uuidv4(),
     designation: 'Web Developer | UI Designer',
-    endDate: 'December 2020',
-    startDate: 'December 2021',
+    endDate: 'December 2021',
+    startDate: 'December 2020',
     organisation: 'Glarizon',
     organisationLogo: glarizonLogo,
     achievements: [
@@ -193,6 +193,12 @@ export const journey: IJourneyListItem[] = [
       Bootstrap,
       SASS
     ]
+  },
+  {
+    id: uuidv4(),
+    designation: 'Started Web Development',
+    startDate: 'April 2020',
+    summary: `Getting bored during the COVID lockdown. I asked my friend what shall I do to pass the time? He said learn programming. Since I was already curious about computers, the internet and how stuff works in general, I decided to give it a go. And that is how I got into development!`
   }
 ];
 

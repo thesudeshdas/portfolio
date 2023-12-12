@@ -69,7 +69,7 @@ export default function DevProjectCard({
           ))}
         </ul>
 
-        <p className='text text-justify'>{description}</p>
+        <p>{description}</p>
 
         <div className='flex gap-2 w-full sm:w-auto'>
           {live && (

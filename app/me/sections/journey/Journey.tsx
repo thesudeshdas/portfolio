@@ -1,3 +1,5 @@
+'use client';
+
 // import nextJs components
 import Image from 'next/image';
 
@@ -22,7 +24,7 @@ import { journey } from './journey.data';
 export default function Journey() {
   return (
     <div className='flex flex-col gap-6'>
-      <h2 className='font-bold text-3xl'>My journey</h2>
+      <h2 className='font-bold text-3xl'>Journey</h2>
 
       <div className='flex'>
         <div className='w-8 flex justify-center flex-shrink-0'>
@@ -56,34 +58,36 @@ export default function Journey() {
               <AccordionItem
                 key={id}
                 value={`item-${index}`}
-                className='border-none'
+                className='border-none mb-14 shadow rounded-md'
               >
-                <AccordionTrigger className='data-[state=open]:bg-zinc-200 data-[state=open]:dark:bg-zinc-800 p-4 pl-2 text-left :no-underline hover:no-underline relative group'>
-                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground rounded-md '></div>
+                <AccordionTrigger className='data-[state=open]:bg-zinc-200 data-[state=open]:dark:bg-zinc-800 p-4 pl-2 text-left :no-underline hover:no-underline relative group rounded-md'>
+                  <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground'></div>
 
                   <div className='flex flex-col gap-2 text-zinc-500 dark:text-zinc-400 group-data-[state=open]:text-foreground'>
                     <h3 className='text-xs'>
-                      {startDate} - {endDate}
+                      {startDate} {endDate ? `- ${endDate}` : ''}
                     </h3>
 
                     <p className='text-xl font-extrabold'>{designation}</p>
 
-                    <Image
-                      src={organisationLogo}
-                      alt={organisation}
-                      height={24}
-                      className='invert dark:invert-0 opacity-50 group-data-[state=open]:opacity-100'
-                    />
+                    {organisationLogo && organisation && (
+                      <Image
+                        src={organisationLogo}
+                        alt={organisation}
+                        height={24}
+                        className='invert dark:invert-0 opacity-50 group-data-[state=open]:opacity-100'
+                      />
+                    )}
                   </div>
                 </AccordionTrigger>
 
                 <AccordionContent className='p-4 pl-2 pt-0 bg-zinc-200 dark:bg-zinc-800 '>
-                  <div className='pt-4 flex flex-col md:flex-row gap-4 md:gap-12 md:items-start  border-t-[1px] border-zinc-950 dark:border-zinc-50'>
-                    <div className='flex flex-col gap-4'>
+                  <div className='pt-4 flex flex-col md:flex-row gap-4 md:gap-12 md:items-start  border-t-[1px] border-zinc-950 dark:border-zinc-50 '>
+                    <div className='flex flex-col flex-grow gap-4'>
                       {summary && <p>{summary}</p>}
 
                       {achievements && (
-                        <ul className='list-disc list-outside pl-4'>
+                        <ul className='list-disc list-outside pl-4 text-justify'>
                           {achievements?.map((achievement) => (
                             <li key={achievement.id}>{achievement.text}</li>
                           ))}
@@ -91,28 +95,30 @@ export default function Journey() {
                       )}
                     </div>
 
-                    <ul className='flex flex-row flex-wrap flex-shrink-0 gap-3 md:w-[300px]'>
-                      {techStack?.map((tech) => (
-                        <TooltipProvider
-                          key={tech.id}
-                          delayDuration={0}
-                        >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div>
-                                <tech.logo
-                                  className={`w-[1.2rem] h-[1.2rem] md:w-[1.6rem] md:h-[1.6rem]`}
-                                />
-                              </div>
-                            </TooltipTrigger>
+                    {techStack && (
+                      <ul className='flex flex-row flex-wrap flex-shrink-0 gap-3 md:w-[300px]'>
+                        {techStack?.map((tech) => (
+                          <TooltipProvider
+                            key={tech.id}
+                            delayDuration={0}
+                          >
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <tech.logo
+                                    className={`w-[1.2rem] h-[1.2rem] md:w-[1.6rem] md:h-[1.6rem]`}
+                                  />
+                                </div>
+                              </TooltipTrigger>
 
-                            <TooltipContent>
-                              <p>{tech.name}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ))}
-                    </ul>
+                              <TooltipContent>
+                                <p>{tech.name}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </AccordionContent>
               </AccordionItem>

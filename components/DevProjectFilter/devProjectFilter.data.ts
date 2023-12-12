@@ -7,15 +7,15 @@ import { IDevFilterBadgeOptionItem } from '@/types/dev/dev.types';
 export const devFiltersBadgesOptions: IDevFilterBadgeOptionItem[] = [
   {
     id: uuidv4(),
-    label: 'React'
-  },
-  {
-    id: uuidv4(),
-    label: 'CSS3'
+    label: 'ReactJS'
   },
   {
     id: uuidv4(),
     label: 'TypeScript'
+  },
+  {
+    id: uuidv4(),
+    label: 'ChakraUI'
   },
   {
     id: uuidv4(),

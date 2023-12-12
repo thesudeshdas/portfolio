@@ -6,45 +6,33 @@ import Image from 'next/image';
 // import icons
 import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 
-// import components
-import Journey from './sections/journey';
+// import sections
+import Journey from './sections/journey/Journey';
+import SkillBank from './sections/skillBank/SkillBank';
+import About from './sections/about/About';
+import FAQ from './sections/faq/FAQ';
 
 export default function Me() {
   return (
-    <div className='py-12 flex flex-col  gap-12'>
+    <div className='py-12 flex flex-col gap-12'>
       <div className='flex flex-col gap-6 sm:flex-row sm:justify-center sm:items-center'>
         <figure className='w-full max-w-[250px]'>
           <div className='relative flex-grow aspect-square'>
             <Image
-              src='/gojo-compressed.png'
+              src='/DP.svg'
               alt='Sudesh Das'
               fill
               className='object-cover rounded-lg'
             />
           </div>
-
-          {/* <figcaption className='text-xs  text-center'>
-            Sudesh Das
-            <br />
-            The author of this portfolio website
-          </figcaption> */}
         </figure>
 
-        <div className='max-w-[640px]'>
+        <div className=' w-full'>
           <h2 className='font-bold text-4xl'>
             Sudesh Das <span className='text-sm font-medium'>( Dash )</span>
           </h2>
 
-          <h3>Fullstack Developer @ Talentplace.ai</h3>
-
-          <p className='my-4 text-justify'>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Autem
-            necessitatibus sapiente temporibus minima quod vitae, consectetur
-            accusantium porro animi veniam architecto magnam omnis tenetur rem
-            totam esse! Dignissimos, quasi eos.
-          </p>
-
-          <div className='flex gap-4'>
+          <div className='flex gap-4 mt-4'>
             <a
               href='https://github.com/thesudeshdas'
               target='_blank'
@@ -68,7 +56,13 @@ export default function Me() {
         </div>
       </div>
 
+      <About />
+
+      <SkillBank />
+
       <Journey />
+
+      <FAQ />
     </div>
   );
 }

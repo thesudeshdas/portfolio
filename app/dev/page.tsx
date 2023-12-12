@@ -70,20 +70,22 @@ export default function Dev() {
         setActiveBadges={setActiveBadges}
       />
 
-      {projectsLoading ? (
-        <>
-          <DevProjectCardSkeleton />
+      <div className='flex flex-col gap-8'>
+        {projectsLoading ? (
+          <>
+            <DevProjectCardSkeleton />
 
-          <DevProjectCardSkeleton />
-        </>
-      ) : (
-        filteredItems?.map((project: IDevProjectListItem) => (
-          <DevProjectCard
-            key={project.id}
-            projectDetails={project}
-          />
-        ))
-      )}
+            <DevProjectCardSkeleton />
+          </>
+        ) : (
+          filteredItems?.map((project: IDevProjectListItem) => (
+            <DevProjectCard
+              key={project.id}
+              projectDetails={project}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }

@@ -15,12 +15,15 @@ import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 
 // import data
 import { appNavLinks } from './appNav.data';
+import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 
 export default function AppNav() {
   return (
-    <nav className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900`}>
+    <nav
+      className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 flex-shrink-0`}
+    >
       <div
-        className={`h-full w-full flex justify-between items-center px-4 max-w-[1000px] mx-auto `}
+        className={`h-full w-full flex justify-between items-center px-4 max-w-[1000px] mx-auto`}
       >
         <Link href='/'>
           <div className='flex items-center gap-1'>
@@ -33,7 +36,7 @@ export default function AppNav() {
               />
             </div>
 
-            <h2 className='font-bold hidden sm:block'>Dash</h2>
+            <h2 className='font-bold '>Dash</h2>
           </div>
         </Link>
 
@@ -61,8 +64,23 @@ export default function AppNav() {
                 <HamburgerMenuIcon className='h-[1.2rem] w-[1.2rem]' />
               </SheetTrigger>
 
-              <SheetContent className='w-[15rem] pt-20'>
-                <ul className='w-fit'>
+              <SheetContent className='w-[15rem] flex flex-col dark:bg-zinc-900 bg-zinc-50'>
+                <Link href='/'>
+                  <div className='flex items-center gap-1 absolute left-4 top-2.5'>
+                    <div className='h-8 w-8 relative'>
+                      <Image
+                        src='/dash-white.png'
+                        alt='Brand'
+                        fill
+                        className='invert dark:invert-0'
+                      />
+                    </div>
+
+                    <h2 className='font-bold '>Dash</h2>
+                  </div>
+                </Link>
+
+                <ul className='w-fit mt-20 h-full'>
                   {appNavLinks.map(({ id, link, text }) => (
                     <li
                       key={id}
@@ -75,6 +93,28 @@ export default function AppNav() {
                     </li>
                   ))}
                 </ul>
+
+                <div className='flex gap-4 mb-20'>
+                  <a
+                    href='https://github.com/thesudeshdas'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+                  </a>
+
+                  <a
+                    href='https://www.linkedin.com/in/thesudeshdas'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+                  </a>
+
+                  <a href='mailto:sudeshkumardas7@gmail.com'>
+                    <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+                  </a>
+                </div>
               </SheetContent>
             </Sheet>
           </div>

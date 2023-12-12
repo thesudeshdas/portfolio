@@ -11,11 +11,11 @@ export const devFiltersBadgesOptions: IDevFilterBadgeOptionItem[] = [
   },
   {
     id: uuidv4(),
-    label: 'CSS3'
+    label: 'TypeScript'
   },
   {
     id: uuidv4(),
-    label: 'TypeScript'
+    label: 'ChakraUI'
   },
   {
     id: uuidv4(),

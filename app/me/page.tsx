@@ -19,37 +19,20 @@ export default function Me() {
         <figure className='w-full max-w-[250px]'>
           <div className='relative flex-grow aspect-square'>
             <Image
-              src='/gojo-compressed.png'
+              src='/DP.svg'
               alt='Sudesh Das'
               fill
               className='object-cover rounded-lg'
             />
           </div>
-
-          {/* <figcaption className='text-xs  text-center'>
-            Sudesh Das
-            <br />
-            The author of this portfolio website
-          </figcaption> */}
         </figure>
 
-        <div className='max-w-[640px] w-full'>
+        <div className=' w-full'>
           <h2 className='font-bold text-4xl'>
             Sudesh Das <span className='text-sm font-medium'>( Dash )</span>
           </h2>
 
-          <h3>Fullstack Dev | UI Designer </h3>
-
-          <p className='mt-4'>
-            I like building stuff. So I became a programmer.
-          </p>
-
-          <p className='mb-4 mt-2'>
-            Other than this, I love football, bikes, video games and music.
-            Wanna chat?
-          </p>
-
-          <div className='flex gap-4'>
+          <div className='flex gap-4 mt-4'>
             <a
               href='https://github.com/thesudeshdas'
               target='_blank'

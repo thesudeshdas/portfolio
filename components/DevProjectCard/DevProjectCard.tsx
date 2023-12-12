@@ -35,12 +35,12 @@ export default function DevProjectCard({
 
   return (
     <div className='flex flex-col lg:flex-row gap-6 items-center'>
-      <div className='relative flex-grow aspect-video w-full sm:max-w-[500px] lg:w-[400px] flex-shrink-0 '>
+      <div className='relative flex-grow aspect-video w-full sm:max-w-[500px] lg:w-[400px] flex-shrink-0 overflow-hidden = rounded-lg'>
         <Image
           src={image}
           alt={title}
           fill
-          className='object-cover rounded-lg '
+          className='object-cover'
         />
       </div>
 
@@ -91,10 +91,7 @@ export default function DevProjectCard({
               target='_blank'
               className='flex-grow'
             >
-              <Button
-                variant='secondary'
-                className='border-[1px] border-foreground w-full'
-              >
+              <Button variant='secondary'>
                 Source
                 <CodeIcon className='ml-1 w-4 h-4' />
               </Button>

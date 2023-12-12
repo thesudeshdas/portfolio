@@ -30,7 +30,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className='fixed inset-0 z-[-2] bg-gradient-to-b from-30% dark:from-zinc-900 dark:to-zinc-800 from-zinc-50 to-zinc-100'></div>
+          <div className='fixed inset-0 z-[-2] bg-gradient-to-b from-80% dark:from-zinc-900 dark:to-zinc-900 from-zinc-50 to-zinc-50'></div>
 
           <AppNav />
 

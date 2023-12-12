@@ -98,3 +98,7 @@ html {
 *::-webkit-scrollbar-corner {
   background-color: transparent; /* color of scrollbar corner, where both the scrollbars meet */
 }
+
+* {
+  line-height: 175%;
+}

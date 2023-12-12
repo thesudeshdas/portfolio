@@ -9,10 +9,12 @@ import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 // import sections
 import Journey from './sections/journey/Journey';
 import SkillBank from './sections/skillBank/SkillBank';
+import About from './sections/about/About';
+import FAQ from './sections/faq/FAQ';
 
 export default function Me() {
   return (
-    <div className='py-12 flex flex-col  gap-12'>
+    <div className='py-12 flex flex-col gap-12'>
       <div className='flex flex-col gap-6 sm:flex-row sm:justify-center sm:items-center'>
         <figure className='w-full max-w-[250px]'>
           <div className='relative flex-grow aspect-square'>
@@ -31,16 +33,20 @@ export default function Me() {
           </figcaption> */}
         </figure>
 
-        <div className='max-w-[640px]'>
+        <div className='max-w-[640px] w-full'>
           <h2 className='font-bold text-4xl'>
             Sudesh Das <span className='text-sm font-medium'>( Dash )</span>
           </h2>
 
-          <h3>Frontend Developer @ Talentplace.ai</h3>
+          <h3>Fullstack Dev | UI Designer </h3>
 
-          <p className='my-4'>
-            Passionate about building from scratch, fullstack developer eager
-            about continuous learning and growth
+          <p className='mt-4'>
+            I like building stuff. So I became a programmer.
+          </p>
+
+          <p className='mb-4 mt-2'>
+            Other than this, I love football, bikes, video games and music.
+            Wanna chat?
           </p>
 
           <div className='flex gap-4'>
@@ -67,9 +73,13 @@ export default function Me() {
         </div>
       </div>
 
+      <About />
+
       <SkillBank />
 
       <Journey />
+
+      <FAQ />
     </div>
   );
 }

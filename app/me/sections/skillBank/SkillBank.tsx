@@ -8,7 +8,7 @@ export default function SkillBank() {
     <div className='flex flex-col gap-6'>
       <h2 className='font-bold text-3xl'>Skills</h2>
 
-      <ul className='flex flex-row flex-wrap flex-shrink-0 gap-2'>
+      <ul className='flex flex-row flex-wrap flex-shrink-0 gap-4 '>
         {allSkills?.map((skill) => (
           <Badge
             key={skill.id}

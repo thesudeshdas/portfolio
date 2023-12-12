@@ -15,6 +15,10 @@ export const devFiltersBadgesOptions: IDevFilterBadgeOptionItem[] = [
   },
   {
     id: uuidv4(),
+    label: 'JavaScript'
+  },
+  {
+    id: uuidv4(),
     label: 'ChakraUI'
   },
   {

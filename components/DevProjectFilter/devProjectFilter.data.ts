@@ -19,7 +19,7 @@ export const devFiltersBadgesOptions: IDevFilterBadgeOptionItem[] = [
   },
   {
     id: uuidv4(),
-    label: 'ChakraUI'
+    label: 'Chakra UI'
   },
   {
     id: uuidv4(),

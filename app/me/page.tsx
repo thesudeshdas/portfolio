@@ -22,7 +22,7 @@ export default function Me() {
               src='/DP.svg'
               alt='Sudesh Das'
               fill
-              className='object-cover rounded-lg'
+              className='object-cover rounded-lg  border-2'
             />
           </div>
         </figure>

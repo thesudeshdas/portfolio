@@ -21,6 +21,7 @@ import {
   NodeJS,
   ReactJS,
   ReduxToolkit,
+  TailwindCSS,
   Turborepo,
   TypeScript
 } from '@/data/icons/icons.data';
@@ -54,10 +55,10 @@ export const devProjectList: IDevProjectListItem[] = [
     id: uuidv4(),
     description: `Developer portfolio platform where devs can show off their projects & blogs. Why spend time learning designing, marketing and selling when the programmers can work on what they do best`,
     image: '/dev/catalyst.png',
-    live: 'https://catalyst-react.netlify.app/',
-    techStack: [ReactJS, TypeScript, ChakraUI, Express, NodeJS, MongoDB],
+    live: 'https://catalyst-2-0.vercel.app/',
+    techStack: [ReactJS, TypeScript, TailwindCSS, Express, NodeJS, MongoDB],
     title: 'Catalyst',
-    sourceCode: 'https://github.com/thesudeshdas/catalyst',
+    sourceCode: 'https://github.com/thesudeshdas/catalyst-2.0',
     featured: true
   },
   {

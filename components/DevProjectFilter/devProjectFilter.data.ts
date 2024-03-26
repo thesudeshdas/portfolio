@@ -23,6 +23,10 @@ export const devFiltersBadgesOptions: IDevFilterBadgeOptionItem[] = [
   },
   {
     id: uuidv4(),
+    label: 'TailwindCSS'
+  },
+  {
+    id: uuidv4(),
     label: 'Express'
   },
   {

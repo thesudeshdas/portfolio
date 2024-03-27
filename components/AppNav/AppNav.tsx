@@ -5,17 +5,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 // import shadcn components
+import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 // import components
+
 import { ModeToggle, ActiveLink } from '../index';
 
 // import icons
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
+import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 
 // import data
 import { appNavLinks } from './appNav.data';
-import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 
 export default function AppNav() {
   return (
@@ -23,7 +25,7 @@ export default function AppNav() {
       className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 flex-shrink-0`}
     >
       <div
-        className={`h-full w-full flex justify-between items-center px-4 max-w-[1000px] mx-auto`}
+        className={`h-full w-full flex justify-between  items-center px-4 max-w-[1000px] mx-auto`}
       >
         <Link href='/'>
           <div className='flex items-center gap-1'>
@@ -42,7 +44,7 @@ export default function AppNav() {
 
         <div className='flex items-center gap-1 lg:gap-2'>
           {/* Nav links for laptops & desktops */}
-          <ul className='hidden lg:flex gap-4'>
+          <ul className='hidden lg:flex gap-4 order-1'>
             {appNavLinks.map(({ id, link, text }) => (
               <li key={id}>
                 <ActiveLink
@@ -53,9 +55,20 @@ export default function AppNav() {
             ))}
           </ul>
 
-          <ModeToggle />
+          <div className='order-3 lg:order-2'>
+            <ModeToggle />
+          </div>
 
-          <div className='lg:hidden'>
+          <a
+            href='https://drive.google.com/file/d/1CzVw78rhNPZy7Sck7ct8tAOwYlx57TD6/view?usp=drive_link'
+            target='_blank'
+            rel='noreferrer'
+            className='mr-2 order-2 lg:order-3'
+          >
+            <Button size='sm'>Resume</Button>
+          </a>
+
+          <div className='lg:hidden order-4'>
             <Sheet>
               <SheetTrigger
                 asChild
@@ -94,7 +107,7 @@ export default function AppNav() {
                   ))}
                 </ul>
 
-                <div className='flex gap-4 mb-20'>
+                <div className='flex gap-4 mb-0'>
                   <a
                     href='https://github.com/thesudeshdas'
                     target='_blank'

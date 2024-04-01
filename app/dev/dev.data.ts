@@ -55,7 +55,7 @@ export const devProjectList: IDevProjectListItem[] = [
     id: uuidv4(),
     description: `Developer portfolio platform where devs can show off their projects & blogs. Why spend time learning designing, marketing and selling when the programmers can work on what they do best`,
     image: '/dev/catalyst.png',
-    live: 'https://catalyst-2-0.vercel.app/',
+    live: 'https://catalyst-dash.vercel.app',
     techStack: [ReactJS, TypeScript, TailwindCSS, Express, NodeJS, MongoDB],
     title: 'Catalyst',
     sourceCode: 'https://github.com/thesudeshdas/catalyst-2.0',

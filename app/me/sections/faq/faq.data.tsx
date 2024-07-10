@@ -88,7 +88,7 @@ export const faqList: IFaqItem[] = [
   {
     id: uuidv4(),
     question: `Why Dash?`,
-    answer: `My real name is Sudesh. I go by "Dash" when I play online games. Also, since people started butchering my actual name, I just ask to call me Dash. Simple to pronounce. Yet still, people mess this up as well 😆`
+    answer: `My real name is Sudesh. I go by "Dash" when I play online games. Also, since people started butchering my actual name, I just ask people to call me Dash. Simple to pronounce. Yet still, people mess this up as well 😆`
   },
 
   {

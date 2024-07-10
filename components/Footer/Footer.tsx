@@ -29,7 +29,9 @@ export default function Footer() {
           </div>
         </Link>
 
-        <p className='text-xs'>© 2023 Sudesh Das. All Rights Reserved.</p>
+        <p className='text-xs'>
+          © 2023 - 2024 Sudesh Das. All Rights Reserved.
+        </p>
       </div>
 
       <div className='flex flex-col items-center sm:items-end gap-3'>

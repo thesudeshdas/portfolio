@@ -12,17 +12,25 @@ export default function About() {
         </p>
 
         <p>
-          I am a fullstack developer working at an early-stage start-up called{' '}
+          I am a fullstack developer working at an amazing start-up{' '}
           <a
             href='https://www.talentplace.ai/'
             rel='noreferrer'
             target='_blank'
             className='border-b-[1px] border-foreground'
           >
-            TalentPlace.ai
+            GrowthX
           </a>
-          . Here, I am in charge of the complete frontend part of three
-          production web apps adhering to ~100k users.
+          . Here, I get to work on creating new products. Visit{' '}
+          <a
+            href='https://www.talentplace.ai/'
+            rel='noreferrer'
+            target='_blank'
+            className='border-b-[1px] border-foreground'
+          >
+            GrowthX
+          </a>{' '}
+          to learn more.
         </p>
 
         <p>

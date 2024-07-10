@@ -107,6 +107,10 @@ export const allSkills: ISkillItem[] = [
   },
   {
     id: uuidv4(),
+    name: 'MUI'
+  },
+  {
+    id: uuidv4(),
     name: 'MongoDB'
   },
   {

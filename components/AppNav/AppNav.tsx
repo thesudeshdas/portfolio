@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 // import shadcn components
-import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 // import components
@@ -59,14 +58,14 @@ export default function AppNav() {
             <ModeToggle />
           </div>
 
-          <a
+          {/* <a
             href='https://drive.google.com/file/d/1CzVw78rhNPZy7Sck7ct8tAOwYlx57TD6/view?usp=drive_link'
             target='_blank'
             rel='noreferrer'
             className='mr-2 order-2 lg:order-3'
           >
             <Button size='sm'>Resume</Button>
-          </a>
+          </a> */}
 
           <div className='lg:hidden order-4'>
             <Sheet>

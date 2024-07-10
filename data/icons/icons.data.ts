@@ -42,7 +42,8 @@ import {
   SiMysql,
   SiFigma,
   SiFramer,
-  SiCanva
+  SiCanva,
+  SiMui
 } from 'react-icons/si';
 
 // import types
@@ -178,6 +179,12 @@ export const Lodash: ITechStackLogo = {
   id: uuidv4(),
   name: 'Lodash',
   logo: SiLodash
+};
+
+export const MUI: ITechStackLogo = {
+  id: uuidv4(),
+  name: 'MUI',
+  logo: SiMui
 };
 
 export const MongoDB: ITechStackLogo = {

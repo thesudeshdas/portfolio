@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { IJourneyListItem } from '@/types/journey/journey.types';
 
 // import assets
+import growthXLogo from '../../../../assets/images/growthx-white.svg';
 import talentplaceLogo from '../../../../assets/images/talentplace-white.svg';
 import neoGLogo from '../../../../assets/images/neog-white.svg';
 import glarizonLogo from '../../../../assets/images/glarizon-white.svg';
@@ -29,6 +30,7 @@ import {
   JavaScript,
   Jest,
   Lodash,
+  MUI,
   MongoDB,
   Mongoose,
   NextJS,
@@ -50,8 +52,33 @@ import {
 export const journey: IJourneyListItem[] = [
   {
     id: uuidv4(),
-    designation: 'Frontend Developer',
+    designation: 'SDE Frontend',
     endDate: 'Present',
+    startDate: 'May 2024',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    achievements: [
+      {
+        id: uuidv4(),
+        text: `Implemented the design system in the talent platform (a job board) based on MUI.`
+      }
+    ],
+    techStack: [
+      NextJS,
+      MUI,
+      Git,
+      GitHub,
+      ReactRouter,
+      Axios,
+      ESLint,
+      Prettier,
+      ReduxToolkit
+    ]
+  },
+  {
+    id: uuidv4(),
+    designation: 'Frontend Developer',
+    endDate: 'May 2024',
     startDate: 'Feb 2023',
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,

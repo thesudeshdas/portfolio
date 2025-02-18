@@ -99,7 +99,7 @@ export const faqList: IFaqItem[] = [
   {
     id: uuidv4(),
     question: `What degree do you have in Computer Science?`,
-    answer: `None. I am formally educated in Commerce as I always had an interest in money 🤑. I have completed my Bachelor of Commerce (Hons) in Management from Ravenshaw University`
+    answer: `None. I am formally educated in Commerce as I always had an interest in finance. I completed my Bachelor of Commerce (Hons) in Management from Ravenshaw University`
   },
   {
     id: uuidv4(),

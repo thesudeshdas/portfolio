@@ -27,7 +27,7 @@ export default function Journey() {
       <h2 className='font-bold text-3xl'>Journey</h2>
 
       <div className='flex'>
-        <div className='w-8 flex justify-center flex-shrink-0'>
+        <div className='w-8 flex justify-center shrink-0'>
           <Separator
             orientation='vertical'
             className='w-[2px] bg-foreground h-full mt-[18px]'
@@ -58,9 +58,9 @@ export default function Journey() {
               <AccordionItem
                 key={id}
                 value={`item-${index}`}
-                className='border-none mb-14 shadow rounded-md'
+                className='border-none mb-14 shadow-sm rounded-md'
               >
-                <AccordionTrigger className='data-[state=open]:bg-zinc-200 data-[state=open]:dark:bg-zinc-800 p-4 pl-2 text-left :no-underline hover:no-underline relative group rounded-md'>
+                <AccordionTrigger className='data-[state=open]:bg-zinc-200 dark:data-[state=open]:bg-zinc-800 p-4 pl-2 text-left :no-underline hover:no-underline relative group rounded-md'>
                   <div className='absolute -left-[24px] top-[18px] w-4 h-4 bg-foreground'></div>
 
                   <div className='flex flex-col gap-2 text-zinc-500 dark:text-zinc-400 group-data-[state=open]:text-foreground'>
@@ -83,7 +83,7 @@ export default function Journey() {
 
                 <AccordionContent className='p-4 pl-2 pt-0 bg-zinc-200 dark:bg-zinc-800 '>
                   <div className='pt-4 flex flex-col md:flex-row gap-4 md:gap-12 md:items-start  border-t-[1px] border-zinc-950 dark:border-zinc-50 '>
-                    <div className='flex flex-col flex-grow gap-4'>
+                    <div className='flex flex-col grow gap-4'>
                       {summary && <p>{summary}</p>}
 
                       {achievements && (
@@ -96,7 +96,7 @@ export default function Journey() {
                     </div>
 
                     {techStack && (
-                      <ul className='flex flex-row flex-wrap flex-shrink-0 gap-3 md:w-[300px]'>
+                      <ul className='flex flex-row flex-wrap shrink-0 gap-3 md:w-[300px]'>
                         {techStack?.map((tech) => (
                           <TooltipProvider
                             key={tech.id}

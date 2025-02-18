@@ -41,7 +41,7 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
 
           <a
@@ -49,11 +49,11 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
 
           <a href='mailto:sudeshkumardas7@gmail.com'>
-            <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
         </div>
 
@@ -65,7 +65,7 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <NextJS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <NextJS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
 
           <p>and</p>
@@ -75,7 +75,7 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <TailwindCSS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <TailwindCSS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
         </div>
       </div>

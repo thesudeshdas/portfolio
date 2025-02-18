@@ -35,7 +35,7 @@ export default function DevProjectCard({
 
   return (
     <div className='flex flex-col lg:flex-row gap-6 items-center'>
-      <div className='relative flex-grow aspect-video w-full sm:max-w-[500px] lg:w-[400px] flex-shrink-0 overflow-hidden = rounded-lg'>
+      <div className='relative grow aspect-video w-full sm:max-w-[500px] lg:w-[400px] shrink-0 overflow-hidden = rounded-lg'>
         <Image
           src={image}
           alt={title}
@@ -44,7 +44,7 @@ export default function DevProjectCard({
         />
       </div>
 
-      <div className='flex flex-col flex-grow gap-2 items-start'>
+      <div className='flex flex-col grow gap-2 items-start'>
         <div className='flex items-center justify-between w-full'>
           <h2 className='font-bold text-xl'>{title}</h2>
 
@@ -53,16 +53,16 @@ export default function DevProjectCard({
               src={organisationLogo}
               alt={organisation}
               height={24}
-              className='group-data-[state=open]:invert-0 invert group-data-[state=open]:dark:invert dark:invert-0'
+              className='group-data-[state=open]:invert-0 invert dark:group-data-[state=open]:invert dark:invert-0'
             />
           )}
         </div>
 
-        <ul className='flex flex-row flex-wrap flex-shrink-0 gap-2'>
+        <ul className='flex flex-row flex-wrap shrink-0 gap-2'>
           {techStack?.map((tech) => (
             <Badge
               key={tech.id}
-              className='py-1 bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 hover:dark:bg-zinc-700'
+              className='py-1 bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700'
             >
               {tech.name}
             </Badge>
@@ -76,7 +76,7 @@ export default function DevProjectCard({
             <Link
               href={live}
               target='_blank'
-              className='flex-grow'
+              className='grow'
             >
               <Button className='w-full'>
                 Live
@@ -89,7 +89,7 @@ export default function DevProjectCard({
             <Link
               href={sourceCode || ''}
               target='_blank'
-              className='flex-grow'
+              className='grow'
             >
               <Button variant='secondary'>
                 Source

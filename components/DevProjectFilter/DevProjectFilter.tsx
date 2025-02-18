@@ -39,7 +39,7 @@ export default function DevProjectFilter({
   };
 
   return (
-    <ul className='sticky top-14 z-10 flex flex-row flex-wrap flex-shrink-0 gap-2 bg-zinc-50 dark:bg-zinc-900 py-4'>
+    <ul className='sticky top-14 z-10 flex flex-row flex-wrap shrink-0 gap-2 bg-zinc-50 dark:bg-zinc-900 py-4'>
       {devFiltersBadgesOptions
         ?.filter((badge) => activeBadges.includes(badge.label))
         ?.map((option) => (
@@ -48,8 +48,8 @@ export default function DevProjectFilter({
             key={option.id}
             className={`py-1 ${
               activeBadges.includes(option.label)
-                ? 'dark:bg-zinc-100 bg-zinc-800 text-background hover:dark:bg-zinc-200 hover:bg-zinc-700'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 hover:dark:bg-zinc-700'
+                ? 'dark:bg-zinc-100 bg-zinc-800 text-background dark:hover:bg-zinc-200 hover:bg-zinc-700'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700'
             } cursor-pointer`}
           >
             {option.label}
@@ -66,8 +66,8 @@ export default function DevProjectFilter({
             key={option.id}
             className={`py-1 ${
               activeBadges.includes(option.label)
-                ? 'dark:bg-zinc-100 bg-zinc-800 text-background hover:dark:bg-zinc-200 hover:bg-zinc-700'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 hover:dark:bg-zinc-700'
+                ? 'dark:bg-zinc-100 bg-zinc-800 text-background dark:hover:bg-zinc-200 hover:bg-zinc-700'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700'
             } cursor-pointer`}
           >
             {option.label}

@@ -22,6 +22,7 @@ export default function RootLayout({
     <html
       lang='en'
       className='h-full'
+      suppressHydrationWarning
     >
       <body
         className={`${inter.className} flex flex-col items-stretch min-h-full `}

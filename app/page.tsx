@@ -13,7 +13,7 @@ export default function Home() {
     <main className='py-12 flex flex-col gap-12'>
       <div className='flex flex-col gap-6 sm:flex-row sm:justify-center sm:items-center'>
         <figure className='w-full max-w-[250px]'>
-          <div className='relative flex-grow aspect-square'>
+          <div className='relative grow aspect-square'>
             <Image
               src='/DP.svg'
               alt='Sudesh Das'
@@ -43,7 +43,7 @@ export default function Home() {
               target='_blank'
               rel='noopener noreferrer'
             >
-              <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+              <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
             </a>
 
             <a
@@ -51,11 +51,11 @@ export default function Home() {
               target='_blank'
               rel='noopener noreferrer'
             >
-              <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+              <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
             </a>
 
             <a href='mailto:sudeshkumardas7@gmail.com'>
-              <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+              <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
             </a>
           </div>
         </div>

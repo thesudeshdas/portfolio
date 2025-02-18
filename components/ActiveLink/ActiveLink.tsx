@@ -24,7 +24,7 @@ export default function ActiveLink({ link, text }: IActiveLinkProps) {
 
         <div
           className={`${
-            pathname === link ? 'w-100 ' : 'w-0'
+            pathname === link ? 'w-full' : 'w-0'
           } h-0.5 mt-0.5 bg-foreground group-hover:w-full transition-all`}
         ></div>
       </div>

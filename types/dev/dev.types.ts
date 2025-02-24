@@ -16,5 +16,5 @@ export interface IDevProjectListItem {
 
 export interface IDevFilterBadgeOptionItem {
   id: string;
-  label: string;
+  label: ITechStackLogo['name'];
 }

@@ -1,5 +1,3 @@
-'use client';
-
 // import nextjs components
 import Image from 'next/image';
 

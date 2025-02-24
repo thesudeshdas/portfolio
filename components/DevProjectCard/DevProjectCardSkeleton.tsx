@@ -1,5 +1,3 @@
-'use client';
-
 // import shadcn components
 import { Skeleton } from '../ui/skeleton';
 

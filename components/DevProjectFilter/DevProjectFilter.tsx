@@ -1,5 +1,3 @@
-'use client';
-
 // import react
 import { Dispatch, SetStateAction } from 'react';
 
@@ -13,13 +11,16 @@ import { devFiltersBadgesOptions } from './devProjectFilter.data';
 interface IDevProjectFilterProps {
   activeBadges: string[];
   setActiveBadges: Dispatch<SetStateAction<string[]>>;
+  setProjectsLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function DevProjectFilter({
   activeBadges,
-  setActiveBadges
+  setActiveBadges,
+  setProjectsLoading
 }: IDevProjectFilterProps) {
   const handleToggleBadge = (badge: string) => {
+    setProjectsLoading(true);
     if (badge === 'Featured') {
       setActiveBadges(['Featured']);
     } else if (activeBadges.includes(badge)) {

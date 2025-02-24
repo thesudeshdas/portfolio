@@ -29,9 +29,7 @@ export default function Footer() {
           </div>
         </Link>
 
-        <p className='text-xs'>
-          © 2023 - 2024 Sudesh Das. All Rights Reserved.
-        </p>
+        <p className='text-xs'>© 2025 Sudesh Das. All Rights Reserved.</p>
       </div>
 
       <div className='flex flex-col items-center sm:items-end gap-3'>
@@ -41,7 +39,7 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
 
           <a
@@ -49,23 +47,23 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
 
           <a href='mailto:sudeshkumardas7@gmail.com'>
-            <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
         </div>
 
         <div className='flex flex-row text-xs items-center gap-1 text-zinc-500 dark:text-zinc-400'>
-          <p>Made in</p>
+          <p>Made with</p>
 
           <a
             href='https://nextjs.org/'
             target='_blank'
             rel='noopener noreferrer'
           >
-            <NextJS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <NextJS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
 
           <p>and</p>
@@ -75,7 +73,7 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <TailwindCSS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:dark:text-foreground ' />
+            <TailwindCSS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
           </a>
         </div>
       </div>

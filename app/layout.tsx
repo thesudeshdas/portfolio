@@ -22,6 +22,7 @@ export default function RootLayout({
     <html
       lang='en'
       className='h-full'
+      suppressHydrationWarning
     >
       <body
         className={`${inter.className} flex flex-col items-stretch min-h-full `}
@@ -32,11 +33,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className='fixed inset-0 z-[-2] bg-gradient-to-b from-80% dark:from-zinc-900 dark:to-zinc-900 from-zinc-50 to-zinc-50'></div>
+          <div className='fixed inset-0 z-[-2] bg-linear-to-b from-80% dark:from-zinc-900 dark:to-zinc-900 from-zinc-50 to-zinc-50'></div>
 
           <AppNav />
 
-          <div className='flex flex-col max-w-[1000px] mx-auto flex-grow w-full'>
+          <div className='flex flex-col max-w-[1000px] mx-auto grow w-full'>
             <div className='flex-col items-center px-4'>{children}</div>
           </div>
 

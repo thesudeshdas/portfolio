@@ -26,7 +26,7 @@ export default function FAQ() {
             value={`item-${index}`}
             className='border-none   rounded-md'
           >
-            <AccordionTrigger className='data-[state=open]:bg-zinc-200 data-[state=open]:dark:bg-zinc-800 p-4 pl-2 text-left no-underline hover:no-underline rounded-md text-zinc-500 dark:text-zinc-400 data-[state=open]:text-foreground'>
+            <AccordionTrigger className='data-[state=open]:bg-zinc-200 dark:data-[state=open]:bg-zinc-800 p-4 pl-2 text-left no-underline hover:no-underline rounded-md text-zinc-500 dark:text-zinc-400 data-[state=open]:text-foreground'>
               <p className='text-md font-bold '>{question}</p>
             </AccordionTrigger>
 

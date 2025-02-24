@@ -1,49 +1,7 @@
-'use client';
-
-// import react
-import { useEffect, useState } from 'react';
-
-// import components
-import {
-  DevProjectCard,
-  DevProjectFilter,
-  DevProjectCardSkeleton
-} from '@/components/index';
-
-// import data
 import { devProjectList } from './dev.data';
-
-// import types
-import { IDevProjectListItem } from '@/types/dev/dev.types';
+import DevProjectList from './sections/DevProjectList';
 
 export default function Dev() {
-  const [activeBadges, setActiveBadges] = useState<string[]>(['Featured']);
-  const [projectsLoading, setProjectsLoading] = useState<boolean>(true);
-  const [filteredItems, setFilteredItems] = useState<IDevProjectListItem[]>([]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-
-    const timeoutId = setTimeout(() => {
-      let result;
-
-      if (activeBadges.length === 0) {
-        result = devProjectList;
-      } else if (activeBadges.length === 1 && activeBadges[0] === 'Featured') {
-        result = devProjectList.filter((project) => project.featured);
-      } else {
-        result = devProjectList.filter((project) =>
-          project.techStack.find((tech) => activeBadges.includes(tech.name))
-        );
-      }
-
-      setFilteredItems(result);
-      setProjectsLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [activeBadges]);
-
   return (
     <div className='py-12 flex flex-col gap-4'>
       <div className='flex flex-col gap-4'>
@@ -65,27 +23,7 @@ export default function Dev() {
         </p>
       </div>
 
-      <DevProjectFilter
-        activeBadges={activeBadges}
-        setActiveBadges={setActiveBadges}
-      />
-
-      <div className='flex flex-col gap-8'>
-        {projectsLoading ? (
-          <>
-            <DevProjectCardSkeleton />
-
-            <DevProjectCardSkeleton />
-          </>
-        ) : (
-          filteredItems?.map((project: IDevProjectListItem) => (
-            <DevProjectCard
-              key={project.id}
-              projectDetails={project}
-            />
-          ))
-        )}
-      </div>
+      <DevProjectList initialProjects={devProjectList} />
     </div>
   );
 }

@@ -29,9 +29,7 @@ export default function Footer() {
           </div>
         </Link>
 
-        <p className='text-xs'>
-          © 2023 - 2024 Sudesh Das. All Rights Reserved.
-        </p>
+        <p className='text-xs'>© 2025 Sudesh Das. All Rights Reserved.</p>
       </div>
 
       <div className='flex flex-col items-center sm:items-end gap-3'>
@@ -58,7 +56,7 @@ export default function Footer() {
         </div>
 
         <div className='flex flex-row text-xs items-center gap-1 text-zinc-500 dark:text-zinc-400'>
-          <p>Made in</p>
+          <p>Made with</p>
 
           <a
             href='https://nextjs.org/'

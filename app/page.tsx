@@ -1,5 +1,3 @@
-'use client';
-
 import { DevProjectCard } from '@/components/index';
 // import next components
 import Image from 'next/image';

@@ -1,6 +1,3 @@
-// import uuid
-import { v4 as uuidv4 } from 'uuid';
-
 // import types
 import { IJourneyListItem } from '@/types/journey/journey.types';
 
@@ -51,7 +48,7 @@ import {
 
 export const journey: IJourneyListItem[] = [
   {
-    id: uuidv4(),
+    id: 'x5424b2c-d2v8-4w88-vz9x-4a81y5z73w70',
     designation: 'SDE Frontend',
     endDate: 'Present',
     startDate: 'May 2024',
@@ -59,7 +56,7 @@ export const journey: IJourneyListItem[] = [
     organisationLogo: growthXLogo,
     achievements: [
       {
-        id: uuidv4(),
+        id: 'a6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
         text: `Implemented the design system in the talent platform (a job board) based on MUI.`
       }
     ],
@@ -76,7 +73,7 @@ export const journey: IJourneyListItem[] = [
     ]
   },
   {
-    id: uuidv4(),
+    id: 'y4315c3d-e3w9-4x99-wa0y-5b92z6a84x60',
     designation: 'Frontend Developer',
     endDate: 'May 2024',
     startDate: 'Feb 2023',
@@ -84,19 +81,19 @@ export const journey: IJourneyListItem[] = [
     organisationLogo: talentplaceLogo,
     achievements: [
       {
-        id: uuidv4(),
+        id: 'b7226e4f-g4x0-4y00-zc2a-7d30b8e95z50',
         text: `Led a team of 7 developers in the successful development of three production-ready web apps within an 11-month time frame, catering to approximately 100k users`
       },
       {
-        id: uuidv4(),
+        id: 'c8117f5g-h5y1-4z11-ad3b-8e40c9f06a40',
         text: `Recreated the initial codebase in under 4 weeks, adopting a newer tech stack along with best coding practices for scalability, ultimately resulting in a 400% growth in the user base`
       },
       {
-        id: uuidv4(),
+        id: 'd9008g6h-i6z2-4a22-be4c-9f50d0g17b30',
         text: `Migrated the frontend architecture from Multi repo to Monorepo, enhancing cross-product development and maintenance efficiency`
       },
       {
-        id: uuidv4(),
+        id: 'e0009h7i-j7a3-4b33-cf5d-0g60h1i28c20',
         text: `Improved user experience by implementing key features, including drag-and-drop, a PDF creator and viewer, along with multiple CRUD functionalities`
       }
     ],
@@ -122,7 +119,7 @@ export const journey: IJourneyListItem[] = [
     ]
   },
   {
-    id: uuidv4(),
+    id: 'z3206d4e-f4x0-4y00-xb1z-6c03a7b95y50',
     designation: 'Teaching Assistant',
     endDate: 'July 2022',
     startDate: 'January 2022',
@@ -130,15 +127,15 @@ export const journey: IJourneyListItem[] = [
     organisationLogo: neoGLogo,
     achievements: [
       {
-        id: uuidv4(),
+        id: 'a5117e5f-g5y1-4z11-ad3b-8e40c9f06a40',
         text: `Guided ~200 students to become full-stack web developers over a six-month boot camp conducting live coding sessions, doubt-solving sessions and one-on-one mentorship sessions`
       },
       {
-        id: uuidv4(),
+        id: 'b6228f6g-h6z2-4a22-be4c-9f50d0g17b30',
         text: `Maintained the LMS's content, keeping it up to date throughout the entire boot camp in NextJS and developed new features`
       },
       {
-        id: uuidv4(),
+        id: 'c7339h7i-i7a3-4b33-cf5d-0g60h1i28c20',
         text: `Revamped the official website and built the admission portal for NeoG Camp 2023`
       }
     ],
@@ -160,7 +157,7 @@ export const journey: IJourneyListItem[] = [
     ]
   },
   {
-    id: uuidv4(),
+    id: 'a2107e6f-g6y1-4z11-ad3b-8e40c9f06a40',
     designation: 'Team Captain',
     endDate: 'December 2021',
     startDate: 'February 2021',
@@ -168,7 +165,7 @@ export const journey: IJourneyListItem[] = [
     organisationLogo: neoGLogo,
     achievements: [
       {
-        id: uuidv4(),
+        id: 'b3018f7g-h7a2-4a22-be4c-9f50d0g17b30',
         text: `Managed a team of 17 members ensuring the on-time completion of assignments via conducting daily stand-ups, doubt-solving sessions and discussions`
       }
     ],
@@ -190,7 +187,7 @@ export const journey: IJourneyListItem[] = [
     ]
   },
   {
-    id: uuidv4(),
+    id: 'b1098e7f-g7y2-4z22-ad4c-9f50d0g17b30',
     designation: 'Web Developer | UI Designer',
     endDate: 'December 2021',
     startDate: 'December 2020',
@@ -198,11 +195,11 @@ export const journey: IJourneyListItem[] = [
     organisationLogo: glarizonLogo,
     achievements: [
       {
-        id: uuidv4(),
+        id: 'c2109f8g-h8a3-4a33-be5d-0g60h1i28c20',
         text: `Established a web dev agency providing digital solutions including the creation of portfolio websites, web apps and UI designing adhering to 6 clients`
       },
       {
-        id: uuidv4(),
+        id: 'd3010g9h-i9b4-4b44-cf6e-1h70i2j39d10',
         text: `Met the diverse requirements of different industries including real estate and food`
       }
     ],
@@ -222,7 +219,7 @@ export const journey: IJourneyListItem[] = [
     ]
   },
   {
-    id: uuidv4(),
+    id: 'c1089e8g-h8y3-4z33-ad5d-0g70i2j40e00',
     designation: 'Started Web Development',
     startDate: 'April 2020',
     summary: `Getting bored during the COVID lockdown. I asked my friend what shall I do to pass the time? He said learn programming. Since I was already curious about computers, the internet and how stuff works in general, I decided to give it a go. And that is how I got into development!`

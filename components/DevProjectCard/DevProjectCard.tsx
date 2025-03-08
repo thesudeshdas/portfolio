@@ -59,7 +59,7 @@ export default function DevProjectCard({
         <ul className='flex flex-row flex-wrap shrink-0 gap-2'>
           {techStack?.map((tech) => (
             <Badge
-              key={tech.id}
+              key={`${title}_${tech.id}`}
               className='py-1 bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700'
             >
               {tech.name}

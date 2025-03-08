@@ -13,6 +13,11 @@ export const appNavLinks: IAppNavLink[] = [
   //   text: 'Blogs'
   // },
   {
+    id: 'e25e872f-42c4-4e7e-835c-28626be3c1bd',
+    link: '/daisy',
+    text: 'Daisy'
+  },
+  {
     id: 'b8762c4d-e3f5-4a66-9c7d-2e89b3f51a90',
     link: '/me',
     text: 'Me'

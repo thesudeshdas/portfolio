@@ -271,25 +271,25 @@ export const SASS: ITechStackLogo = {
 };
 
 export const TailwindCSS: ITechStackLogo = {
-  id: 'g6033k1l-m1e7-4f77-ei8g-3j70h4i62f80',
+  id: 'r6060r2w-x2p8-4q88-pt9r-4u81s5t73q70',
   name: 'TailwindCSS',
   logo: SiTailwindcss
 };
 
 export const TypeScript: ITechStackLogo = {
-  id: 'g6033k1l-m1e7-4f77-ei8g-3j70h4i62f80',
+  id: 's7071s3x-y3q9-4r99-qu0s-5v92t6u84r60',
   name: 'TypeScript',
   logo: SiTypescript
 };
 
 export const Turborepo: ITechStackLogo = {
-  id: 'g6033k1l-m1e7-4f77-ei8g-3j70h4i62f80',
+  id: 't8082t4y-z4r0-4s00-rv1t-6w03u7v95s50',
   name: 'Turborepo',
   logo: SiTurborepo
 };
 
 export const Vite: ITechStackLogo = {
-  id: 'g6033k1l-m1e7-4f77-ei8g-3j70h4i62f80',
+  id: 'u9093u5z-a5s1-4t11-sw2u-7x14v8w06t40',
   name: 'Vite',
   logo: SiVite
 };

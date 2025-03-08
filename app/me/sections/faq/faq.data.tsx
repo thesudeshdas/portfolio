@@ -77,7 +77,7 @@ export function CommerceToCoding() {
 
 export const faqList: IFaqItem[] = [
   {
-    id: 'a97541c3-b5b4-4055-8558-a41b732d07b0',
+    id: '0ee335fe-b2e0-46f2-9d6f-f31cab107d60',
     question: `Is this FAQ section even needed? Who are asking these questions?`,
     answer: `Honestly no. XD. But because I can, I made this. On a serious note, I do come across people who usually have this chain of questions and thus I decided to answer in that order. And a few things that I would the world to know about.`
   },

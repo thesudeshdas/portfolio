@@ -186,3 +186,11 @@ html {
 * {
   line-height: 175%;
 }
+
+.time-hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.time-hover:hover {
+  color: #007bff;
+}

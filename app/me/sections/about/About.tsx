@@ -14,7 +14,7 @@ export default function About() {
         <p>
           I am a fullstack developer working at an amazing start-up{' '}
           <a
-            href='https://www.talentplace.ai/'
+            href='https://growthx.club/'
             rel='noreferrer'
             target='_blank'
             className='border-b-[1px] border-foreground'
@@ -23,7 +23,7 @@ export default function About() {
           </a>
           . Here, I get to work on creating new products. Visit{' '}
           <a
-            href='https://www.talentplace.ai/'
+            href='https://growthx.club/'
             rel='noreferrer'
             target='_blank'
             className='border-b-[1px] border-foreground'

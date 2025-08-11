@@ -151,13 +151,13 @@ export const GitLab: ITechStackLogo = {
 };
 
 export const GraphQL: ITechStackLogo = {
-  id: 'l3001p6q-r6j2-4k22-jn3l-8o25m9n17k30',
+  id: 'l3001p6q-r6j2-4k22-jn3l-8o25m9n17k31',
   name: 'GraphQL',
   logo: SiGraphql
 };
 
 export const HTML5: ITechStackLogo = {
-  id: 'm4002q7r-s7k3-4l33-ko4m-9p36n0o28l20',
+  id: 'm4002q7r-s7k3-4l33-ko4m-9p36n0o28l21',
   name: 'HTML5',
   logo: SiHtml5
 };
@@ -175,7 +175,7 @@ export const Jest: ITechStackLogo = {
 };
 
 export const Lodash: ITechStackLogo = {
-  id: 'n5003r8s-t8l4-4m44-lp5n-0q47o1p39m10',
+  id: 'n5003r8s-t8l4-4m44-lp5n-0q47o1p39m11',
   name: 'Lodash',
   logo: SiLodash
 };
@@ -241,7 +241,7 @@ export const ReactHookForm: ITechStackLogo = {
 };
 
 export const ReactJS: ITechStackLogo = {
-  id: 'o3057o9t-u9m5-4n55-mq6o-1r58p2q40n00',
+  id: 'o3057o9t-u9m5-4n55-mq6o-1r58p2q40n01',
   name: 'ReactJS',
   logo: SiReact
 };
@@ -253,7 +253,7 @@ export const ReactRouter: ITechStackLogo = {
 };
 
 export const ReactTable: ITechStackLogo = {
-  id: 'p4058p0u-v0n6-4o66-nr7p-2s69q3r51o90',
+  id: 'p4058p0u-v0n6-4o66-nr7p-2s69q3r51o91',
   name: 'React Table',
   logo: SiReacttable
 };
@@ -265,7 +265,7 @@ export const ReduxToolkit: ITechStackLogo = {
 };
 
 export const SASS: ITechStackLogo = {
-  id: 'q5059q1v-w1o7-4p77-os8q-3t70r4s62p80',
+  id: 'q5059q1v-w1o7-4p77-os8q-3t70r4s62p81',
   name: 'SASS',
   logo: SiSass
 };

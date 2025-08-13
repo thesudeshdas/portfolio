@@ -1,21 +1,22 @@
 'use client';
 
-// import nextjs components
+// import next components
 import Image from 'next/image';
 import Link from 'next/link';
 
-// import shadcn components
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-
-// import components
-import { ModeToggle, ActiveLink } from '../index';
-
 // import icons
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
-import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+
+// import components
+import ActiveLink from '../ActiveLink/ActiveLink';
+import ModeToggle from '../ModeToggle/ModeToggle';
 
 // import data
 import { appNavLinks } from './appNav.data';
+import { socialLinks } from '@/data/social/social.data';
+
+// import ui components
+import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 
 export default function AppNav() {
   return (
@@ -106,25 +107,25 @@ export default function AppNav() {
                 </ul>
 
                 <div className='mb-0 flex gap-4'>
-                  <a
-                    href='https://github.com/thesudeshdas'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    <FiGithub className='hover:text-foreground dark:hover:text-foreground h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
-                  </a>
-
-                  <a
-                    href='https://www.linkedin.com/in/thesudeshdas'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    <FiLinkedin className='hover:text-foreground dark:hover:text-foreground h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
-                  </a>
-
-                  <a href='mailto:sudeshkumardas7@gmail.com'>
-                    <FiMail className='hover:text-foreground dark:hover:text-foreground h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
-                  </a>
+                  {socialLinks.map((link) => {
+                    const IconComponent = link.icon;
+                    return (
+                      <a
+                        key={link.name}
+                        href={link.url}
+                        target={link.name === 'Email' ? undefined : '_blank'}
+                        rel={
+                          link.name === 'Email'
+                            ? undefined
+                            : 'noopener noreferrer'
+                        }
+                        aria-label={link.label}
+                        className='hover:text-foreground dark:hover:text-foreground transition-colors'
+                      >
+                        <IconComponent className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
+                      </a>
+                    );
+                  })}
                 </div>
               </SheetContent>
             </Sheet>

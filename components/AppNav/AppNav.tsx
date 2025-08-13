@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 // import components
-
 import { ModeToggle, ActiveLink } from '../index';
 
 // import icons
@@ -21,14 +20,14 @@ import { appNavLinks } from './appNav.data';
 export default function AppNav() {
   return (
     <nav
-      className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 shrink-0`}
+      className={`sticky top-0 z-10 h-14 shrink-0 bg-zinc-50 dark:bg-zinc-900`}
     >
       <div
-        className={`h-full w-full flex justify-between  items-center px-4 max-w-[1000px] mx-auto`}
+        className={`mx-auto flex h-full w-full max-w-[1000px] items-center justify-between px-4`}
       >
         <Link href='/'>
           <div className='flex items-center gap-1'>
-            <div className='h-8 w-8 relative'>
+            <div className='relative h-8 w-8'>
               <Image
                 src='/dash-white.png'
                 alt='Brand'
@@ -37,13 +36,13 @@ export default function AppNav() {
               />
             </div>
 
-            <h2 className='font-bold '>Dash</h2>
+            <h2 className='font-bold'>Dash</h2>
           </div>
         </Link>
 
         <div className='flex items-center gap-1 lg:gap-2'>
           {/* Nav links for laptops & desktops */}
-          <ul className='hidden lg:flex gap-4 order-1'>
+          <ul className='order-1 hidden gap-4 lg:flex'>
             {appNavLinks.map(({ id, link, text }) => (
               <li key={id}>
                 <ActiveLink
@@ -67,7 +66,7 @@ export default function AppNav() {
             <Button size='sm'>Resume</Button>
           </a> */}
 
-          <div className='lg:hidden order-4'>
+          <div className='order-4 lg:hidden'>
             <Sheet>
               <SheetTrigger
                 asChild
@@ -76,10 +75,10 @@ export default function AppNav() {
                 <HamburgerMenuIcon className='h-[1.2rem] w-[1.2rem]' />
               </SheetTrigger>
 
-              <SheetContent className='w-[15rem] flex flex-col dark:bg-zinc-900 bg-zinc-50'>
+              <SheetContent className='flex w-[15rem] flex-col bg-zinc-50 dark:bg-zinc-900'>
                 <Link href='/'>
-                  <div className='flex items-center gap-1 absolute left-4 top-2.5'>
-                    <div className='h-8 w-8 relative'>
+                  <div className='absolute top-2.5 left-4 flex items-center gap-1'>
+                    <div className='relative h-8 w-8'>
                       <Image
                         src='/dash-white.png'
                         alt='Brand'
@@ -88,11 +87,11 @@ export default function AppNav() {
                       />
                     </div>
 
-                    <h2 className='font-bold '>Dash</h2>
+                    <h2 className='font-bold'>Dash</h2>
                   </div>
                 </Link>
 
-                <ul className='w-fit mt-20 h-full'>
+                <ul className='mt-20 h-full w-fit'>
                   {appNavLinks.map(({ id, link, text }) => (
                     <li
                       key={id}
@@ -106,13 +105,13 @@ export default function AppNav() {
                   ))}
                 </ul>
 
-                <div className='flex gap-4 mb-0'>
+                <div className='mb-0 flex gap-4'>
                   <a
                     href='https://github.com/thesudeshdas'
                     target='_blank'
                     rel='noopener noreferrer'
                   >
-                    <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
+                    <FiGithub className='hover:text-foreground dark:hover:text-foreground h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
                   </a>
 
                   <a
@@ -120,11 +119,11 @@ export default function AppNav() {
                     target='_blank'
                     rel='noopener noreferrer'
                   >
-                    <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
+                    <FiLinkedin className='hover:text-foreground dark:hover:text-foreground h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
                   </a>
 
                   <a href='mailto:sudeshkumardas7@gmail.com'>
-                    <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
+                    <FiMail className='hover:text-foreground dark:hover:text-foreground h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
                   </a>
                 </div>
               </SheetContent>

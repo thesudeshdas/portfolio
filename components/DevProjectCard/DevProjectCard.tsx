@@ -32,8 +32,8 @@ export default function DevProjectCard({
   } = projectDetails;
 
   return (
-    <div className='flex flex-col lg:flex-row gap-6 items-center'>
-      <div className='relative grow aspect-video w-full sm:max-w-[500px] lg:w-[400px] shrink-0 overflow-hidden = rounded-lg'>
+    <div className='flex flex-col items-center gap-6 lg:flex-row'>
+      <div className='relative aspect-video w-full shrink-0 grow overflow-hidden rounded-lg border sm:max-w-[500px] lg:w-[400px]'>
         <Image
           src={image}
           alt={title}
@@ -42,25 +42,25 @@ export default function DevProjectCard({
         />
       </div>
 
-      <div className='flex flex-col grow gap-2 items-start'>
-        <div className='flex items-center justify-between w-full'>
-          <h2 className='font-bold text-xl'>{title}</h2>
+      <div className='flex grow flex-col items-start gap-2'>
+        <div className='flex w-full items-center justify-between'>
+          <h2 className='text-xl font-bold'>{title}</h2>
 
           {organisation && organisationLogo && (
             <Image
               src={organisationLogo}
               alt={organisation}
               height={24}
-              className='group-data-[state=open]:invert-0 invert dark:group-data-[state=open]:invert dark:invert-0'
+              className='invert group-data-[state=open]:invert-0 dark:invert-0 dark:group-data-[state=open]:invert'
             />
           )}
         </div>
 
-        <ul className='flex flex-row flex-wrap shrink-0 gap-2'>
+        <ul className='flex shrink-0 flex-row flex-wrap gap-2'>
           {techStack?.map((tech) => (
             <Badge
               key={`${title}_${tech.id}`}
-              className='py-1 bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700'
+              className='text-foreground bg-zinc-100 py-1 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700'
             >
               {tech.name}
             </Badge>
@@ -69,7 +69,7 @@ export default function DevProjectCard({
 
         <p>{description}</p>
 
-        <div className='flex gap-2 w-full sm:w-auto'>
+        <div className='flex w-full gap-2 sm:w-auto'>
           {live && (
             <Link
               href={live}
@@ -78,7 +78,7 @@ export default function DevProjectCard({
             >
               <Button className='w-full'>
                 Live
-                <ExternalLinkIcon className='ml-1 w-4 h-4' />
+                <ExternalLinkIcon className='ml-1 h-4 w-4' />
               </Button>
             </Link>
           )}
@@ -91,7 +91,7 @@ export default function DevProjectCard({
             >
               <Button variant='secondary'>
                 Source
-                <CodeIcon className='ml-1 w-4 h-4' />
+                <CodeIcon className='ml-1 h-4 w-4' />
               </Button>
             </Link>
           )}

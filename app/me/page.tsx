@@ -25,3 +25,5 @@ export default function Me() {
 // faqs
 
 // contact
+
+// short story - explain who i am; long story, link to the story

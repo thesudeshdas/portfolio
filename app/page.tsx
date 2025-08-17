@@ -3,7 +3,9 @@
 // import next components
 import Image from 'next/image';
 
-import { socialLinks } from '@/data/social/social.data';
+// import components
+import SocialLinks from '@/components/SocialLinks/SocialLinks';
+
 import { useEffect, useRef } from 'react';
 
 export default function Home() {
@@ -42,27 +44,7 @@ export default function Home() {
 
               <p className='mb-4'>Software Engineer • Amateur Storyteller</p>
 
-              <div className='flex gap-4'>
-                {socialLinks.map((link) => {
-                  const IconComponent = link.icon;
-                  return (
-                    <a
-                      key={link.name}
-                      href={link.url}
-                      target={link.name === 'Email' ? undefined : '_blank'}
-                      rel={
-                        link.name === 'Email'
-                          ? undefined
-                          : 'noopener noreferrer'
-                      }
-                      aria-label={link.label}
-                      className='hover:text-foreground dark:hover:text-foreground transition-colors'
-                    >
-                      <IconComponent className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
-                    </a>
-                  );
-                })}
-              </div>
+              <SocialLinks />
             </div>
           </div>
 

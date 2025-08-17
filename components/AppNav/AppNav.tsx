@@ -10,10 +10,10 @@ import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 // import components
 import ActiveLink from '../ActiveLink/ActiveLink';
 import ModeToggle from '../ModeToggle/ModeToggle';
+import SocialLinks from '../SocialLinks/SocialLinks';
 
 // import data
 import { appNavLinks } from './appNav.data';
-import { socialLinks } from '@/data/social/social.data';
 
 // import ui components
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
@@ -41,63 +41,34 @@ export default function AppNav() {
           </div>
         </Link>
 
-        <div className='flex items-center gap-1 lg:gap-2'>
-          {/* Nav links for laptops & desktops */}
-          <ul className='order-1 hidden gap-4 lg:flex'>
-            {appNavLinks.map(({ id, link, text }) => (
-              <li key={id}>
-                <ActiveLink
-                  link={link}
-                  text={text}
-                />
-              </li>
-            ))}
-          </ul>
-
-          <div className='order-3 lg:order-2'>
-            <ModeToggle />
+        <div className='flex items-center gap-4'>
+          <div className='hidden sm:flex'>
+            <ul className='flex items-center gap-8'>
+              {appNavLinks.map(({ id, link, text }) => (
+                <li key={id}>
+                  <ActiveLink
+                    link={link}
+                    text={text}
+                  />
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* <a
-            href='https://drive.google.com/file/d/1CzVw78rhNPZy7Sck7ct8tAOwYlx57TD6/view?usp=drive_link'
-            target='_blank'
-            rel='noreferrer'
-            className='mr-2 order-2 lg:order-3'
-          >
-            <Button size='sm'>Resume</Button>
-          </a> */}
+          <ModeToggle />
 
-          <div className='order-4 lg:hidden'>
+          <div className='sm:hidden'>
             <Sheet>
-              <SheetTrigger
-                asChild
-                autoFocus={false}
-              >
-                <HamburgerMenuIcon className='h-[1.2rem] w-[1.2rem]' />
+              <SheetTrigger asChild>
+                <button className='flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 dark:border-zinc-700'>
+                  <HamburgerMenuIcon className='h-4 w-4' />
+                </button>
               </SheetTrigger>
 
-              <SheetContent className='flex w-[15rem] flex-col bg-zinc-50 dark:bg-zinc-900'>
-                <Link href='/'>
-                  <div className='absolute top-2.5 left-4 flex items-center gap-1'>
-                    <div className='relative h-8 w-8'>
-                      <Image
-                        src='/dash-white.png'
-                        alt='Brand'
-                        fill
-                        className='invert dark:invert-0'
-                      />
-                    </div>
-
-                    <h2 className='font-bold'>Dash</h2>
-                  </div>
-                </Link>
-
-                <ul className='mt-20 h-full w-fit'>
+              <SheetContent>
+                <ul className='mb-8 flex flex-col gap-4'>
                   {appNavLinks.map(({ id, link, text }) => (
-                    <li
-                      key={id}
-                      className='mb-4'
-                    >
+                    <li key={id}>
                       <ActiveLink
                         link={link}
                         text={text}
@@ -106,26 +77,8 @@ export default function AppNav() {
                   ))}
                 </ul>
 
-                <div className='mb-0 flex gap-4'>
-                  {socialLinks.map((link) => {
-                    const IconComponent = link.icon;
-                    return (
-                      <a
-                        key={link.name}
-                        href={link.url}
-                        target={link.name === 'Email' ? undefined : '_blank'}
-                        rel={
-                          link.name === 'Email'
-                            ? undefined
-                            : 'noopener noreferrer'
-                        }
-                        aria-label={link.label}
-                        className='hover:text-foreground dark:hover:text-foreground transition-colors'
-                      >
-                        <IconComponent className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400' />
-                      </a>
-                    );
-                  })}
+                <div className='mb-0'>
+                  <SocialLinks />
                 </div>
               </SheetContent>
             </Sheet>

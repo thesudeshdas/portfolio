@@ -21,7 +21,7 @@ import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 export default function AppNav() {
   return (
     <nav
-      className={`sticky top-0 z-10 h-14 shrink-0 bg-zinc-50 dark:bg-zinc-900`}
+      className={`sticky top-0 z-10 h-16 shrink-0 bg-zinc-50 sm:h-20 dark:bg-zinc-900`}
     >
       <div
         className={`mx-auto flex h-full w-full max-w-[1000px] items-center justify-between px-4`}

@@ -15,16 +15,16 @@ export interface SocialLink {
 
 export const socialLinks: SocialLink[] = [
   {
-    name: 'LinkedIn',
-    url: 'https://www.linkedin.com/in/thesudeshdas',
-    icon: FiLinkedin,
-    label: 'Connect with me on LinkedIn'
-  },
-  {
     name: 'GitHub',
     url: 'https://github.com/thesudeshdas',
     icon: FiGithub,
     label: 'View my work on GitHub'
+  },
+  {
+    name: 'LinkedIn',
+    url: 'https://www.linkedin.com/in/thesudeshdas',
+    icon: FiLinkedin,
+    label: 'Connect with me on LinkedIn'
   },
   {
     name: 'YouTube',

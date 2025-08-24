@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Stories of Dash'
 };
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 export default async function Stories() {
   const publishedPosts = await getAllPublished();
 

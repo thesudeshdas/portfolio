@@ -4,6 +4,8 @@ import SectionHeader from '@/components/SectionHeader/SectionHeader';
 import { getAllPublished } from '@/lib/notion';
 import { StoriesContainer } from '@/components/index';
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 export default async function Home() {
   const publishedPosts = await getAllPublished();
 

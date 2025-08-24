@@ -10,6 +10,8 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { entry } = await params;
 

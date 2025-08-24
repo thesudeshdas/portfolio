@@ -76,7 +76,7 @@ export default function StoriesContainer({
                 </span>
               </div>
 
-              <p className='text-muted-foreground line-clamp-2 w-3/4 pb-3 text-sm'>
+              <p className='text-muted-foreground line-clamp-2 h-20 w-3/4 pb-3 text-sm'>
                 {firstPublishedPost.description}
               </p>
             </div>
@@ -84,22 +84,24 @@ export default function StoriesContainer({
         </>
       )}
 
-      <div className='flex items-start justify-between'>
-        <SectionHeader
-          text={storiesListHeader}
-          className='mb-4'
-        />
+      {storiesList.length > 0 && (
+        <div className='flex items-start justify-between'>
+          <SectionHeader
+            text={storiesListHeader}
+            className='mb-4'
+          />
 
-        {!isPathNameStories && (
-          <Link
-            href={'/stories'}
-            className='text-muted-foreground hover:text-foreground mt-1 flex items-center gap-3 text-xs transition-all'
-          >
-            All stories
-            <DoubleArrowRightIcon />
-          </Link>
-        )}
-      </div>
+          {!isPathNameStories && storiesList.length > 1 && (
+            <Link
+              href={'/stories'}
+              className='text-muted-foreground hover:text-foreground mt-1 flex items-center gap-3 text-xs transition-all'
+            >
+              All stories
+              <DoubleArrowRightIcon />
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className='flex flex-col gap-14'>
         {storiesList.map((post, index) => (

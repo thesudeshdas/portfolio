@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
   env: {
     NOTION_DATABASE_ID: process.env.NOTION_DATABASE_ID,
     NOTION_TOKEN: process.env.NOTION_TOKEN
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.notion.so',
+        port: '',
+        pathname: '/images/**'
+      }
+    ]
   }
 };
 

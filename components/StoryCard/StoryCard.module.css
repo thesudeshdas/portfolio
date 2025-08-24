@@ -1,0 +1,51 @@
+/* Single Grid Layout with Responsive Areas */
+.storyCard {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    'title cover'
+    'description cover'
+    'date cover';
+}
+
+/* Desktop Grid Areas */
+@media (min-width: 640px) {
+  .storyCard {
+    gap: 4px;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      'cover title'
+      'cover description'
+      'cover date';
+  }
+}
+
+/* Grid Area Assignments */
+.cover {
+  grid-area: cover;
+}
+
+.date {
+  grid-area: date;
+}
+
+.title {
+  grid-area: title;
+}
+
+.description {
+  grid-area: description;
+}
+
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}

@@ -181,6 +181,10 @@ html {
   color: #007bff;
 }
 
+.section-header {
+  @apply text-muted-foreground mb-4 text-sm font-medium;
+}
+
 /* Line clamp utilities */
 .line-clamp-1 {
   overflow: hidden;

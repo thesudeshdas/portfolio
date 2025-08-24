@@ -5,6 +5,7 @@ import StoryCard from './StoryCard';
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import SectionHeader from '../SectionHeader/SectionHeader';
 
 interface StoriesContainerProps {
   publishedPosts: IStory[];
@@ -26,9 +27,10 @@ export default function StoriesContainer({
 
   return (
     <main className='col-span-3 mx-auto flex flex-col py-8'>
-      <h3 className='text-muted-foreground mb-4 text-sm font-medium'>
-        Latest rant
-      </h3>
+      <SectionHeader
+        text='Latest rants'
+        className='mb-4'
+      />
 
       <Link
         href={`/stories/${firstPublishedPost.slug}`}
@@ -59,9 +61,10 @@ export default function StoriesContainer({
         </div>
       </Link>
 
-      <h3 className='text-muted-foreground mt-20 mb-4 text-sm font-medium'>
-        More Stories
-      </h3>
+      <SectionHeader
+        text='More Stories'
+        className='mt-20 mb-4'
+      />
 
       <div className='flex flex-col gap-14'>
         {publishedPosts.slice(1).map((post, index) => (

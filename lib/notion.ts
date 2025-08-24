@@ -55,7 +55,7 @@ export const fetchPageBlocks = cache((pageId: string) => {
     .then((res) => res.results as BlockObjectResponse[]);
 });
 
-function getToday(datestring) {
+function getToday(dateString: string | undefined) {
   const months = [
     'January',
     'February',
@@ -73,8 +73,8 @@ function getToday(datestring) {
 
   let date = new Date();
 
-  if (datestring) {
-    date = new Date(datestring);
+  if (dateString) {
+    date = new Date(dateString);
   }
 
   const day = date.getDate();
@@ -86,7 +86,7 @@ function getToday(datestring) {
 }
 
 const getPageMetaData = (post: PageObjectResponse) => {
-  const getTags = (tags) => {
+  const getTags = (tags: { name: string }[]) => {
     const allTags = tags.map((tag) => {
       return tag.name;
     });
@@ -96,11 +96,26 @@ const getPageMetaData = (post: PageObjectResponse) => {
 
   return {
     id: post.id,
-    title: post.properties.Title.title[0]?.plain_text ?? '',
-    tags: getTags(post.properties.Tags.multi_select),
-    description: post.properties.Description.rich_text[0]?.plain_text ?? '',
-    date: getToday(post.properties.Date.date?.start),
-    slug: post.properties.Slug.rich_text[0]?.plain_text ?? '',
+    title:
+      post.properties.Title?.type === 'title'
+        ? post.properties.Title.title[0]?.plain_text ?? ''
+        : '',
+    tags:
+      post.properties.Tags?.type === 'multi_select'
+        ? getTags(post.properties.Tags.multi_select)
+        : [],
+    description:
+      post.properties.Description?.type === 'rich_text'
+        ? post.properties.Description.rich_text[0]?.plain_text ?? ''
+        : '',
+    date:
+      post.properties.Date?.type === 'date'
+        ? getToday(post.properties.Date.date?.start)
+        : '',
+    slug:
+      post.properties.Slug?.type === 'rich_text'
+        ? post.properties.Slug.rich_text[0]?.plain_text ?? ''
+        : '',
     icon: post.icon?.type === 'emoji' ? post.icon.emoji : null,
     cover: post.cover?.type === 'external' ? post.cover.external.url : null
   };
@@ -122,7 +137,7 @@ export const getAllPublished = async () => {
       }
     ]
   });
-  const allPosts = posts.results;
+  const allPosts = posts.results as PageObjectResponse[];
 
   return allPosts.map((post) => {
     return getPageMetaData(post);
@@ -140,7 +155,7 @@ export const getAllInProgress = async () => {
     }
   });
 
-  const allPosts = posts.results;
+  const allPosts = posts.results as PageObjectResponse[];
 
   return allPosts.map((post) => {
     return getPageMetaData(post);
@@ -171,6 +186,11 @@ export const getSinglePost = async (slug: string) => {
   });
 
   const page = response.results[0] as PageObjectResponse | undefined;
+
+  if (!page) {
+    throw new Error('Page not found');
+  }
+
   const metadata = getPageMetaData(page);
   const mdblocks = await n2m.pageToMarkdown(page.id);
   const mdString = n2m.toMarkdownString(mdblocks);

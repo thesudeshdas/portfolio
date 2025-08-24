@@ -1,30 +1,19 @@
-'use client';
-
 import Image from 'next/image';
 import SocialLinks from '@/components/SocialLinks/SocialLinks';
 import SectionHeader from '@/components/SectionHeader/SectionHeader';
-import { useEffect, useRef } from 'react';
+import { getAllPublished } from '@/lib/notion';
+import { StoriesContainer } from '@/components/index';
 
-export default function Home() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (containerRef.current && window.innerWidth >= 640) {
-      // sm breakpoint is 640px
-      containerRef.current.style.height = `${containerRef.current.clientHeight}px`;
-    }
-  }, []);
+export default async function Home() {
+  const publishedPosts = await getAllPublished();
 
   return (
     <main className='flex flex-col gap-12 py-12'>
       <div className='flex flex-col gap-20 sm:max-w-[600px]'>
-        <div
-          ref={containerRef}
-          className='flex flex-col gap-6'
-        >
+        <div className='flex flex-col gap-6'>
           <div className='flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-center'>
             <figure className='aspect-square h-full max-w-[150px] sm:max-w-full'>
-              <div className='relative aspect-square grow'>
+              <div className='relative aspect-square w-[125px]'>
                 <Image
                   src='/DP.svg'
                   alt='Sudesh Das'
@@ -67,55 +56,12 @@ export default function Home() {
         </div>
 
         <div className='flex w-full flex-col gap-4'>
-          <SectionHeader text='Latest rants' />
-
-          <div className='w-full max-w-4xl'>
-            <ul className='space-y-4'>
-              <li className='border-border border-b pb-3'>
-                <a
-                  href='/blogs'
-                  className='group block'
-                >
-                  <h5 className='group-hover:text-foreground text-lg font-medium transition-colors'>
-                    Building in Public: My Journey as a Developer
-                  </h5>
-                  <p className='text-muted-foreground mt-1 text-sm'>
-                    Sharing the ups and downs of building software in the open
-                  </p>
-                </a>
-              </li>
-              <li className='border-border border-b pb-3'>
-                <a
-                  href='/blogs'
-                  className='group block'
-                >
-                  <h5 className='group-hover:text-foreground text-lg font-medium transition-colors'>
-                    Lessons Learned from 100+ Code Reviews
-                  </h5>
-                  <p className='text-muted-foreground mt-1 text-sm'>
-                    Key insights from reviewing code across different projects
-                  </p>
-                </a>
-              </li>
-              <li className='border-border border-b pb-3'>
-                <a
-                  href='/blogs'
-                  className='group block'
-                >
-                  <h5 className='group-hover:text-foreground text-lg font-medium transition-colors'>
-                    The Art of Writing Clean Code
-                  </h5>
-                  <p className='text-muted-foreground mt-1 text-sm'>
-                    Principles and practices for maintainable software
-                  </p>
-                </a>
-              </li>
-            </ul>
-          </div>
+          <StoriesContainer
+            publishedPosts={publishedPosts}
+            storiesListHeader='Latest rants'
+          />
         </div>
       </div>
     </main>
   );
 }
-
-// currently working, currently building, recently wrote

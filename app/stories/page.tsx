@@ -21,5 +21,10 @@ export default async function Stories() {
     );
   }
 
-  return <StoriesContainer publishedPosts={publishedPosts} />;
+  return (
+    <StoriesContainer
+      publishedPosts={publishedPosts}
+      firstPostFeatured
+    />
+  );
 }

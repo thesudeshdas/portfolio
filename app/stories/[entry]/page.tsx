@@ -2,7 +2,6 @@ import ReactMarkdown from 'react-markdown';
 import { getSinglePost } from '@/lib/notion';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { findAndStyleTime } from '@/lib/dateMe';
 
 import styles from './Entry.module.css';
 
@@ -30,13 +29,16 @@ export default async function DiaryEntry({
 
   const post = await getSinglePost(entry);
 
+  // const contentToBeShown = findAndStyleTime(post.markdown.parent);
+  const contentToBeShown = post.markdown.parent;
+
   if (!post) {
     notFound();
   }
 
   return (
     <section className={styles['entry-main']}>
-      <ReactMarkdown>{findAndStyleTime(post.markdown.parent)}</ReactMarkdown>
+      <ReactMarkdown>{contentToBeShown}</ReactMarkdown>
     </section>
   );
 }

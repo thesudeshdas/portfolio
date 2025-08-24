@@ -4,19 +4,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-// import icons
-import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
-
 // import data
 import { NextJS, TailwindCSS } from '@/data/icons/icons.data';
 
+// import components
+import SocialLinks from '../SocialLinks/SocialLinks';
+
 export default function Footer() {
   return (
-    <div className='flex flex-col sm:flex-row justify-between items-center py-4 px-4 border-t-[1px] border-zinc-400 dark:border-zinc-500 gap-8 max-w-[1000px] mx-auto w-full'>
-      <div className='flex flex-col items-center sm:items-start gap-2'>
+    <div className='mx-auto flex w-full max-w-[1000px] flex-col items-center justify-between gap-8 border-t-[1px] border-zinc-400 py-8 sm:flex-row dark:border-zinc-500'>
+      <div className='flex flex-col items-center gap-6 sm:items-start'>
         <Link href='/'>
           <div className='flex items-center gap-1'>
-            <div className='h-8 w-8 relative'>
+            <div className='relative h-8 w-8'>
               <Image
                 src='/dash-white.png'
                 alt='Brand'
@@ -32,30 +32,10 @@ export default function Footer() {
         <p className='text-xs'>© 2025 Sudesh Das. All Rights Reserved.</p>
       </div>
 
-      <div className='flex flex-col items-center sm:items-end gap-3'>
-        <div className='flex items-center gap-4'>
-          <a
-            href='https://github.com/thesudeshdas'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
-          </a>
+      <div className='flex flex-col items-center gap-6 sm:items-end'>
+        <SocialLinks />
 
-          <a
-            href='https://www.linkedin.com/in/thesudeshdas'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
-          </a>
-
-          <a href='mailto:sudeshkumardas7@gmail.com'>
-            <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
-          </a>
-        </div>
-
-        <div className='flex flex-row text-xs items-center gap-1 text-zinc-500 dark:text-zinc-400'>
+        <div className='flex flex-row items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400'>
           <p>Made with</p>
 
           <a
@@ -63,7 +43,7 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <NextJS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
+            <NextJS.logo className='hover:text-foreground dark:hover:text-foreground h-3 w-3 text-zinc-500 dark:text-zinc-400' />
           </a>
 
           <p>and</p>
@@ -73,7 +53,7 @@ export default function Footer() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <TailwindCSS.logo className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
+            <TailwindCSS.logo className='hover:text-foreground dark:hover:text-foreground h-3 w-3 text-zinc-500 dark:text-zinc-400' />
           </a>
         </div>
       </div>

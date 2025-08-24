@@ -5,6 +5,10 @@ import DevProjectCardSkeleton from './DevProjectCard/DevProjectCardSkeleton';
 import DevProjectFilter from './DevProjectFilter/DevProjectFilter';
 import Footer from './Footer/Footer';
 import ModeToggle from './ModeToggle/ModeToggle';
+import SocialLinks from './SocialLinks/SocialLinks';
+import StoryCard from './StoryCard/StoryCard';
+import StoryCardSkeleton from './StoryCard/StoryCardSkeleton';
+import StoriesContainer from './StoryCard/StoriesContainer';
 
 export {
   ActiveLink,
@@ -13,5 +17,9 @@ export {
   DevProjectCardSkeleton,
   DevProjectFilter,
   Footer,
-  ModeToggle
+  ModeToggle,
+  SocialLinks,
+  StoryCard,
+  StoryCardSkeleton,
+  StoriesContainer
 };

@@ -1,0 +1,20 @@
+.entry-main {
+  padding: 32px 0;
+}
+
+.entry-main img {
+  margin: 32px 0;
+}
+
+.entry-main p {
+  margin-bottom: 12px;
+}
+
+.entry-main h1,
+.entry-main h2,
+.entry-main h3,
+.entry-main h4,
+.entry-main h5,
+.entry-main h6 {
+  margin-bottom: 12px;
+}

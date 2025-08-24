@@ -25,7 +25,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className={`${inter.className} flex flex-col items-stretch min-h-full `}
+        className={`${inter.className} flex min-h-full flex-col items-stretch`}
       >
         <ThemeProvider
           attribute='class'
@@ -33,15 +33,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className='fixed inset-0 z-[-2] bg-linear-to-b from-80% dark:from-zinc-900 dark:to-zinc-900 from-zinc-50 to-zinc-50'></div>
+          <div className='fixed inset-0 z-[-2] bg-linear-to-b from-zinc-50 from-80% to-zinc-50 dark:from-zinc-900 dark:to-zinc-900'></div>
 
           <AppNav />
 
-          <div className='flex flex-col max-w-[1000px] mx-auto grow w-full'>
-            <div className='flex-col items-center px-4'>{children}</div>
-          </div>
+          <div className='overflow mx-auto flex w-full max-w-[1000px] grow flex-col'>
+            <div className='h-full flex-1 flex-col items-center px-4'>
+              {children}
+            </div>
 
-          <Footer />
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>

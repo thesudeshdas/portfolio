@@ -1,34 +1,34 @@
 'use client';
 
-// import nextjs components
+// import next components
 import Image from 'next/image';
 import Link from 'next/link';
 
-// import shadcn components
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-
-// import components
-
-import { ModeToggle, ActiveLink } from '../index';
-
 // import icons
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
-import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+
+// import components
+import ActiveLink from '../ActiveLink/ActiveLink';
+import ModeToggle from '../ModeToggle/ModeToggle';
+import SocialLinks from '../SocialLinks/SocialLinks';
 
 // import data
 import { appNavLinks } from './appNav.data';
 
+// import ui components
+import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
+
 export default function AppNav() {
   return (
     <nav
-      className={`h-14 sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 shrink-0`}
+      className={`sticky top-0 z-10 h-16 shrink-0 bg-zinc-50 sm:h-20 dark:bg-zinc-900`}
     >
       <div
-        className={`h-full w-full flex justify-between  items-center px-4 max-w-[1000px] mx-auto`}
+        className={`mx-auto flex h-full w-full max-w-[1000px] items-center justify-between px-4`}
       >
         <Link href='/'>
           <div className='flex items-center gap-1'>
-            <div className='h-8 w-8 relative'>
+            <div className='relative h-8 w-8'>
               <Image
                 src='/dash-white.png'
                 alt='Brand'
@@ -37,49 +37,38 @@ export default function AppNav() {
               />
             </div>
 
-            <h2 className='font-bold '>Dash</h2>
+            <h2 className='font-bold'>Dash</h2>
           </div>
         </Link>
 
-        <div className='flex items-center gap-1 lg:gap-2'>
-          {/* Nav links for laptops & desktops */}
-          <ul className='hidden lg:flex gap-4 order-1'>
-            {appNavLinks.map(({ id, link, text }) => (
-              <li key={id}>
-                <ActiveLink
-                  link={link}
-                  text={text}
-                />
-              </li>
-            ))}
-          </ul>
-
-          <div className='order-3 lg:order-2'>
-            <ModeToggle />
+        <div className='flex items-center sm:gap-4'>
+          <div className='hidden sm:flex'>
+            <ul className='flex items-center gap-8'>
+              {appNavLinks.map(({ id, link, text }) => (
+                <li key={id}>
+                  <ActiveLink
+                    link={link}
+                    text={text}
+                  />
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* <a
-            href='https://drive.google.com/file/d/1CzVw78rhNPZy7Sck7ct8tAOwYlx57TD6/view?usp=drive_link'
-            target='_blank'
-            rel='noreferrer'
-            className='mr-2 order-2 lg:order-3'
-          >
-            <Button size='sm'>Resume</Button>
-          </a> */}
+          <ModeToggle />
 
-          <div className='lg:hidden order-4'>
+          <div className='sm:hidden'>
             <Sheet>
-              <SheetTrigger
-                asChild
-                autoFocus={false}
-              >
-                <HamburgerMenuIcon className='h-[1.2rem] w-[1.2rem]' />
+              <SheetTrigger asChild>
+                <button className='text-foreground flex h-8 w-8 items-center justify-center rounded-md p-0'>
+                  <HamburgerMenuIcon className='h-4 w-4' />
+                </button>
               </SheetTrigger>
 
-              <SheetContent className='w-[15rem] flex flex-col dark:bg-zinc-900 bg-zinc-50'>
+              <SheetContent className='flex h-full w-[15rem] flex-col bg-zinc-50 dark:bg-zinc-900'>
                 <Link href='/'>
-                  <div className='flex items-center gap-1 absolute left-4 top-2.5'>
-                    <div className='h-8 w-8 relative'>
+                  <div className='absolute top-2.5 left-4 flex items-center gap-1'>
+                    <div className='relative h-8 w-8'>
                       <Image
                         src='/dash-white.png'
                         alt='Brand'
@@ -88,11 +77,11 @@ export default function AppNav() {
                       />
                     </div>
 
-                    <h2 className='font-bold '>Dash</h2>
+                    <h2 className='font-bold'>Dash</h2>
                   </div>
                 </Link>
 
-                <ul className='w-fit mt-20 h-full'>
+                <ul className='mt-20 h-full w-fit'>
                   {appNavLinks.map(({ id, link, text }) => (
                     <li
                       key={id}
@@ -106,26 +95,8 @@ export default function AppNav() {
                   ))}
                 </ul>
 
-                <div className='flex gap-4 mb-0'>
-                  <a
-                    href='https://github.com/thesudeshdas'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    <FiGithub className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
-                  </a>
-
-                  <a
-                    href='https://www.linkedin.com/in/thesudeshdas'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    <FiLinkedin className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
-                  </a>
-
-                  <a href='mailto:sudeshkumardas7@gmail.com'>
-                    <FiMail className='h-[1.2rem] w-[1.2rem] text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground ' />
-                  </a>
+                <div className='mb-0'>
+                  <SocialLinks />
                 </div>
               </SheetContent>
             </Sheet>

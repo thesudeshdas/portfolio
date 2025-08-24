@@ -1,11 +1,8 @@
 'use client';
 
-// import next components
 import Image from 'next/image';
-
-// import components
 import SocialLinks from '@/components/SocialLinks/SocialLinks';
-
+import SectionHeader from '@/components/SectionHeader/SectionHeader';
 import { useEffect, useRef } from 'react';
 
 export default function Home() {
@@ -56,23 +53,21 @@ export default function Home() {
         </div>
 
         <div className='flex flex-col gap-4'>
-          <h4 className='text-3xl'>Latest Shenanigans</h4>
+          <SectionHeader text='Latest Shenanigans' />
 
-          <div className='w-full max-w-4xl'>
-            <div className='bg-muted relative aspect-video w-full overflow-hidden rounded-lg border'>
-              <iframe
-                src='https://www.youtube.com/embed/videoseries?list=UUk6BULrAO7SWaSg0Vie-Hqg'
-                title='Latest Video from Hey Who Is Dash'
-                className='absolute inset-0 h-full w-full'
-                allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-                allowFullScreen
-              />
-            </div>
+          <div className='bg-muted relative aspect-video w-full max-w-4xl overflow-hidden rounded-lg border'>
+            <iframe
+              src='https://www.youtube.com/embed/videoseries?list=UUk6BULrAO7SWaSg0Vie-Hqg'
+              title='Latest Video from Hey Who Is Dash'
+              className='absolute inset-0 h-full w-full'
+              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+              allowFullScreen
+            />
           </div>
         </div>
 
         <div className='flex w-full flex-col gap-4'>
-          <h4 className='text-3xl'>Latest Reads</h4>
+          <SectionHeader text='Latest rants' />
 
           <div className='w-full max-w-4xl'>
             <ul className='space-y-4'>

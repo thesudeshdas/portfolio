@@ -7,17 +7,12 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion';
+import SectionHeader from '@/components/SectionHeader/SectionHeader';
 
 export default function FAQ() {
   return (
     <div className='flex flex-col gap-6'>
-      <div>
-        <h2 className='text-3xl font-bold'>FAQs (that no one asked for)</h2>
-
-        <p className='text-xs text-zinc-500 dark:text-zinc-400'>
-          But I&apos;d like to address them anyway.
-        </p>
-      </div>
+      <SectionHeader text='FAQs (that no one asked for)' />
 
       <Accordion
         type='single'

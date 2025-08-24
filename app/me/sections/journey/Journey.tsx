@@ -20,11 +20,12 @@ import {
 
 // import assets
 import { journey } from './journey.data';
+import SectionHeader from '@/components/SectionHeader/SectionHeader';
 
 export default function Journey() {
   return (
     <div className='flex flex-col gap-6'>
-      <h2 className='text-3xl font-bold'>The journey so far...</h2>
+      <SectionHeader text='The journey so far...' />
 
       <div className='flex'>
         <div className='flex w-8 shrink-0 justify-center'>
@@ -61,7 +62,7 @@ export default function Journey() {
                 className='mb-14 rounded-md border-none shadow-sm'
               >
                 <AccordionTrigger className=':no-underline group relative rounded-md p-4 pl-2 text-left hover:no-underline data-[state=open]:bg-zinc-200 dark:data-[state=open]:bg-zinc-800'>
-                  <div className='bg-foreground absolute top-[18px] -left-[24px] h-4 w-4'></div>
+                  <div className='bg-foreground absolute top-[18px] -left-[24px] h-4 w-4 rounded-md'></div>
 
                   <div className='group-data-[state=open]:text-foreground flex flex-col gap-2 text-zinc-500 dark:text-zinc-400'>
                     <h3 className='text-xs'>

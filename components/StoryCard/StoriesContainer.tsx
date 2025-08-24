@@ -13,12 +13,14 @@ interface StoriesContainerProps {
   publishedPosts: IStory[];
   firstPostFeatured?: boolean;
   storiesListHeader?: string;
+  maxStories?: number;
 }
 
 export default function StoriesContainer({
   publishedPosts,
   firstPostFeatured = false,
-  storiesListHeader = 'More Stories'
+  storiesListHeader = 'More Stories',
+  maxStories = 4
 }: StoriesContainerProps) {
   const pathname = usePathname();
 
@@ -27,6 +29,10 @@ export default function StoriesContainer({
   const [hoveredStory, setHoveredStory] = useState<string | null>(null);
 
   const isPathNameStories = pathname === '/stories';
+
+  const storiesList = firstPostFeatured
+    ? publishedPosts.slice(1, maxStories)
+    : publishedPosts.slice(0, maxStories);
 
   const handleOnMouseEnter = (storyId: string) => {
     setHoveredStory(storyId);
@@ -96,7 +102,7 @@ export default function StoriesContainer({
       </div>
 
       <div className='flex flex-col gap-14'>
-        {publishedPosts.slice(1).map((post, index) => (
+        {storiesList.map((post, index) => (
           <StoryCard
             key={post.id || index + 1}
             post={post}

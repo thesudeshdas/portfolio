@@ -106,7 +106,7 @@ export default function Journey() {
                               <TooltipTrigger asChild>
                                 <div>
                                   <tech.logo
-                                    className={`h-[1.2rem] w-[1.2rem] md:h-[1.6rem] md:w-[1.6rem]`}
+                                    className={`h-4 w-4 md:h-5 md:w-5`}
                                   />
                                 </div>
                               </TooltipTrigger>

@@ -41,7 +41,7 @@ export default function AppNav() {
           </div>
         </Link>
 
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center sm:gap-4'>
           <div className='hidden sm:flex'>
             <ul className='flex items-center gap-8'>
               {appNavLinks.map(({ id, link, text }) => (
@@ -60,15 +60,33 @@ export default function AppNav() {
           <div className='sm:hidden'>
             <Sheet>
               <SheetTrigger asChild>
-                <button className='flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 dark:border-zinc-700'>
+                <button className='text-foreground flex h-8 w-8 items-center justify-center rounded-md p-0'>
                   <HamburgerMenuIcon className='h-4 w-4' />
                 </button>
               </SheetTrigger>
 
-              <SheetContent>
-                <ul className='mb-8 flex flex-col gap-4'>
+              <SheetContent className='flex h-full w-[15rem] flex-col bg-zinc-50 dark:bg-zinc-900'>
+                <Link href='/'>
+                  <div className='absolute top-2.5 left-4 flex items-center gap-1'>
+                    <div className='relative h-8 w-8'>
+                      <Image
+                        src='/dash-white.png'
+                        alt='Brand'
+                        fill
+                        className='invert dark:invert-0'
+                      />
+                    </div>
+
+                    <h2 className='font-bold'>Dash</h2>
+                  </div>
+                </Link>
+
+                <ul className='mt-20 h-full w-fit'>
                   {appNavLinks.map(({ id, link, text }) => (
-                    <li key={id}>
+                    <li
+                      key={id}
+                      className='mb-4'
+                    >
                       <ActiveLink
                         link={link}
                         text={text}

@@ -39,5 +39,3 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 - Radix Icons
 - Simple Icons
-
-NOTION_TOKEN=secret_el34qrEr9T29UOLw8XfLwblOaMKvUk9WUia8P8qT3wU

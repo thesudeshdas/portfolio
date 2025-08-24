@@ -96,11 +96,13 @@ const getPageMetaData = (post: PageObjectResponse) => {
 
   return {
     id: post.id,
-    title: post.properties.Title.title[0].plain_text,
+    title: post.properties.Title.title[0]?.plain_text ?? '',
     tags: getTags(post.properties.Tags.multi_select),
-    description: post.properties.Description.rich_text[0].plain_text,
+    description: post.properties.Description.rich_text[0]?.plain_text ?? '',
     date: getToday(post.properties.Date.date?.start),
-    slug: post.properties.Slug.rich_text[0].plain_text
+    slug: post.properties.Slug.rich_text[0]?.plain_text ?? '',
+    icon: post.icon?.type === 'emoji' ? post.icon.emoji : null,
+    cover: post.cover?.type === 'external' ? post.cover.external.url : null
   };
 };
 
@@ -112,8 +114,32 @@ export const getAllPublished = async () => {
       status: {
         equals: 'Published'
       }
+    },
+    sorts: [
+      {
+        property: 'Date',
+        direction: 'descending'
+      }
+    ]
+  });
+  const allPosts = posts.results;
+
+  return allPosts.map((post) => {
+    return getPageMetaData(post);
+  });
+};
+
+export const getAllInProgress = async () => {
+  const posts = await notion.databases.query({
+    database_id: process.env.NOTION_DATABASE_ID!,
+    filter: {
+      property: 'Status',
+      status: {
+        equals: 'In Progress'
+      }
     }
   });
+
   const allPosts = posts.results;
 
   return allPosts.map((post) => {

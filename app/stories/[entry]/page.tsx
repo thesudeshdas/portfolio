@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { findAndStyleTime } from '@/lib/dateMe';
 
+import styles from './Entry.module.css';
+
 type Props = {
   params: Promise<{ entry: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -33,7 +35,7 @@ export default async function DiaryEntry({
   }
 
   return (
-    <section>
+    <section className={styles['entry-main']}>
       <ReactMarkdown>{findAndStyleTime(post.markdown.parent)}</ReactMarkdown>
     </section>
   );

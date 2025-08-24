@@ -1,9 +1,5 @@
-.container {
-  padding: 0 2rem;
-}
-
-.main {
-  padding: 4rem;
+.entry-main {
+  padding: 4rem 0;
 }
 
 .card {

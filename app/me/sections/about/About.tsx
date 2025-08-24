@@ -82,7 +82,7 @@ export default function About() {
 
         <p>
           If you are someone who has overlapping interest(s), feel free to HMU
-          on socials (Most active on emails though)
+          on socials (Most active on email though)
         </p>
       </div>
     </div>

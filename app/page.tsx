@@ -37,7 +37,7 @@ export default function Home() {
               </div>
             </figure>
 
-            <div className='flex w-full flex-col gap-2'>
+            <div className='flex w-full flex-col gap-0'>
               <h2 className='text-4xl'>
                 Sudesh Das <span className='text-sm'>( Dash )</span>
               </h2>

@@ -59,6 +59,7 @@ export default async function Home() {
           <StoriesContainer
             publishedPosts={publishedPosts}
             storiesListHeader='Latest rants'
+            maxStories={3}
           />
         </div>
       </div>

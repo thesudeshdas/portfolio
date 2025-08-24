@@ -16,18 +16,18 @@ export default function ActiveLink({ link, text }: IActiveLinkProps) {
   return (
     <Link href={link}>
       <div className='group'>
-        <p
+        <span
           className={`${
-            pathname === link ? 'font-bold' : 'text-zinc-500 dark:text-zinc-400'
-          } group-hover:text-foreground transition-all`}
+            pathname === link ? '' : 'text-zinc-500 dark:text-zinc-400'
+          } group-hover:text-foreground text-sm transition-all`}
         >
           {text}
-        </p>
+        </span>
 
         <div
           className={`${
             pathname === link ? 'w-full' : 'w-0'
-          } h-0.5 mt-0.5 bg-foreground group-hover:w-full transition-all`}
+          } bg-foreground mt-0.5 h-0.5 transition-all group-hover:w-full`}
         ></div>
       </div>
     </Link>

@@ -197,8 +197,6 @@ export const getSinglePost = async (slug: string) => {
   const metadata = getPageMetaData(page);
   const mdblocks = await n2m.pageToMarkdown(page.id);
 
-  console.log({ mdblocks });
-
   const mdString = n2m.toMarkdownString(mdblocks);
 
   return {

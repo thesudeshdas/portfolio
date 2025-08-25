@@ -41,8 +41,6 @@ export default async function DiaryEntry({
     notFound();
   }
 
-  console.log({ post });
-
   return (
     <main>
       <NavLink

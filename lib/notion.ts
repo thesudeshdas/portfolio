@@ -162,7 +162,10 @@ export const getAllInProgress = async () => {
   });
 };
 
-const n2m = new NotionToMarkdown({ notionClient: notion });
+const n2m = new NotionToMarkdown({
+  notionClient: notion,
+  config: { parseChildPages: false }
+});
 
 export const getSinglePost = async (slug: string) => {
   const response = await notion.databases.query({
@@ -193,6 +196,9 @@ export const getSinglePost = async (slug: string) => {
 
   const metadata = getPageMetaData(page);
   const mdblocks = await n2m.pageToMarkdown(page.id);
+
+  console.log({ mdblocks });
+
   const mdString = n2m.toMarkdownString(mdblocks);
 
   return {

@@ -3,7 +3,9 @@
 }
 
 .entry-main img {
-  margin: 32px 0;
+  margin: 32px auto;
+  max-width: 40rem;
+  border-radius: var(--radius);
 }
 
 .entry-main p {
@@ -12,9 +14,18 @@
 
 .entry-main h1,
 .entry-main h2,
-.entry-main h3,
-.entry-main h4,
-.entry-main h5,
-.entry-main h6 {
+.entry-main h3 {
   margin-bottom: 12px;
+}
+
+.entry-main h1 {
+  font-size: 2rem;
+}
+
+.entry-main h2 {
+  font-size: 1.5rem;
+}
+
+.entry-main h3 {
+  font-size: 1.25rem;
 }

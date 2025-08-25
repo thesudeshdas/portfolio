@@ -5,6 +5,7 @@ import DevProjectCardSkeleton from './DevProjectCard/DevProjectCardSkeleton';
 import DevProjectFilter from './DevProjectFilter/DevProjectFilter';
 import Footer from './Footer/Footer';
 import ModeToggle from './ModeToggle/ModeToggle';
+import NavLink from './NavLink/NavLink';
 import SocialLinks from './SocialLinks/SocialLinks';
 import StoryCard from './StoryCard/StoryCard';
 import StoryCardSkeleton from './StoryCard/StoryCardSkeleton';
@@ -18,6 +19,7 @@ export {
   DevProjectFilter,
   Footer,
   ModeToggle,
+  NavLink,
   SocialLinks,
   StoryCard,
   StoryCardSkeleton,

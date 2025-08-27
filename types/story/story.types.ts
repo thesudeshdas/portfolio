@@ -6,4 +6,5 @@ export interface IStory {
   slug: string;
   icon: string | null;
   cover: string | null;
+  tags?: string[];
 }

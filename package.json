@@ -10,7 +10,6 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@notionhq/client": "^2.2.16",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -23,7 +22,6 @@
     "clsx": "^2.0.0",
     "next": "15.1.7",
     "next-themes": "^0.4.4",
-    "notion-to-md": "^3.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",

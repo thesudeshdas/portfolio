@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import { getSinglePost } from '@/lib/notion';
+import { getStoryBySlug } from '@/lib/stories';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import styles from './Entry.module.css';
@@ -16,7 +16,13 @@ export const revalidate = 300; // Revalidate every 5 minutes
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { entry } = await params;
 
-  const post = await getSinglePost(entry);
+  const post = await getStoryBySlug(entry);
+
+  if (!post) {
+    return {
+      title: 'Story Not Found'
+    };
+  }
 
   return {
     title: post.metadata.title
@@ -30,16 +36,13 @@ export default async function DiaryEntry({
 }) {
   const { entry } = await params;
 
-  const post = await getSinglePost(entry);
-
-  // const contentToBeShown = findAndStyleTime(post.markdown.parent);
-  const contentToBeShown = post.markdown.parent;
-
-  const { title, description, cover } = post.metadata;
+  const post = await getStoryBySlug(entry);
 
   if (!post) {
     notFound();
   }
+
+  const { title, description, cover } = post.metadata;
 
   return (
     <main>
@@ -68,7 +71,7 @@ export default async function DiaryEntry({
       )}
 
       <section className={styles['entry-main']}>
-        <ReactMarkdown>{contentToBeShown}</ReactMarkdown>
+        <ReactMarkdown>{post.markdown}</ReactMarkdown>
       </section>
     </main>
   );

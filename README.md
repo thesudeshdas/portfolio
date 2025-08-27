@@ -1,12 +1,12 @@
 # Dash - Personal Portfolio
 
-A modern, responsive personal portfolio website built with Next.js 15, TypeScript, and Tailwind CSS. Features a clean design, dark/light theme support, and integration with Notion for dynamic content management.
+A modern, responsive personal portfolio website built with Next.js 15, TypeScript, and Tailwind CSS. Features a clean design, dark/light theme support, and comprehensive content management.
 
 ## ✨ Features
 
 - **Modern Design**: Clean, responsive layout with beautiful typography and spacing
 - **Theme Support**: Dark/light mode with system preference detection
-- **Dynamic Content**: Notion integration for blog posts and stories
+- **Dynamic Content**: Static content management with markdown support
 - **Performance**: Built with Next.js 15 for optimal performance and SEO
 - **Type Safety**: Full TypeScript implementation with strict type checking
 - **Responsive**: Mobile-first design that works on all devices
@@ -19,7 +19,7 @@ A modern, responsive personal portfolio website built with Next.js 15, TypeScrip
 - **Styling**: Tailwind CSS 4.0
 - **UI Components**: Radix UI primitives
 - **State Management**: React 19 with built-in state
-- **Content Management**: Notion API integration
+- **Content Management**: Static content with markdown support
 - **Icons**: React Icons
 - **Code Quality**: ESLint, Prettier, Husky
 - **Package Manager**: pnpm
@@ -35,6 +35,7 @@ portfolio/
 │   ├── stories/           # Story/blog entries
 │   ├── work/              # Work experience
 │   ├── globals.css        # Global styles
+│   ├── icon.ico           # Favicon
 │   ├── layout.tsx         # Root layout component
 │   └── page.tsx           # Homepage
 ├── components/             # Reusable UI components
@@ -42,16 +43,45 @@ portfolio/
 │   ├── ActiveLink/        # Navigation link component
 │   ├── AppNav/            # Main navigation
 │   ├── DevProjectCard/    # Project showcase cards
+│   ├── DevProjectFilter/  # Project filtering
 │   ├── Footer/            # Site footer
 │   ├── ModeToggle/        # Theme toggle
+│   ├── NavLink/           # Navigation link wrapper
 │   ├── SectionHeader/     # Section titles
 │   ├── SocialLinks/       # Social media links
-│   └── StoryCard/         # Blog/story cards
+│   ├── StoryCard/         # Blog/story cards
+│   ├── theme-provider.tsx # Theme context provider
+│   └── index.ts           # Component exports
 ├── data/                  # Static data and configuration
+│   ├── icons/             # Icon definitions
+│   └── social/            # Social media configuration
 ├── lib/                   # Utility functions and integrations
+│   ├── dateMe.ts          # Date utilities
+│   ├── stories.ts         # Story management
+│   └── utils.ts           # General utilities
 ├── types/                 # TypeScript type definitions
+│   ├── dev/               # Development project types
+│   ├── faq/               # FAQ types
+│   ├── icons/             # Icon types
+│   ├── journey/           # Journey types
+│   ├── navs/              # Navigation types
+│   ├── skillBank/         # Skills types
+│   └── story/             # Story types
+├── assets/                # Additional assets
+│   ├── images/            # Company logos and images
+│   └── stories/           # Markdown story files
 ├── public/                # Static assets and images
-└── assets/                # Additional assets
+│   ├── dev/               # Development project images
+│   ├── DP.svg             # Profile picture
+│   └── gojo-compressed.png # Hero image
+├── .husky/                # Git hooks configuration
+├── components.json         # shadcn/ui configuration
+├── .eslintrc.json         # ESLint configuration
+├── .prettierrc.json       # Prettier configuration
+├── postcss.config.js      # PostCSS configuration
+├── tailwind.config.ts     # Tailwind CSS configuration
+├── tsconfig.json          # TypeScript configuration
+└── next.config.ts         # Next.js configuration
 ```
 
 ## 🛠️ Getting Started
@@ -60,7 +90,6 @@ portfolio/
 
 - Node.js 18+
 - pnpm (recommended) or npm
-- Notion account and API access (for content management)
 
 ### Installation
 
@@ -78,12 +107,7 @@ portfolio/
    ```
 
 3. **Environment Setup**
-   Create a `.env.local` file in the root directory:
-
-   ```env
-   NOTION_DATABASE_ID=your_notion_database_id
-   NOTION_TOKEN=your_notion_integration_token
-   ```
+   No environment variables required for basic setup.
 
 4. **Run the development server**
 
@@ -115,7 +139,7 @@ The app uses `next-themes` for theme management. Themes can be customized in `co
 
 ### Content Management
 
-- Blog posts and stories are managed through Notion
+- Blog posts and stories are managed as static markdown files
 - Static content is stored in `data/` directory
 - Images and assets are in `public/` directory
 
@@ -124,7 +148,7 @@ The app uses `next-themes` for theme management. Themes can be customized in `co
 ### Next.js Config
 
 - ESLint configuration for code quality
-- Image optimization with remote patterns for Notion
+- Image optimization with remote patterns
 - Environment variable handling
 
 ### TypeScript
@@ -161,10 +185,7 @@ pnpm start
 
 ### Environment Variables
 
-Ensure all required environment variables are set in your production environment:
-
-- `NOTION_DATABASE_ID`
-- `NOTION_TOKEN`
+No environment variables are required for production deployment.
 
 ## 🤝 Contributing
 

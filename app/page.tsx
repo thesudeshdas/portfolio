@@ -1,13 +1,13 @@
 import Image from 'next/image';
 import SocialLinks from '@/components/SocialLinks/SocialLinks';
 import SectionHeader from '@/components/SectionHeader/SectionHeader';
-import { getAllPublished } from '@/lib/notion';
+import { getAllStories } from '@/lib/stories';
 import { StoriesContainer } from '@/components/index';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function Home() {
-  const publishedPosts = await getAllPublished();
+  const publishedPosts = await getAllStories();
 
   return (
     <main className='flex flex-col gap-12 py-12'>

@@ -36,11 +36,15 @@ export default async function Home() {
             </div>
           </div>
 
-          <p>
-            Code pays the bills, but motorcycles & filmmaking keep me curious.
-            Here exploring life — chasing ideas, stories, and the roads. Sharing
-            experiments, explorations & experiences.
-          </p>
+          <div>
+            <p>
+              Code pays the bills, but motorcycles & filmmaking keep me curious.
+            </p>
+
+            <p>Here exploring life — chasing ideas, stories, and the roads.</p>
+
+            <p>Sharing experiments, explorations & experiences.</p>
+          </div>
         </div>
 
         <div className='flex flex-col gap-4'>

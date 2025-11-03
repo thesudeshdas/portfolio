@@ -81,7 +81,7 @@ export default function AppNav() {
                   </div>
                 </Link>
 
-                <ul className='mt-20 h-full w-fit'>
+                <ul className='0 mt-20 h-full w-full px-6'>
                   {appNavLinks.map(({ id, link, text }) => (
                     <li
                       key={id}
@@ -95,9 +95,7 @@ export default function AppNav() {
                   ))}
                 </ul>
 
-                <div className='mb-0'>
-                  <SocialLinks />
-                </div>
+                <SocialLinks className='flex w-full justify-between p-6' />
               </SheetContent>
             </Sheet>
           </div>

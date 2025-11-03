@@ -81,7 +81,7 @@ export default function AppNav() {
                   </div>
                 </Link>
 
-                <ul className='0 mt-20 h-full w-full px-6'>
+                <ul className='0 mt-20 h-full w-fit px-6'>
                   {appNavLinks.map(({ id, link, text }) => (
                     <li
                       key={id}

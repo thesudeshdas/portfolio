@@ -19,7 +19,7 @@ export default function ModeToggle() {
       onClick={
         theme === 'dark' ? () => setTheme('light') : () => setTheme('dark')
       }
-      className='dark:zinc-400 hover:text-foreground text-foreground cursor-pointer hover:bg-transparent sm:text-zinc-500'
+      className='dark:zinc-400 hover:text-foreground text-foreground cursor-pointer hover:bg-transparent sm:text-zinc-500 dark:hover:bg-transparent'
     >
       <SunIcon className='h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90' />
 

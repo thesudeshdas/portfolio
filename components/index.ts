@@ -1,6 +1,7 @@
 import ActiveLink from './ActiveLink/ActiveLink';
 import AppNav from './AppNav/AppNav';
 import DevProjectCard from './DevProjectCard/DevProjectCard';
+import DVDScreensaver from './DVDScreensaver/DVDScreensaver';
 import DevProjectCardSkeleton from './DevProjectCard/DevProjectCardSkeleton';
 import DevProjectFilter from './DevProjectFilter/DevProjectFilter';
 import Footer from './Footer/Footer';
@@ -17,6 +18,7 @@ export {
   DevProjectCard,
   DevProjectCardSkeleton,
   DevProjectFilter,
+  DVDScreensaver,
   Footer,
   ModeToggle,
   NavLink,

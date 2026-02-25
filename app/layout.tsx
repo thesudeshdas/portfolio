@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 
 // import components
-import { AppNav, Footer } from '@/components/index';
+import { AppNav, DVDScreensaver, Footer } from '@/components/index';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,6 +35,7 @@ export default function RootLayout({
         >
           <div className='fixed inset-0 z-[-2] bg-linear-to-b from-zinc-50 from-80% to-zinc-50 dark:from-zinc-900 dark:to-zinc-900'></div>
 
+          <DVDScreensaver />
           <AppNav />
 
           <div className='overflow mx-auto flex w-full max-w-[1000px] grow flex-col'>

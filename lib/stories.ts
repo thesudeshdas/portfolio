@@ -4,6 +4,7 @@ import path from 'path';
 import { IStory } from '@/types/story/story.types';
 
 const storiesDirectory = path.join(process.cwd(), 'assets/stories');
+const blogsDirectory = path.join(process.cwd(), 'assets/blogs');
 
 // Helper function to extract frontmatter from markdown content
 const extractFrontmatter = (content: string) => {
@@ -41,14 +42,14 @@ const extractFrontmatter = (content: string) => {
   return metadata;
 };
 
-export const getAllStories = async (): Promise<IStory[]> => {
+const getAllPosts = async (directory: string): Promise<IStory[]> => {
   try {
-    const files = await fs.readdir(storiesDirectory);
+    const files = await fs.readdir(directory);
     const markdownFiles = files.filter((file) => file.endsWith('.md'));
 
     const stories: IStory[] = await Promise.all(
       markdownFiles.map(async (filename) => {
-        const filePath = path.join(storiesDirectory, filename);
+        const filePath = path.join(directory, filename);
         const fileContents = await fs.readFile(filePath, 'utf8');
 
         // Generate slug from filename
@@ -120,9 +121,12 @@ export const getAllStories = async (): Promise<IStory[]> => {
   }
 };
 
-export const getStoryBySlug = async (slug: string) => {
+export const getAllStories = () => getAllPosts(storiesDirectory);
+export const getAllBlogs = () => getAllPosts(blogsDirectory);
+
+const getPostBySlug = async (directory: string, slug: string) => {
   try {
-    const filePath = path.join(storiesDirectory, `${slug}.md`);
+    const filePath = path.join(directory, `${slug}.md`);
     const fileContents = await fs.readFile(filePath, 'utf8');
 
     // Extract frontmatter
@@ -192,3 +196,8 @@ export const getStoryBySlug = async (slug: string) => {
     return null;
   }
 };
+
+export const getStoryBySlug = (slug: string) =>
+  getPostBySlug(storiesDirectory, slug);
+export const getBlogBySlug = (slug: string) =>
+  getPostBySlug(blogsDirectory, slug);

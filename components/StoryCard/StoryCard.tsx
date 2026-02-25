@@ -6,6 +6,7 @@ import { IStory } from '@/types/story/story.types';
 
 interface StoryCardProps {
   post: IStory;
+  basePath?: string;
   comingSoon?: boolean;
   onMouseEnter?: (storyId: string) => void;
   onMouseLeave?: () => void;
@@ -14,6 +15,7 @@ interface StoryCardProps {
 
 export default function StoryCard({
   post,
+  basePath = '/stories',
   comingSoon = false,
   onMouseEnter,
   onMouseLeave,
@@ -23,7 +25,7 @@ export default function StoryCard({
 
   return (
     <Link
-      href={`/stories/${post.slug}`}
+      href={`${basePath}/${post.slug}`}
       onMouseEnter={() => onMouseEnter?.(post.id)}
       onMouseLeave={onMouseLeave}
     >

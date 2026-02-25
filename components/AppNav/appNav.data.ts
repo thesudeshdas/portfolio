@@ -7,11 +7,11 @@ export const appNavLinks: IAppNavLink[] = [
     link: '/code',
     text: 'Code'
   },
-  // {
-  //   id: uuidv4(),
-  //   link: '/blogs',
-  //   text: 'Blogs'
-  // },
+  {
+    id: '4f8a2c1e-6d3b-4e9a-b7c5-1a2d3e4f5a6b',
+    link: '/blogs',
+    text: 'Blogs'
+  },
   {
     id: 'e25e872f-42c4-4e7e-835c-28626be3c1bd',
     link: '/stories',

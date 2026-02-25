@@ -13,14 +13,18 @@ interface StoriesContainerProps {
   publishedPosts: IStory[];
   firstPostFeatured?: boolean;
   storiesListHeader?: string;
+  featuredHeader?: string;
   maxStories?: number;
+  basePath?: string;
 }
 
 export default function StoriesContainer({
   publishedPosts,
   firstPostFeatured = false,
   storiesListHeader = 'More Stories',
-  maxStories = 4
+  featuredHeader = 'Latest rants',
+  maxStories = 4,
+  basePath = '/stories'
 }: StoriesContainerProps) {
   const pathname = usePathname();
 
@@ -28,7 +32,7 @@ export default function StoriesContainer({
 
   const [hoveredStory, setHoveredStory] = useState<string | null>(null);
 
-  const isPathNameStories = pathname === '/stories';
+  const isPathNameStories = pathname === basePath;
 
   const storiesList = firstPostFeatured
     ? publishedPosts.slice(1, maxStories)
@@ -46,12 +50,12 @@ export default function StoriesContainer({
       {firstPostFeatured && (
         <>
           <SectionHeader
-            text='Latest rants'
+            text={featuredHeader}
             className='mb-4'
           />
 
           <Link
-            href={`/stories/${firstPublishedPost.slug}`}
+            href={`${basePath}/${firstPublishedPost.slug}`}
             onMouseEnter={() => handleOnMouseEnter(firstPublishedPost.id)}
             onMouseLeave={handleOnMouseLeave}
             className='mb-20'
@@ -93,10 +97,10 @@ export default function StoriesContainer({
 
           {!isPathNameStories && storiesList.length > 1 && (
             <Link
-              href={'/stories'}
+              href={basePath}
               className='text-muted-foreground hover:text-foreground mt-1 flex items-center gap-3 text-xs transition-all'
             >
-              All stories
+              View all
               <DoubleArrowRightIcon />
             </Link>
           )}
@@ -108,6 +112,7 @@ export default function StoriesContainer({
           <StoryCard
             key={post.id || index + 1}
             post={post}
+            basePath={basePath}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
             hoveredStory={hoveredStory}

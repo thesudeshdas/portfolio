@@ -50,6 +50,21 @@ Type definitions in `types/` organized by domain (e.g., `types/story/story.types
 
 `@/*` maps to the project root (e.g., `@/components`, `@/lib/utils`).
 
+## Working Principles
+
+- **Investigate before implementing** — search the codebase for existing patterns, utilities, and services before writing new code. Show what you found and propose an approach before touching files.
+- **Use React/Next.js idioms** — always prefer React state, hooks, and Next.js patterns over DOM manipulation or vanilla JS approaches.
+- **Minimal changes only** — don't refactor surrounding code, add extra features, or make "improvements" beyond what was asked. If a bug fix touches 2 lines, the diff should be ~2 lines.
+- **When fixing bugs** — investigate the exact reproduction path first. Don't reframe bugs as missing features or generalize the problem.
+
+## Git & Deployment
+
+- **Verify branch before committing** — always run `git branch` and confirm you're on the correct branch before any commit.
+- **Never commit to `main` directly** unless explicitly asked.
+- **Always push after committing** — don't leave commits local. If deploying to Vercel, confirm the push landed.
+- **Only commit requested files** — when in doubt, list the files that will be staged and wait for confirmation. Never `git add -A` or `git add .` without asking.
+- **One thing at a time for batch fixes** — when given multiple bugs/tasks, work through them sequentially: fix, verify, commit, push, then move to the next.
+
 ## Code Style
 
 - **Single quotes** everywhere (JS and JSX)

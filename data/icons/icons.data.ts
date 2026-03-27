@@ -49,7 +49,8 @@ import {
   SiRabbitmq,
   SiPostgresql,
   SiAmazonaws,
-  SiOpenai
+  SiOpenai,
+  SiSwift
 } from 'react-icons/si';
 
 // import types
@@ -317,6 +318,12 @@ export const SASS: ITechStackLogo = {
   id: 'q5059q1v-w1o7-4p77-os8q-3t70r4s62p81',
   name: 'SASS',
   logo: SiSass
+};
+
+export const Swift: ITechStackLogo = {
+  id: 'r1060r2w-x2p8-4q88-pt9r-4u81s5t73q71',
+  name: 'Swift',
+  logo: SiSwift
 };
 
 export const SocketIO: ITechStackLogo = {

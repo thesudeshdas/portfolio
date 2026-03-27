@@ -6,9 +6,9 @@ import { IProject, ProjectCategory } from '@/types/project/project.types';
 import ProjectCard from '@/components/ProjectCard/ProjectCard';
 
 const categoryOrder: ProjectCategory[] = [
+  'open-source',
   'product',
   'work',
-  'open-source',
   'personal',
   'graveyard'
 ];

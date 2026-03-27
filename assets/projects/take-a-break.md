@@ -6,7 +6,7 @@ status: active
 role: Solo
 highlight: Smart pause detects screen recordings, video calls, and fullscreen apps
 year: 2026
-live: https://github.com/thesudeshdas/take-a-break/releases/tag/v1.0.0
+live: https://thesudeshdas.github.io/take-a-break/
 sourceCode: https://github.com/thesudeshdas/take-a-break
 techStack: ['swift']
 featured: true

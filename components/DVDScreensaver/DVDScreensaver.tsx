@@ -203,7 +203,9 @@ export default function DVDScreensaver() {
 
   return (
     <div
-      className='fixed inset-0 z-[9999] cursor-none bg-black'
+      className={`fixed inset-0 z-[9999] bg-black ${
+        visible ? 'cursor-none' : 'pointer-events-none'
+      }`}
       style={{
         opacity: visible ? 1 : 0,
         transition: `opacity ${FADE_DURATION}ms ease-in-out`

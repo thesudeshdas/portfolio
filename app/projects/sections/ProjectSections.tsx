@@ -6,6 +6,7 @@ import { IProject, ProjectCategory } from '@/types/project/project.types';
 import ProjectCard from '@/components/ProjectCard/ProjectCard';
 
 const categoryOrder: ProjectCategory[] = [
+  'building',
   'open-source',
   'product',
   'work',
@@ -17,6 +18,10 @@ const categoryConfig: Record<
   ProjectCategory,
   { label: string; description: string }
 > = {
+  building: {
+    label: 'Currently Building',
+    description: "What I'm working on right now"
+  },
   product: {
     label: 'Products',
     description: "Revenue-generating things I'm building"

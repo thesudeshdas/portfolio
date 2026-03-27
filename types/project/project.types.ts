@@ -3,7 +3,8 @@ export type ProjectCategory =
   | 'work'
   | 'personal'
   | 'graveyard'
-  | 'product';
+  | 'product'
+  | 'building';
 
 export type ProjectStatus = 'active' | 'maintained' | 'archived' | 'sunset';
 

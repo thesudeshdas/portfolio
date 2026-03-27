@@ -42,16 +42,35 @@ import {
   SiFigma,
   SiFramer,
   SiCanva,
-  SiMui
+  SiMui,
+  SiExpo,
+  SiSocketdotio,
+  SiRedis,
+  SiRabbitmq,
+  SiPostgresql,
+  SiAmazonaws,
+  SiOpenai
 } from 'react-icons/si';
 
 // import types
 import { ITechStackLogo } from '@/types/icons/icons.types';
 
+export const OpenAI: ITechStackLogo = {
+  id: 'a0901a1b-c1u7-4v77-uy8w-3z70x4y62v60',
+  name: 'OpenAI',
+  logo: SiOpenai
+};
+
 export const ApolloGraphQL: ITechStackLogo = {
   id: 'a1001b2c-d2v8-4w88-vz9x-4a81y5z73w70',
   name: 'Apollo GraphQL',
   logo: SiApollographql
+};
+
+export const AWS: ITechStackLogo = {
+  id: 'a1101b3d-d3v9-4w99-vz0y-4a92y6z84w60',
+  name: 'AWS',
+  logo: SiAmazonaws
 };
 
 export const Axios: ITechStackLogo = {
@@ -106,6 +125,12 @@ export const ESLint: ITechStackLogo = {
   id: 'j1009n4o-p4h0-4i00-hl1j-6m03k7l95i50',
   name: 'ESLint',
   logo: SiEslint
+};
+
+export const Expo: ITechStackLogo = {
+  id: 'd8059g7h-i7a3-4b33-ae4c-9f36d0e28b21',
+  name: 'Expo',
+  logo: SiExpo
 };
 
 export const Express: ITechStackLogo = {
@@ -216,6 +241,12 @@ export const NodeJS: ITechStackLogo = {
   logo: SiNodedotjs
 };
 
+export const PostgreSQL: ITechStackLogo = {
+  id: 'l1900p5q-r5j1-4k11-jm2k-8n14l8m06j41',
+  name: 'PostgreSQL',
+  logo: SiPostgresql
+};
+
 export const Postman: ITechStackLogo = {
   id: 'l1988p6q-r6j2-4k22-jn3l-8o25m9n17k30',
   name: 'Postman',
@@ -234,6 +265,12 @@ export const Python: ITechStackLogo = {
   logo: SiPython
 };
 
+export const RabbitMQ: ITechStackLogo = {
+  id: 'n3056o9t-t9l5-4m55-lq6n-1q58o2p40m01',
+  name: 'RabbitMQ',
+  logo: SiRabbitmq
+};
+
 export const ReactHookForm: ITechStackLogo = {
   id: 'o3057o9t-u9m5-4n55-mq6o-1r58p2q40n00',
   name: 'React Hook Form',
@@ -243,6 +280,12 @@ export const ReactHookForm: ITechStackLogo = {
 export const ReactJS: ITechStackLogo = {
   id: 'o3057o9t-u9m5-4n55-mq6o-1r58p2q40n01',
   name: 'ReactJS',
+  logo: SiReact
+};
+
+export const ReactNative: ITechStackLogo = {
+  id: 'o3057o9t-u9m5-4n55-mq6o-1r58p2q40n02',
+  name: 'React Native',
   logo: SiReact
 };
 
@@ -258,6 +301,12 @@ export const ReactTable: ITechStackLogo = {
   logo: SiReacttable
 };
 
+export const Redis: ITechStackLogo = {
+  id: 'q4059q0v-v0n7-4o77-nr8p-2s70q3r62o80',
+  name: 'Redis',
+  logo: SiRedis
+};
+
 export const ReduxToolkit: ITechStackLogo = {
   id: 'q5059q1v-w1o7-4p77-os8q-3t70r4s62p80',
   name: 'Redux Toolkit',
@@ -268,6 +317,12 @@ export const SASS: ITechStackLogo = {
   id: 'q5059q1v-w1o7-4p77-os8q-3t70r4s62p81',
   name: 'SASS',
   logo: SiSass
+};
+
+export const SocketIO: ITechStackLogo = {
+  id: 'r5060r1w-w1o8-4p88-os9q-3t81r4s73p70',
+  name: 'Socket.IO',
+  logo: SiSocketdotio
 };
 
 export const TailwindCSS: ITechStackLogo = {

@@ -7,6 +7,8 @@ import DevProjectFilter from './DevProjectFilter/DevProjectFilter';
 import Footer from './Footer/Footer';
 import ModeToggle from './ModeToggle/ModeToggle';
 import NavLink from './NavLink/NavLink';
+import ProjectCard from './ProjectCard/ProjectCard';
+import ProjectCardSkeleton from './ProjectCard/ProjectCardSkeleton';
 import SocialLinks from './SocialLinks/SocialLinks';
 import StoryCard from './StoryCard/StoryCard';
 import StoryCardSkeleton from './StoryCard/StoryCardSkeleton';
@@ -22,6 +24,8 @@ export {
   Footer,
   ModeToggle,
   NavLink,
+  ProjectCard,
+  ProjectCardSkeleton,
   SocialLinks,
   StoryCard,
   StoryCardSkeleton,

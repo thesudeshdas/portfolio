@@ -4,8 +4,8 @@ import { IAppNavLink } from '@/types/navs/navs.types';
 export const appNavLinks: IAppNavLink[] = [
   {
     id: 'a97541c3-b5b4-4055-8558-a41b732d07b0',
-    link: '/code',
-    text: 'Code'
+    link: '/projects',
+    text: 'Projects'
   },
   {
     id: '4f8a2c1e-6d3b-4e9a-b7c5-1a2d3e4f5a6b',

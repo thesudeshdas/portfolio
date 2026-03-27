@@ -4,11 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  ExternalLinkIcon,
-  CodeIcon,
-  ArrowRightIcon
-} from '@radix-ui/react-icons';
+import { ExternalLinkIcon, CodeIcon } from '@radix-ui/react-icons';
 import { IProject } from '@/types/project/project.types';
 import { resolveTechStack } from '@/data/icons/techStackMap';
 
@@ -66,12 +62,7 @@ export default function ProjectCard({ project }: IProjectCardProps) {
       <div className='flex w-full grow flex-col items-start gap-2'>
         <div className='flex w-full items-center justify-between gap-2'>
           <div className='flex items-center gap-2'>
-            <Link
-              href={`/projects/${slug}`}
-              className='text-xl font-bold hover:underline'
-            >
-              {title}
-            </Link>
+            <h3 className='text-xl font-bold'>{title}</h3>
             {category === 'work' && organisation && (
               <span className='text-muted-foreground text-sm'>
                 @ {organisation}
@@ -114,19 +105,6 @@ export default function ProjectCard({ project }: IProjectCardProps) {
         <p className='line-clamp-3'>{description}</p>
 
         <div className='flex w-full gap-2 sm:w-auto'>
-          <Link
-            href={`/projects/${slug}`}
-            className='grow'
-          >
-            <Button
-              variant='outline'
-              className='w-full'
-            >
-              View Details
-              <ArrowRightIcon className='ml-1 h-4 w-4' />
-            </Button>
-          </Link>
-
           {live && (
             <Link
               href={live}

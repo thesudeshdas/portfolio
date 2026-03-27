@@ -8,6 +8,7 @@ highlight: End-to-end B2B hiring pipeline for GrowthX partner companies
 year: 2024-2026
 organisation: GrowthX
 cover:
+live: https://talent.growthx.club/
 techStack: ['nextjs', 'typescript', 'redux', 'mui']
 featured: false
 order: 7

@@ -8,6 +8,7 @@ highlight: Reduced job application time from ~15 min to under 30 seconds
 year: 2024-2025
 organisation: GrowthX
 cover:
+live: https://chromewebstore.google.com/detail/gaaeokfljnaahnemphknpchoimmbmhjj
 techStack: ['react', 'typescript', 'vite', 'redux']
 featured: true
 order: 2

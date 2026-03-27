@@ -8,6 +8,7 @@ highlight: Zero to production in 3 months, solo ownership
 year: 2025-2026
 organisation: GrowthX
 cover:
+live: https://apps.apple.com/us/app/growthx-club/id6757463407
 techStack:
   ['reactnative', 'expo', 'typescript', 'tailwindcss', 'redis', 'socketio']
 featured: true

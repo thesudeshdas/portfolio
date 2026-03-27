@@ -8,6 +8,7 @@ highlight: Eliminated 504 timeouts via async polling architecture
 year: 2025-2026
 organisation: GrowthX
 cover:
+live: https://growthx.club/ai-roadmap
 techStack: ['nextjs', 'typescript', 'openai', 'aws', 'express', 'mongodb']
 featured: true
 order: 3

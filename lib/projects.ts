@@ -12,7 +12,17 @@ const extractFrontmatter = (content: string) => {
   const frontmatter = frontmatterMatch[1];
   const metadata: Record<string, any> = {};
 
-  frontmatter.split('\n').forEach((line) => {
+  const lines = frontmatter.split('\n');
+  const joined: string[] = [];
+  for (const line of lines) {
+    if (line.match(/^\s/) && joined.length > 0) {
+      joined[joined.length - 1] += ' ' + line.trim();
+    } else {
+      joined.push(line);
+    }
+  }
+
+  joined.forEach((line) => {
     const [key, ...valueParts] = line.split(':');
     if (key && valueParts.length > 0) {
       const value = valueParts.join(':').trim();
@@ -21,7 +31,8 @@ const extractFrontmatter = (content: string) => {
         metadata[key.trim()] = value.slice(1, -1);
       } else if (value.startsWith('[') && value.endsWith(']')) {
         try {
-          metadata[key.trim()] = JSON.parse(value);
+          const normalized = value.replace(/'/g, '"');
+          metadata[key.trim()] = JSON.parse(normalized);
         } catch {
           metadata[key.trim()] = value;
         }

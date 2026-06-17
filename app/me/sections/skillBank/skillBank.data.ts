@@ -39,7 +39,7 @@ export const allSkills: ISkillItem[] = [
   },
   {
     id: 's0009w7x-y7q3-4r33-qu4s-9v36t0u18r20',
-    name: 'CSS3'
+    name: 'CSS'
   },
   {
     id: 't9900x8y-z8r4-4s44-rv5t-0w47u1v29s10',
@@ -179,7 +179,7 @@ export const allSkills: ISkillItem[] = [
   },
   {
     id: 'o2011s8t-u9m5-4n55-mq6o-1r58p2q40n00',
-    name: 'NodeJS'
+    name: 'Node.js'
   },
   {
     id: 'p1022t9u-v0n6-4o66-nr7p-2s69q3r51o90',
@@ -195,7 +195,7 @@ export const allSkills: ISkillItem[] = [
   },
   {
     id: 's4045w1x-y2o9-4r99-qu0s-5v14t6u84r60',
-    name: 'ReactJS'
+    name: 'React'
   },
   {
     id: 't5056x2y-z3p0-4s00-rv1t-6w25u7v95s50',
@@ -219,7 +219,7 @@ export const allSkills: ISkillItem[] = [
   },
   {
     id: 'r7544v2w-x1o8-4q88-pt9r-4u81s5t73q70',
-    name: 'UI Designing'
+    name: 'UI Design'
   },
   {
     id: 's8655w3x-y2o9-4r99-qu0s-5v14t6u84r60',
@@ -232,5 +232,193 @@ export const allSkills: ISkillItem[] = [
   {
     id: 'u0877y5z-a4q1-4r00-sw2u-7x36v8w06t40',
     name: 'Web Development'
+  },
+  {
+    id: 'skill-sync-access-control',
+    name: 'Access Control'
+  },
+  {
+    id: 'skill-sync-ai-autofill',
+    name: 'AI Autofill'
+  },
+  {
+    id: 'skill-sync-aisensy',
+    name: 'AISensy'
+  },
+  {
+    id: 'skill-sync-analytics',
+    name: 'Analytics'
+  },
+  {
+    id: 'skill-sync-analytics-instrumentation',
+    name: 'Analytics Instrumentation'
+  },
+  {
+    id: 'skill-sync-anthropic-claude',
+    name: 'Anthropic Claude'
+  },
+  {
+    id: 'skill-sync-app-store-deployment',
+    name: 'App Store Deployment'
+  },
+  {
+    id: 'skill-sync-authentication',
+    name: 'Authentication'
+  },
+  {
+    id: 'skill-sync-aws-s3',
+    name: 'AWS S3'
+  },
+  {
+    id: 'skill-sync-background-jobs',
+    name: 'Background Jobs'
+  },
+  {
+    id: 'skill-sync-client-communication',
+    name: 'Client Communication'
+  },
+  {
+    id: 'skill-sync-cloudfront',
+    name: 'CloudFront'
+  },
+  {
+    id: 'skill-sync-communication',
+    name: 'Communication'
+  },
+  {
+    id: 'skill-sync-content-operations',
+    name: 'Content Operations'
+  },
+  {
+    id: 'skill-sync-cost-tracking',
+    name: 'Cost Tracking'
+  },
+  {
+    id: 'skill-sync-deep-linking',
+    name: 'Deep Linking'
+  },
+  {
+    id: 'skill-sync-design-systems',
+    name: 'Design Systems'
+  },
+  {
+    id: 'skill-sync-dom-automation',
+    name: 'DOM Automation'
+  },
+  {
+    id: 'skill-sync-eas',
+    name: 'EAS'
+  },
+  {
+    id: 'skill-sync-file-upload-automation',
+    name: 'File Upload Automation'
+  },
+  {
+    id: 'skill-sync-frontend-architecture',
+    name: 'Frontend Architecture'
+  },
+  {
+    id: 'skill-sync-full-stack-development',
+    name: 'Full-stack Development'
+  },
+  {
+    id: 'skill-sync-latex',
+    name: 'LaTeX'
+  },
+  {
+    id: 'skill-sync-leadership',
+    name: 'Leadership'
+  },
+  {
+    id: 'skill-sync-lms',
+    name: 'LMS'
+  },
+  {
+    id: 'skill-sync-manifest-v3',
+    name: 'Manifest V3'
+  },
+  {
+    id: 'skill-sync-mcp',
+    name: 'MCP'
+  },
+  {
+    id: 'skill-sync-mentorship',
+    name: 'Mentorship'
+  },
+  {
+    id: 'skill-sync-mern',
+    name: 'MERN'
+  },
+  {
+    id: 'skill-sync-msg91',
+    name: 'MSG91'
+  },
+  {
+    id: 'skill-sync-nativewind',
+    name: 'NativeWind'
+  },
+  {
+    id: 'skill-sync-observability',
+    name: 'Observability'
+  },
+  {
+    id: 'skill-sync-pdf-workflows',
+    name: 'PDF Workflows'
+  },
+  {
+    id: 'skill-sync-performance-optimization',
+    name: 'Performance Optimization'
+  },
+  {
+    id: 'skill-sync-polling-ux',
+    name: 'Polling UX'
+  },
+  {
+    id: 'skill-sync-product-delivery',
+    name: 'Product Delivery'
+  },
+  {
+    id: 'skill-sync-project-coordination',
+    name: 'Project Coordination'
+  },
+  {
+    id: 'skill-sync-reanimated',
+    name: 'Reanimated'
+  },
+  {
+    id: 'skill-sync-scalable-architecture',
+    name: 'Scalable Architecture'
+  },
+  {
+    id: 'skill-sync-seo',
+    name: 'SEO'
+  },
+  {
+    id: 'skill-sync-ses',
+    name: 'SES'
+  },
+  {
+    id: 'skill-sync-sql',
+    name: 'SQL'
+  },
+  {
+    id: 'skill-sync-supabase',
+    name: 'Supabase'
+  },
+  {
+    id: 'skill-sync-tailwindcss',
+    name: 'TailwindCSS'
+  },
+  {
+    id: 'skill-sync-tanstack-query',
+    name: 'TanStack Query'
+  },
+  {
+    id: 'skill-sync-team-leadership',
+    name: 'Team Leadership'
+  },
+  {
+    id: 'skill-sync-video-playback',
+    name: 'Video Playback'
   }
 ];

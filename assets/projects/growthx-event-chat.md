@@ -11,7 +11,7 @@ cover:
 techStack:
   ['socketio', 'mongodb', 'rabbitmq', 'react', 'typescript', 'reactnative']
 featured: true
-order: 4
+order: 5
 ---
 
 Architected a full real-time event chat system using Socket.IO with MongoDB, supporting comments, threaded replies, emoji reactions, message editing/deletion, pinning/unpinning, and soft-delete patterns.

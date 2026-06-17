@@ -11,7 +11,7 @@ cover:
 live: https://growthx.club/ai-roadmap
 techStack: ['nextjs', 'typescript', 'openai', 'aws', 'express', 'mongodb']
 featured: true
-order: 3
+order: 4
 ---
 
 Built an end-to-end AI roadmap generation system integrating Anthropic Claude on the backend with a full service wrapper, model registry (Opus, Sonnet, Haiku with cost definitions), and configuration.

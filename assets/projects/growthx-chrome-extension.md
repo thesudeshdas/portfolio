@@ -11,7 +11,7 @@ cover:
 live: https://chromewebstore.google.com/detail/gaaeokfljnaahnemphknpchoimmbmhjj
 techStack: ['react', 'typescript', 'vite', 'redux']
 featured: true
-order: 2
+order: 3
 ---
 
 Architected the complete Chrome Extension (Manifest V3) with full product ownership: content scripts for DOM manipulation, background service worker for message routing, and React popup UI.

@@ -23,7 +23,7 @@ techStack:
     'socketio'
   ]
 featured: true
-order: 8
+order: 2
 ---
 
 Owned frontend and backend development across 6 repositories for GrowthX — a B2B community platform for professionals.

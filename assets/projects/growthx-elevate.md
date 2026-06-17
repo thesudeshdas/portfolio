@@ -10,7 +10,7 @@ organisation: GrowthX
 cover:
 techStack: ['nextjs', 'typescript', 'redux', 'mui']
 featured: true
-order: 5
+order: 6
 ---
 
 Built the ELEVATE learning platform from scratch: dashboard, module pages, sub-category pages, video player, textual content modules, and course sections.

@@ -2,28 +2,92 @@
 import { IDevProjectListItem } from '@/types/dev/dev.types';
 
 // import assets
+import growthXLogo from '../../assets/images/growthx-white.svg';
 import talentplaceLogo from '../../assets/images/talentplace-white.svg';
 import neoGLogo from '../../assets/images/neog-white.svg';
 
 // import data
 import {
+  AWS,
   Bootstrap,
   CSS3,
   ChakraUI,
   Express,
+  Expo,
   HTML5,
   JavaScript,
+  MUI,
   MongoDB,
   NextJS,
   NodeJS,
+  OpenAI,
+  RabbitMQ,
+  ReactNative,
   ReactJS,
+  Redis,
   ReduxToolkit,
+  SocketIO,
   TailwindCSS,
   Turborepo,
   TypeScript
 } from '@/data/icons/icons.data';
 
 export const devProjectList: IDevProjectListItem[] = [
+  {
+    id: 'a1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `Production React Native app built from scratch with event discovery, real-time chat, onboarding animations, offline caching, analytics and 10+ Android rendering fixes`,
+    image: '/dash-white.png',
+    live: 'https://apps.apple.com/us/app/growthx-club/id6757463407',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [ReactNative, Expo, TypeScript, TailwindCSS, SocketIO, Redis],
+    title: 'GrowthX Mobile App',
+    featured: true
+  },
+  {
+    id: 'b1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `Full real-time event chat system using Socket.IO and MongoDB with threaded replies, reactions, pinning, read-status tracking and WhatsApp reminder workflows for 1000+ events`,
+    image: '/dash-white.png',
+    live: '/projects/growthx-event-chat',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [ReactJS, ReactNative, TypeScript, SocketIO, MongoDB, RabbitMQ],
+    title: 'Real-Time Event Chat',
+    featured: true
+  },
+  {
+    id: 'c1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `B2B community platform work across events, learning, jobs, career tools, admin operations, SEO, analytics and backend services across 6 repositories`,
+    image: '/dash-white.png',
+    live: 'https://www.growthx.club',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [NextJS, TypeScript, ReduxToolkit, MUI, Express, MongoDB, Redis],
+    title: 'GrowthX Platform',
+    featured: true
+  },
+  {
+    id: 'd1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `B2B hiring workflows for job posting, verification approvals, AI-powered job autofill, applicant tracking, member discovery, candidate curation and team invites`,
+    image: '/dash-white.png',
+    live: 'https://talent.growthx.club/',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [NextJS, TypeScript, ReduxToolkit, MUI, OpenAI],
+    title: 'GrowthX Talent Platform',
+    featured: true
+  },
+  {
+    id: 'e1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `AI-powered career roadmap generator with LinkedIn enrichment, prompt templating, S3 storage, CloudFront delivery and async polling to eliminate 504 timeouts`,
+    image: '/dash-white.png',
+    live: '/projects/growthx-ai-roadmap',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [NextJS, TypeScript, OpenAI, AWS, Express, MongoDB],
+    title: 'AI Career Roadmap',
+    featured: true
+  },
   {
     id: 'o4015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
     description: `Data driven job portal which generates candidates based on the
@@ -35,7 +99,7 @@ export const devProjectList: IDevProjectListItem[] = [
     organisationLogo: talentplaceLogo,
     techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
     title: 'Job Portal',
-    featured: true
+    featured: false
   },
   {
     id: 'p3006t4u-v4n0-4o00-nr1p-6s03q7r95o50',
@@ -46,7 +110,7 @@ export const devProjectList: IDevProjectListItem[] = [
     organisationLogo: talentplaceLogo,
     techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
     title: 'Resume Builder',
-    featured: true
+    featured: false
   },
   {
     id: 'r3034v0w-x1o8-4q88-pt9r-4u81s5t73q70',
@@ -56,7 +120,7 @@ export const devProjectList: IDevProjectListItem[] = [
     techStack: [ReactJS, TypeScript, TailwindCSS, Express, NodeJS, MongoDB],
     title: 'Catalyst',
     sourceCode: 'https://github.com/thesudeshdas/catalyst-2.0',
-    featured: true
+    featured: false
   },
   {
     id: 's4045w1x-y2o9-4r99-qu0s-5v14t6u84r60',
@@ -66,7 +130,7 @@ export const devProjectList: IDevProjectListItem[] = [
     techStack: [ReactJS, JavaScript, Express, NodeJS, MongoDB],
     title: 'Dashtra',
     sourceCode: 'https://github.com/thesudeshdas/dashtra',
-    featured: true
+    featured: false
   },
   {
     id: 't5056x2y-z3p0-4s00-rv1t-6w25u7v95s50',

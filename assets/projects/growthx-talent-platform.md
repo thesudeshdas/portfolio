@@ -10,7 +10,7 @@ organisation: GrowthX
 cover:
 live: https://talent.growthx.club/
 techStack: ['nextjs', 'typescript', 'redux', 'mui']
-featured: false
+featured: true
 order: 7
 ---
 

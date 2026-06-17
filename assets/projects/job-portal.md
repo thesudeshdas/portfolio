@@ -10,8 +10,8 @@ organisation: TalentPlace.ai
 cover: /dev/jobPortal.png
 live: https://job-tp.vercel.app/
 techStack: ['react', 'typescript', 'chakraui', 'turborepo', 'redux']
-featured: true
-order: 1
+featured: false
+order: 20
 ---
 
 Built the frontend for TalentPlace.ai's flagship job portal. The platform uses data-driven matching to connect employers with the best candidates from a pool of ~100k profiles.

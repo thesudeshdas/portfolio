@@ -47,6 +47,11 @@ export default function About() {
         </p>
 
         <p>
+          I build product systems across web, mobile, backend, analytics and
+          career tooling.
+        </p>
+
+        <p>
           I am an amateur storyteller. I{' '}
           <span
             className='relative inline-block font-medium'

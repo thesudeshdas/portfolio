@@ -10,8 +10,8 @@ organisation: TalentPlace.ai
 cover: /dev/resumeBuilder.png
 live: https://www.talentplace.ai/
 techStack: ['react', 'typescript', 'chakraui', 'turborepo', 'redux']
-featured: true
-order: 2
+featured: false
+order: 21
 ---
 
 Built the frontend for TalentPlace.ai's resume builder — a career profile platform that uses 500+ data points to help users craft professional resumes from 80+ templates.

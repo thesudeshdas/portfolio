@@ -10,6 +10,7 @@ import glarizonLogo from '../../../../assets/images/glarizon-white.svg';
 // import icons
 import {
   ApacheECharts,
+  AWS,
   Axios,
   Bootstrap,
   CSS3,
@@ -33,14 +34,20 @@ import {
   NextJS,
   NodeJS,
   Postman,
+  PostgreSQL,
   Prettier,
   Python,
+  RabbitMQ,
+  ReactNative,
   ReactHookForm,
   ReactJS,
   ReactRouter,
   ReactTable,
+  Redis,
   ReduxToolkit,
   SASS,
+  SocketIO,
+  TailwindCSS,
   Turborepo,
   TypeScript,
   Vite
@@ -49,27 +56,48 @@ import {
 export const journey: IJourneyListItem[] = [
   {
     id: 'x5424b2c-d2v8-4w88-vz9x-4a81y5z73w70',
-    designation: 'SDE Frontend',
+    designation: 'Software Engineer',
     endDate: 'Present',
-    startDate: 'May 2024',
+    startDate: 'June 2024',
     organisation: 'GrowthX',
     organisationLogo: growthXLogo,
     achievements: [
       {
         id: 'a6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
-        text: `Implemented the design system in the talent platform (a job board) based on MUI.`
+        text: `Owned product engineering across 6 GrowthX repositories, contributing 2,276 commits across Next.js web, React Native mobile, Chrome extension, Express backend, admin panel and B2B portal surfaces`
+      },
+      {
+        id: 'b6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
+        text: `Shipped 20+ feature modules across events, learning, jobs, career tools, notifications, resume review, analytics, SEO and admin operations`
+      },
+      {
+        id: 'c6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
+        text: `Built B2B talent platform workflows including job posting, verification approvals, lifecycle states, AI-powered job autofill, applicant tracking, member directory filters, candidate curation, shortlisting and team invites`
+      },
+      {
+        id: 'd6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
+        text: `Architected real-time event chat with Socket.IO and MongoDB, supporting threaded replies, reactions, pinning, read-status tracking, WhatsApp/SMS reminders and access states for 1000+ community events`
+      },
+      {
+        id: 'e6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
+        text: `Built the GrowthX mobile app from scratch with React Native, Expo, NativeWind, Reanimated interactions, offline chat caching, analytics and 10+ Android rendering fixes`
       }
     ],
     techStack: [
       NextJS,
+      ReactNative,
+      TypeScript,
       MUI,
-      Git,
-      GitHub,
-      ReactRouter,
-      Axios,
-      ESLint,
-      Prettier,
-      ReduxToolkit
+      TailwindCSS,
+      ReduxToolkit,
+      Express,
+      MongoDB,
+      Redis,
+      PostgreSQL,
+      SocketIO,
+      RabbitMQ,
+      AWS,
+      Git
     ]
   },
   {

@@ -5,10 +5,10 @@ export default function Dev() {
   return (
     <div className='flex flex-col gap-4 py-12'>
       <div className='flex flex-col gap-4'>
-        <h2 className='text-4xl font-bold'>Creation</h2>
+        <h2 className='text-4xl font-bold'>Engineering Work</h2>
         <p>
-          Passionate about building from scratch, these are just a few of my
-          projects that I have worked on.
+          Product systems I have built across web, mobile, backend and career
+          tooling.
         </p>
       </div>
 

@@ -126,6 +126,58 @@ export const allSkills: ISkillItem[] = [
     name: 'Next.js'
   },
   {
+    id: 'o1000s8t-u9m5-4n55-mq6o-1r58p2q40n00',
+    name: 'React Native'
+  },
+  {
+    id: 'p1000t9u-v0n6-4o66-nr7p-2s69q3r51o90',
+    name: 'Expo'
+  },
+  {
+    id: 'q1000u9v-w1o7-4p77-os8q-3t70r4s62p80',
+    name: 'Socket.IO'
+  },
+  {
+    id: 'r1000v0w-x1o8-4q88-pt9r-4u81s5t73q70',
+    name: 'Redis'
+  },
+  {
+    id: 's1000w1x-y2o9-4r99-qu0s-5v14t6u84r60',
+    name: 'PostgreSQL'
+  },
+  {
+    id: 't1000x2y-z3p0-4s00-rv1t-6w25u7v95s50',
+    name: 'AWS'
+  },
+  {
+    id: 'u1000y5z-a4q1-4r00-sw2u-7x36v8w06t40',
+    name: 'RabbitMQ'
+  },
+  {
+    id: 'v1000z6a-b5r2-4s11-tx3v-9y47w5z67u30',
+    name: 'Sentry'
+  },
+  {
+    id: 'w1000a7b-c6s3-4t44-uy4w-9z51x6y78v20',
+    name: 'Mixpanel'
+  },
+  {
+    id: 'x1000b8c-d7t4-4u55-vz5x-0a62y7z89w30',
+    name: 'Amplitude'
+  },
+  {
+    id: 'y1000c9d-e8u5-4v66-wa6y-1b73z8a90x40',
+    name: 'RTK Query'
+  },
+  {
+    id: 'z1000d0e-f9v6-4w77-xb7z-2c84a9b01y50',
+    name: 'Chrome Extensions'
+  },
+  {
+    id: 'a1001e1f-g0w7-4x88-yc8a-3d95b0c12z60',
+    name: 'Product Engineering'
+  },
+  {
     id: 'o2011s8t-u9m5-4n55-mq6o-1r58p2q40n00',
     name: 'NodeJS'
   },

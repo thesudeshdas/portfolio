@@ -290,6 +290,10 @@ export const allSkills: ISkillItem[] = [
     name: 'Content Operations'
   },
   {
+    id: 'skill-sync-convex',
+    name: 'Convex'
+  },
+  {
     id: 'skill-sync-cost-tracking',
     name: 'Cost Tracking'
   },
@@ -312,6 +316,10 @@ export const allSkills: ISkillItem[] = [
   {
     id: 'skill-sync-file-upload-automation',
     name: 'File Upload Automation'
+  },
+  {
+    id: 'skill-sync-content-scripts',
+    name: 'Content Scripts'
   },
   {
     id: 'skill-sync-frontend-architecture',
@@ -360,6 +368,14 @@ export const allSkills: ISkillItem[] = [
   {
     id: 'skill-sync-observability',
     name: 'Observability'
+  },
+  {
+    id: 'skill-sync-novu',
+    name: 'Novu'
+  },
+  {
+    id: 'skill-sync-openapi',
+    name: 'OpenAPI'
   },
   {
     id: 'skill-sync-pdf-workflows',
@@ -420,5 +436,9 @@ export const allSkills: ISkillItem[] = [
   {
     id: 'skill-sync-video-playback',
     name: 'Video Playback'
+  },
+  {
+    id: 'skill-sync-webextension',
+    name: 'WebExtension'
   }
 ];

@@ -50,7 +50,10 @@ import {
   SiPostgresql,
   SiAmazonaws,
   SiOpenai,
-  SiSwift
+  SiSwift,
+  SiSupabase,
+  SiLatex,
+  SiNovu
 } from 'react-icons/si';
 
 // import types
@@ -324,6 +327,24 @@ export const Swift: ITechStackLogo = {
   id: 'r1060r2w-x2p8-4q88-pt9r-4u81s5t73q71',
   name: 'Swift',
   logo: SiSwift
+};
+
+export const Supabase: ITechStackLogo = {
+  id: 'r2060r2w-x2p8-4q88-pt9r-4u81s5t73q72',
+  name: 'Supabase',
+  logo: SiSupabase
+};
+
+export const LaTeX: ITechStackLogo = {
+  id: 'r3060r2w-x2p8-4q88-pt9r-4u81s5t73q73',
+  name: 'LaTeX',
+  logo: SiLatex
+};
+
+export const Novu: ITechStackLogo = {
+  id: 'r4060r2w-x2p8-4q88-pt9r-4u81s5t73q74',
+  name: 'Novu',
+  logo: SiNovu
 };
 
 export const SocketIO: ITechStackLogo = {

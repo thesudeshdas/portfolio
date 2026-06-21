@@ -2,7 +2,7 @@ import {
   FiGithub,
   FiLinkedin,
   FiMail,
-  FiYoutube,
+  // FiYoutube,
   FiInstagram
 } from 'react-icons/fi';
 
@@ -26,12 +26,13 @@ export const socialLinks: SocialLink[] = [
     icon: FiLinkedin,
     label: 'Connect with me on LinkedIn'
   },
-  {
-    name: 'YouTube',
-    url: 'https://www.youtube.com/@heywhoisdash',
-    icon: FiYoutube,
-    label: 'Watch my content on YouTube'
-  },
+  // Hidden for now: YouTube social link.
+  // {
+  //   name: 'YouTube',
+  //   url: 'https://www.youtube.com/@heywhoisdash',
+  //   icon: FiYoutube,
+  //   label: 'Watch my content on YouTube'
+  // },
   {
     name: 'Instagram',
     url: 'https://www.instagram.com/heywhoisdash',

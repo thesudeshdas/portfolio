@@ -56,31 +56,35 @@ import {
 export const journey: IJourneyListItem[] = [
   {
     id: 'x5424b2c-d2v8-4w88-vz9x-4a81y5z73w70',
-    designation: 'Software Engineer',
+    designation: 'SDE-2 (promoted from SDE)',
     endDate: 'Present',
-    startDate: 'June 2024',
+    startDate: 'May 2024',
     organisation: 'GrowthX',
     organisationLogo: growthXLogo,
     achievements: [
       {
         id: 'a6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
-        text: `Owned product engineering across 6 GrowthX repositories, contributing 2,276 commits across Next.js web, React Native mobile, Chrome extension, Express backend, admin panel and B2B portal surfaces`
+        text: `Shipped production systems across 6 GrowthX repositories with 2,276 commits across Next.js web, React Native mobile, Chrome extension, Express backend, admin, B2B portal and job/talent surfaces`
       },
       {
         id: 'b6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
-        text: `Shipped 20+ feature modules across events, learning, jobs, career tools, notifications, resume review, analytics, SEO and admin operations`
+        text: `Built GrowthX events platform workflows supporting 1,052 events, 23,110 registrations and 9,798 unique registrants across web, mobile, backend, admin, real-time chat, approvals, galleries and calendar flows`
       },
       {
         id: 'c6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
-        text: `Built B2B talent platform workflows including job posting, verification approvals, lifecycle states, AI-powered job autofill, applicant tracking, member directory filters, candidate curation, shortlisting and team invites`
+        text: `Shipped AI Roadmap with Claude, async background jobs, signed asset delivery, model-cost tracking, polling UX and notifications; generated 999 roadmaps for 822 unique users`
       },
       {
         id: 'd6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
-        text: `Architected real-time event chat with Socket.IO and MongoDB, supporting threaded replies, reactions, pinning, read-status tracking, WhatsApp/SMS reminders and access states for 1000+ community events`
+        text: `Built GrowthX jobs and talent workflows spanning 673 companies, 1,421 jobs, 6,775 applications, 883 candidates and 5,622 tracked jobs across candidate and employer surfaces`
       },
       {
         id: 'e6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
-        text: `Built the GrowthX mobile app from scratch with React Native, Expo, NativeWind, Reanimated interactions, offline chat caching, analytics and 10+ Android rendering fixes`
+        text: `Built Elevate Chrome extension flows for ATS detection, resume/social autofill, LinkedIn job scraping, saved jobs and AI resume review, with 2,830 resume reviews and 516 saved jobs recorded`
+      },
+      {
+        id: 'f6335d3e-f3w9-4x00-yb1z-6c20a7d84y60',
+        text: `Solely built a standalone community app with Member Connect, posts, comments, DMs, search, notifications and Claude moderation, reaching ~270 peak WAU in the first month`
       }
     ],
     techStack: [
@@ -110,19 +114,19 @@ export const journey: IJourneyListItem[] = [
     achievements: [
       {
         id: 'b7226e4f-g4x0-4y00-zc2a-7d30b8e95z50',
-        text: `Led a team of 7 developers in the successful development of three production-ready web apps within an 11-month time frame, catering to approximately 100k users`
+        text: `Led 7 developers shipping three production-ready web apps in 11 months for approximately 100k users`
       },
       {
         id: 'c8117f5g-h5y1-4z11-ad3b-8e40c9f06a40',
-        text: `Recreated the initial codebase in under 4 weeks, adopting a newer tech stack along with best coding practices for scalability, ultimately resulting in a 400% growth in the user base`
+        text: `Rebuilt the initial frontend in under 4 weeks and migrated products into a Turborepo/pnpm monorepo with shared UI components, theme, icon package, utilities and tooling`
       },
       {
         id: 'd9008g6h-i6z2-4a22-be4c-9f50d0g17b30',
-        text: `Migrated the frontend architecture from Multi repo to Monorepo, enhancing cross-product development and maintenance efficiency`
+        text: `Built career profile, resume/PDF generation, job search, apply, auth, onboarding, subscription and CRUD-heavy product workflows with React, TypeScript, Redux Toolkit and Chakra UI`
       },
       {
         id: 'e0009h7i-j7a3-4b33-cf5d-0g60h1i28c20',
-        text: `Improved user experience by implementing key features, including drag-and-drop, a PDF creator and viewer, along with multiple CRUD functionalities`
+        text: `Owned frontend drag-and-drop reordering, validated profile editors, true PDF download workflows and candidate-facing application views`
       }
     ],
     techStack: [

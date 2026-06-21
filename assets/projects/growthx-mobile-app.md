@@ -3,8 +3,8 @@ title: GrowthX Mobile App
 description: Production React Native app built from scratch — event discovery, real-time chat, onboarding animations, and auto-scaling design system.
 category: work
 status: active
-role: Solo Engineer
-highlight: Zero to production in 3 months, solo ownership
+role: Primary Mobile Engineer
+highlight: Primary contributor from zero to production in 3 months
 year: 2025-2026
 organisation: GrowthX
 cover:
@@ -15,7 +15,7 @@ featured: true
 order: 1
 ---
 
-Built the entire GrowthX mobile app from zero to production in 3 months with full ownership.
+Served as the primary engineer on the GrowthX mobile app from zero to production in 3 months. This was not a solo effort; I led and owned major mobile surfaces while collaborating with the wider team.
 
 Features include event discovery with scroll-driven animations (parallax hero, sticky blurring search bar, animated filter pills), a "scaling sheet" event detail experience, real-time chat with threaded replies and offline SQLite caching, and multi-step onboarding with complex Reanimated card transitions.
 

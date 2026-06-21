@@ -20,6 +20,7 @@ import {
   MongoDB,
   NextJS,
   NodeJS,
+  Novu,
   OpenAI,
   RabbitMQ,
   ReactNative,
@@ -27,15 +28,18 @@ import {
   Redis,
   ReduxToolkit,
   SocketIO,
+  Supabase,
   TailwindCSS,
   Turborepo,
-  TypeScript
+  TypeScript,
+  Vite,
+  LaTeX
 } from '@/data/icons/icons.data';
 
 export const devProjectList: IDevProjectListItem[] = [
   {
     id: 'a1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
-    description: `Production React Native app built from scratch with event discovery, real-time chat, onboarding animations, offline caching, analytics and 10+ Android rendering fixes`,
+    description: `Production React Native app where I was the primary contributor across event discovery, real-time chat, onboarding animations, offline caching, analytics and 10+ Android rendering fixes`,
     image: '/dash-white.png',
     live: 'https://apps.apple.com/us/app/growthx-club/id6757463407',
     organisation: 'GrowthX',
@@ -89,27 +93,101 @@ export const devProjectList: IDevProjectListItem[] = [
     featured: true
   },
   {
+    id: 'f1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `Standalone community app with Member Connect matchmaking, posts, comments, DMs, search, notifications and Claude moderation, reaching ~270 peak WAU in the first month`,
+    image: '/dash-white.png',
+    live: '/projects/growthx-community-member-connect',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [ReactJS, TypeScript, Vite, TailwindCSS, OpenAI],
+    title: 'GrowthX Community App',
+    featured: true
+  },
+  {
+    id: 'g1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `Chrome extension for ATS detection, resume and social autofill, LinkedIn job scraping, saved jobs and AI resume review, with 2,830 resume reviews and 516 saved jobs recorded`,
+    image: '/dash-white.png',
+    live: '/projects/growthx-chrome-extension',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [ReactJS, TypeScript, Vite, ReduxToolkit],
+    title: 'Elevate Browser Extension',
+    featured: true
+  },
+  {
+    id: 'h1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `GrowthX notification systems across email, WhatsApp and platform workflows, covering 22,592 emails at 99.8% success, 86,552 Novu subscribers and 11 workflows`,
+    image: '/dash-white.png',
+    live: '/projects/growthx-notifications-platform',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [NodeJS, TypeScript, MongoDB, Novu],
+    title: 'Notifications Platform',
+    featured: true
+  },
+  {
+    id: 'i1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `Learning platform built from scratch with personalized dashboards, module navigation, video playback, member-only gates and upgrade funnels`,
+    image: '/dash-white.png',
+    live: '/projects/growthx-elevate',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [NextJS, TypeScript, ReduxToolkit, MUI],
+    title: 'ELEVATE Learning Platform',
+    featured: true
+  },
+  {
+    id: 'j1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `Career evidence platform with Career Vault, structured journal, resume builder, LaTeX PDF compilation, job-search phases and local MCP tools for agent-assisted resume workflows`,
+    image: '/dash-white.png',
+    live: '/projects/stayhireable',
+    techStack: [ReactJS, TypeScript, Supabase, LaTeX],
+    title: 'StayHireable',
+    sourceCode: 'https://github.com/thesudeshdas/stayhireable',
+    featured: true
+  },
+  {
     id: 'o4015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
-    description: `Data driven job portal which generates candidates based on the
-    requirements of the job. Queries through ~100k candidates &
-    recommends the top candidates along with a detailed matching report`,
+    description: `Frontend job search and apply portal with listings, search, filters, end-to-end apply flow, application summaries and candidate-facing views`,
     image: '/dev/jobPortal.png',
-    live: 'https://job-tp.vercel.app/',
+    live: '/projects/talentplace-job-search-apply-portal',
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
-    title: 'Job Portal',
+    title: 'TalentPlace Job Search Portal',
     featured: false
   },
   {
     id: 'p3006t4u-v4n0-4o00-nr1p-6s03q7r95o50',
-    description: `Data driven digital career profile builder based on over 500 data points for levelling up career. Choose from over 80 aesthetic & performant templates to download the resume`,
+    description: `Career profile builder with multi-step onboarding, validated profile editors, drag-and-drop reordering, auth, reports and subscription flows`,
     image: '/dev/resumeBuilder.png',
-    live: 'https://www.talentplace.ai/',
+    live: '/projects/talentplace-career-profile-builder',
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
-    title: 'Resume Builder',
+    title: 'TalentPlace Career Profile Builder',
+    featured: false
+  },
+  {
+    id: 'q3006t4u-v4n0-4o00-nr1p-6s03q7r95o50',
+    description: `Multi-template resume rendering engine with React document components, reusable template data and client-side true PDF generation`,
+    image: '/dev/resumeBuilder.png',
+    live: '/projects/talentplace-pdf-generation',
+    organisation: 'TalentPlace.ai',
+    organisationLogo: talentplaceLogo,
+    techStack: [ReactJS, TypeScript, ChakraUI],
+    title: 'Resume Templates & PDF Generation',
+    featured: false
+  },
+  {
+    id: 'q4006t4u-v4n0-4o00-nr1p-6s03q7r95o50',
+    description: `Frontend platform migration into a Turborepo and pnpm monorepo with shared UI components, theme, icons, utilities and tooling`,
+    image: '/dev/resumeBuilder.png',
+    live: '/projects/talentplace-frontend-platform',
+    organisation: 'TalentPlace.ai',
+    organisationLogo: talentplaceLogo,
+    techStack: [ReactJS, TypeScript, ChakraUI, Turborepo],
+    title: 'TalentPlace Frontend Platform',
     featured: false
   },
   {

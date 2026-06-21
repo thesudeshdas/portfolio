@@ -10,7 +10,7 @@ export function ReachOut() {
       would be the fastest way. Email me at{' '}
       <a
         href='mailto:sudeshkumardas7@gmail.com'
-        className='border-b-[1px] border-foreground'
+        className='border-foreground border-b-[1px]'
       >
         sudeshkumardas7@gmail.com
       </a>
@@ -24,10 +24,12 @@ export function GotStarted() {
     <p>
       I got into web development during the COVID-19 lockdown. I needed
       something to do and my friend suggested programming. I learnt the basics
-      from YouTube, then got into{' '}
+      from online resources, then got into{' '}
+      {/* Hidden for now: YouTube mention. */}
+      {/* from YouTube, then got into{' '} */}
       <a
         href='https://neog.camp'
-        className='border-b-[1px] border-foreground'
+        className='border-foreground border-b-[1px]'
         rel='noreferrer'
         target='_blank'
       >
@@ -36,7 +38,7 @@ export function GotStarted() {
       , a six week boot camp by{' '}
       <a
         href='https://tanaypratap.com'
-        className='border-b-[1px] border-foreground'
+        className='border-foreground border-b-[1px]'
         rel='noreferrer'
         target='_blank'
       >
@@ -105,7 +107,9 @@ export const faqList: IFaqItem[] = [
   {
     id: 'f4320g8h-i7j9-4e00-0g1h-6i22d7e85f90',
     question: `Is it expensive to learn web development? Especially since you are not from the CS field`,
-    answer: `Nope. everything is on YouTube, blogs, docs. Join a community, subscribe to some newsletters, and you are good to learn anything new (not just web development)`
+    // Hidden for now: YouTube mention.
+    // answer: `Nope. everything is on YouTube, blogs, docs. Join a community, subscribe to some newsletters, and you are good to learn anything new (not just web development)`
+    answer: `Nope. everything is available across blogs, docs and communities. Join a community, subscribe to some newsletters, and you are good to learn anything new (not just web development)`
   },
   {
     id: 'g3210h9i-j8k0-4f11-1g2i-7j33e8f96g00',

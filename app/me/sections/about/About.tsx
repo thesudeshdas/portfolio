@@ -1,5 +1,6 @@
 // import next components
-import Image from 'next/image';
+// Hidden for now: profile picture.
+// import Image from 'next/image';
 
 // import components
 import SocialLinks from '@/components/SocialLinks/SocialLinks';
@@ -8,6 +9,7 @@ export default function About() {
   return (
     <div className='flex flex-col gap-12'>
       <div className='flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-center'>
+        {/* Hidden for now: profile picture.
         <figure className='w-full max-w-[250px]'>
           <div className='relative aspect-square grow'>
             <Image
@@ -18,6 +20,7 @@ export default function About() {
             />
           </div>
         </figure>
+        */}
 
         <div className='w-full'>
           <h2 className='text-4xl font-bold'>
@@ -51,6 +54,7 @@ export default function About() {
           career tooling.
         </p>
 
+        {/* Hidden for now: YouTube/video-facing about copy.
         <p>
           I am an amateur storyteller. I{' '}
           <span
@@ -83,6 +87,12 @@ export default function About() {
           about my life and experiences (mainly related to motorcycling).
           Outside of tech and motorcycles, I enjoy football (Hala Madrid!),
           video games and doom-scrolling.
+        </p>
+        */}
+
+        <p>
+          Outside of tech and motorcycles, I enjoy football (Hala Madrid!),
+          games and exploring stories from the road.
         </p>
 
         <p>

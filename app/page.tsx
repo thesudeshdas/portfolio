@@ -1,6 +1,8 @@
-import Image from 'next/image';
+// Hidden for now: profile picture.
+// import Image from 'next/image';
 import SocialLinks from '@/components/SocialLinks/SocialLinks';
-import SectionHeader from '@/components/SectionHeader/SectionHeader';
+// Hidden for now: YouTube latest-video embed.
+// import SectionHeader from '@/components/SectionHeader/SectionHeader';
 import { getAllStories } from '@/lib/stories';
 import { StoriesContainer } from '@/components/index';
 
@@ -14,6 +16,7 @@ export default async function Home() {
       <div className='flex flex-col gap-20 sm:max-w-[600px]'>
         <div className='flex flex-col gap-6'>
           <div className='flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-center'>
+            {/* Hidden for now: profile picture.
             <figure className='aspect-square h-full max-w-[150px] sm:max-w-full'>
               <div className='relative aspect-square w-[125px]'>
                 <Image
@@ -24,6 +27,7 @@ export default async function Home() {
                 />
               </div>
             </figure>
+            */}
 
             <div className='flex w-full flex-col gap-0'>
               <h2 className='text-4xl'>
@@ -47,6 +51,7 @@ export default async function Home() {
           </div>
         </div>
 
+        {/* Hidden for now: YouTube latest-video embed.
         <div className='flex flex-col gap-4'>
           <SectionHeader text='Latest Shenanigans' />
 
@@ -60,6 +65,7 @@ export default async function Home() {
             />
           </div>
         </div>
+        */}
 
         <div className='flex w-full flex-col gap-4'>
           <StoriesContainer

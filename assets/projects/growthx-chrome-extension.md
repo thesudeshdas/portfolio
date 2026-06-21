@@ -1,10 +1,10 @@
 ---
-title: GrowthX Chrome Extension
-description: Chrome extension automating job applications across 6 ATS platforms — reducing application time from ~15 minutes to under 30 seconds.
+title: Elevate Browser Extension
+description: Chrome extension for ATS detection, resume and social autofill, LinkedIn job scraping, saved jobs and AI resume review.
 category: work
-status: archived
+status: active
 role: Solo Engineer
-highlight: Reduced job application time from ~15 min to under 30 seconds
+highlight: 2,830 resume reviews and 516 saved jobs recorded
 year: 2024-2025
 organisation: GrowthX
 cover:
@@ -19,5 +19,10 @@ Architected the complete Chrome Extension (Manifest V3) with full product owners
 Built a multi-platform autofill engine filling forms across 6 ATS platforms (Lever, Greenhouse v1/v2, Freshteam, Keka, Zoho Recruit) using platform-specific DOM selectors, DataTransfer API for resume uploads, and MutationObserver for upload confirmation.
 
 Implemented a three-layer IPC system (React popup → service worker → content script) handling 12+ message types, cross-origin authentication sync between the web app and extension, and job insights with AI-powered resume-to-job compatibility checking.
+
+Shipped Apply via GX job assistant, ATS detection, resume/social autofill,
+LinkedIn job scraping, saved jobs and AI resume review flows. Verified
+production evidence includes 2,830 resume reviews and 516 jobs saved through
+the extension.
 
 Integrated Amplitude analytics through a backend proxy with 20+ instrumented events.

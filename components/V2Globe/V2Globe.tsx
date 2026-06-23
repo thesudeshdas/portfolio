@@ -27,31 +27,53 @@ const MOBILE_ALTITUDE = 2.85;
 const MIN_ALTITUDE = 0.45;
 const MAX_ALTITUDE = 4.2;
 const MAX_ZOOM = 500;
+const MIN_OUTLINE_DETAIL = 10;
+const MAX_OUTLINE_DETAIL = 100;
+const DEFAULT_OUTLINE_DETAIL = 70;
 const POV_TRANSITION_MS = 1600;
 const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 
 type GlobeDirection = 'up' | 'down' | 'left' | 'right';
 
-type GeoJsonGeometry = {
-  type: string;
-  coordinates: number[];
-};
+type GeoJsonPosition = [number, number, ...number[]];
+type GeoJsonLineCoordinates = GeoJsonPosition[];
+type GeoJsonMultiLineCoordinates = GeoJsonPosition[][];
 
-type CountryFeature = {
+type GeoJsonGeometry =
+  | {
+      type: 'LineString';
+      coordinates: GeoJsonLineCoordinates;
+    }
+  | {
+      type: 'MultiLineString';
+      coordinates: GeoJsonMultiLineCoordinates;
+    };
+
+type MapLineFeature = {
   type: 'Feature';
   properties: Record<string, unknown>;
   geometry: GeoJsonGeometry;
 };
 
-type CountriesGeoJson = {
+type MapLinesGeoJson = {
   type: 'FeatureCollection';
-  features: CountryFeature[];
+  features: MapLineFeature[];
 };
 
 type GlobePointOfView = {
   lat: number;
   lng: number;
   altitude: number;
+};
+
+type CountryBorderPoint = {
+  lat: number;
+  lng: number;
+  altitude: number;
+};
+
+type CountryBorderPath = {
+  points: CountryBorderPoint[];
 };
 
 function getInitialAltitude(width: number) {
@@ -87,20 +109,60 @@ function getAltitudeFromZoom(zoom: number) {
   );
 }
 
-function getCountryGeometry(feature: object) {
-  return (feature as CountryFeature).geometry;
-}
-
-function getPolygonCapColor() {
-  return 'rgba(0,0,0,0)';
-}
-
-function getPolygonSideColor() {
-  return 'rgba(0,0,0,0)';
-}
-
-function getPolygonStrokeColor() {
+function getBorderLineColor() {
   return 'rgba(244,244,241,0.92)';
+}
+
+function getCountryBorderPaths(features: MapLineFeature[]) {
+  return features.flatMap((feature) => {
+    const { geometry } = feature;
+    const lines =
+      geometry.type === 'LineString'
+        ? [geometry.coordinates]
+        : geometry.coordinates;
+
+    return lines
+      .filter((line) => line.length > 1)
+      .map((line) => ({
+        points: line.map(([lng, lat]) => ({
+          lat,
+          lng,
+          altitude: 0.008
+        }))
+      }));
+  });
+}
+
+function getDetailedBorderPaths(
+  paths: CountryBorderPath[],
+  outlineDetail: number
+) {
+  const clampedDetail = Math.max(
+    MIN_OUTLINE_DETAIL,
+    Math.min(MAX_OUTLINE_DETAIL, outlineDetail)
+  );
+
+  if (clampedDetail === MAX_OUTLINE_DETAIL) {
+    return paths;
+  }
+
+  return paths.map((path) => {
+    if (path.points.length <= 2) {
+      return path;
+    }
+
+    const targetPointCount = Math.max(
+      2,
+      Math.ceil(path.points.length * (clampedDetail / MAX_OUTLINE_DETAIL))
+    );
+    const pointStep = (path.points.length - 1) / (targetPointCount - 1);
+    const points = Array.from(
+      { length: targetPointCount },
+      (_, index) => path.points[Math.round(index * pointStep)]
+    );
+
+    return { points };
+  });
 }
 
 export default function V2Globe({ isActive }: { isActive: boolean }) {
@@ -111,11 +173,12 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
     altitude: DESKTOP_ALTITUDE
   });
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [countries, setCountries] = useState<CountryFeature[]>([]);
+  const [borderPaths, setBorderPaths] = useState<CountryBorderPath[]>([]);
   const [isGlobeReady, setIsGlobeReady] = useState(false);
   const [currentPov, setCurrentPov] = useState<GlobePointOfView>(
     currentPovRef.current
   );
+  const [outlineDetail, setOutlineDetail] = useState(DEFAULT_OUTLINE_DETAIL);
 
   const globeMaterial = useMemo(
     () =>
@@ -124,17 +187,6 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       }),
     []
   );
-  const polygonCapMaterial = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        color: '#050505',
-        depthWrite: false,
-        opacity: 0,
-        transparent: true
-      }),
-    []
-  );
-
   const updatePointOfView = useCallback(
     (pov: GlobePointOfView, transitionMs = 0) => {
       currentPovRef.current = pov;
@@ -142,6 +194,10 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       globeRef.current?.pointOfView(pov, transitionMs);
     },
     []
+  );
+  const visibleBorderPaths = useMemo(
+    () => getDetailedBorderPaths(borderPaths, outlineDetail),
+    [borderPaths, outlineDetail]
   );
 
   const focusBengaluru = useCallback(
@@ -191,10 +247,6 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
     );
   };
 
-  const handleResetNorth = () => {
-    updatePointOfView(currentPovRef.current, 420);
-  };
-
   useEffect(() => {
     const container = containerRef.current;
 
@@ -217,7 +269,7 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
   }, []);
 
   useEffect(() => {
-    if (!isActive || countries.length > 0) {
+    if (!isActive || borderPaths.length > 0) {
       return;
     }
 
@@ -229,10 +281,10 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
           throw new Error('Failed to load country boundaries');
         }
 
-        return (await response.json()) as CountriesGeoJson;
+        return (await response.json()) as MapLinesGeoJson;
       })
       .then((data) => {
-        setCountries(data.features);
+        setBorderPaths(getCountryBorderPaths(data.features));
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === 'AbortError') {
@@ -245,7 +297,7 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
     return () => {
       controller.abort();
     };
-  }, [countries.length, isActive]);
+  }, [borderPaths.length, isActive]);
 
   useEffect(() => {
     if (!isGlobeReady || !isActive) {
@@ -316,14 +368,15 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
           backgroundColor='rgba(0,0,0,0)'
           globeMaterial={globeMaterial}
           showAtmosphere={false}
-          polygonsData={countries}
-          polygonGeoJsonGeometry={getCountryGeometry}
-          polygonCapColor={getPolygonCapColor}
-          polygonCapMaterial={polygonCapMaterial}
-          polygonSideColor={getPolygonSideColor}
-          polygonStrokeColor={getPolygonStrokeColor}
-          polygonAltitude={0.01}
-          polygonsTransitionDuration={900}
+          pathsData={visibleBorderPaths}
+          pathPoints='points'
+          pathPointLat='lat'
+          pathPointLng='lng'
+          pathPointAlt='altitude'
+          pathColor={getBorderLineColor}
+          pathStroke={0.32}
+          pathResolution={2}
+          pathTransitionDuration={0}
           enablePointerInteraction
           onGlobeReady={() => {
             setIsGlobeReady(true);
@@ -367,16 +420,23 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
             />
           </label>
 
-          <div className='mt-5 border-t border-white/10 pt-4'>
-            <div className='mb-2 text-xs text-white/65'>North axis</div>
-            <button
-              type='button'
-              onClick={handleResetNorth}
-              className='min-h-9 w-full rounded-md border border-white/15 bg-white/5 px-3 text-left text-xs text-white transition-colors hover:border-white/35 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
-            >
-              Reset north-up
-            </button>
-          </div>
+          <label className='mt-5 block border-t border-white/10 pt-4'>
+            <span className='mb-2 flex items-center justify-between text-xs text-white/65'>
+              <span>Map detail</span>
+              <span>{outlineDetail}%</span>
+            </span>
+            <input
+              type='range'
+              min={MIN_OUTLINE_DETAIL}
+              max={MAX_OUTLINE_DETAIL}
+              step='1'
+              value={outlineDetail}
+              onChange={(event) => {
+                setOutlineDetail(Number(event.target.value));
+              }}
+              className='w-full accent-white'
+            />
+          </label>
 
           <dl className='mt-5 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/10 pt-4 text-xs'>
             <dt className='text-white/45'>Lat</dt>

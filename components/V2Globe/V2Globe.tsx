@@ -29,11 +29,13 @@ const INDIA_VIEW = {
   lat: 22.8,
   lng: 78.9
 };
-const MIN_ALTITUDE = 1.05;
+const MIN_ALTITUDE = 0.34;
 const MAX_ALTITUDE = 4.2;
-const MAX_ZOOM = 500;
+const MAX_ZOOM = 1500;
 const INTRO_START_ZOOM = 250;
-const INTRO_END_ZOOM = 500;
+const INTRO_END_ZOOM = 1425;
+const MIN_DISPLAY_ZOOM = 0;
+const MAX_DISPLAY_ZOOM = 100;
 const MIN_OUTLINE_DETAIL = 10;
 const MAX_OUTLINE_DETAIL = 100;
 const DEFAULT_OUTLINE_DETAIL = MIN_OUTLINE_DETAIL;
@@ -300,6 +302,30 @@ function getAltitudeFromZoom(zoom: number) {
   return (
     MAX_ALTITUDE - (clampedZoom / MAX_ZOOM) * (MAX_ALTITUDE - MIN_ALTITUDE)
   );
+}
+
+function getDisplayZoomFromAltitude(altitude: number) {
+  const rawZoom = getZoomFromAltitude(altitude);
+  const displayZoom =
+    ((rawZoom - INTRO_START_ZOOM) / (INTRO_END_ZOOM - INTRO_START_ZOOM)) *
+    MAX_DISPLAY_ZOOM;
+
+  return Math.round(
+    Math.max(MIN_DISPLAY_ZOOM, Math.min(MAX_DISPLAY_ZOOM, displayZoom))
+  );
+}
+
+function getAltitudeFromDisplayZoom(displayZoom: number) {
+  const clampedDisplayZoom = Math.max(
+    MIN_DISPLAY_ZOOM,
+    Math.min(MAX_DISPLAY_ZOOM, displayZoom)
+  );
+  const rawZoom =
+    INTRO_START_ZOOM +
+    (clampedDisplayZoom / MAX_DISPLAY_ZOOM) *
+      (INTRO_END_ZOOM - INTRO_START_ZOOM);
+
+  return getAltitudeFromZoom(rawZoom);
 }
 
 function getLocationMarkerScale(altitude: number) {
@@ -786,7 +812,7 @@ export default function V2Globe({
     updatePointOfView(
       {
         ...currentPovRef.current,
-        altitude: getAltitudeFromZoom(value)
+        altitude: getAltitudeFromDisplayZoom(value)
       },
       0
     );
@@ -1196,14 +1222,14 @@ export default function V2Globe({
           <label className='block'>
             <span className='mb-2 flex items-center justify-between text-xs text-white/65'>
               <span>Zoom</span>
-              <span>{getZoomFromAltitude(currentPov.altitude)}%</span>
+              <span>{getDisplayZoomFromAltitude(currentPov.altitude)}%</span>
             </span>
             <input
               type='range'
-              min='0'
-              max={MAX_ZOOM}
+              min={MIN_DISPLAY_ZOOM}
+              max={MAX_DISPLAY_ZOOM}
               step='1'
-              value={getZoomFromAltitude(currentPov.altitude)}
+              value={getDisplayZoomFromAltitude(currentPov.altitude)}
               onChange={(event) => {
                 handleZoomChange(Number(event.target.value));
               }}

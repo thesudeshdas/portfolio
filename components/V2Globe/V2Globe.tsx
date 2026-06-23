@@ -24,8 +24,11 @@ const BENGALURU_VIEW = {
 };
 const DESKTOP_ALTITUDE = 2.2;
 const MOBILE_ALTITUDE = 2.85;
+const MIN_ALTITUDE = 0.45;
+const MAX_ALTITUDE = 4.2;
+const MAX_ZOOM = 500;
 const POV_TRANSITION_MS = 1600;
-const GLOBE_ROTATE_EVENT = 'v2-globe-rotate';
+const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 
 type GlobeDirection = 'up' | 'down' | 'left' | 'right';
 
@@ -51,38 +54,6 @@ type GlobePointOfView = {
   altitude: number;
 };
 
-const GLOBE_CONTROLS: Array<{
-  direction: GlobeDirection;
-  label: string;
-  symbol: string;
-  className: string;
-}> = [
-  {
-    direction: 'up',
-    label: 'Rotate globe up',
-    symbol: '↑',
-    className: 'col-start-2 row-start-1'
-  },
-  {
-    direction: 'left',
-    label: 'Rotate globe left',
-    symbol: '←',
-    className: 'col-start-1 row-start-2'
-  },
-  {
-    direction: 'right',
-    label: 'Rotate globe right',
-    symbol: '→',
-    className: 'col-start-3 row-start-2'
-  },
-  {
-    direction: 'down',
-    label: 'Rotate globe down',
-    symbol: '↓',
-    className: 'col-start-2 row-start-3'
-  }
-];
-
 function getInitialAltitude(width: number) {
   return width < 640 ? MOBILE_ALTITUDE : DESKTOP_ALTITUDE;
 }
@@ -95,12 +66,33 @@ function clampLatitude(latitude: number) {
   return Math.max(-72, Math.min(72, latitude));
 }
 
+function clampAltitude(altitude: number) {
+  return Math.max(MIN_ALTITUDE, Math.min(MAX_ALTITUDE, altitude));
+}
+
+function getZoomFromAltitude(altitude: number) {
+  const clampedAltitude = clampAltitude(altitude);
+
+  return Math.round(
+    ((MAX_ALTITUDE - clampedAltitude) / (MAX_ALTITUDE - MIN_ALTITUDE)) *
+      MAX_ZOOM
+  );
+}
+
+function getAltitudeFromZoom(zoom: number) {
+  const clampedZoom = Math.max(0, Math.min(MAX_ZOOM, zoom));
+
+  return (
+    MAX_ALTITUDE - (clampedZoom / MAX_ZOOM) * (MAX_ALTITUDE - MIN_ALTITUDE)
+  );
+}
+
 function getCountryGeometry(feature: object) {
   return (feature as CountryFeature).geometry;
 }
 
 function getPolygonCapColor() {
-  return '#050505';
+  return 'rgba(0,0,0,0)';
 }
 
 function getPolygonSideColor() {
@@ -121,57 +113,86 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [countries, setCountries] = useState<CountryFeature[]>([]);
   const [isGlobeReady, setIsGlobeReady] = useState(false);
+  const [currentPov, setCurrentPov] = useState<GlobePointOfView>(
+    currentPovRef.current
+  );
 
   const globeMaterial = useMemo(
     () =>
-      new THREE.MeshPhongMaterial({
-        color: '#050505',
-        emissive: '#020202',
-        shininess: 14,
-        specular: '#2a2a2a'
+      new THREE.MeshBasicMaterial({
+        color: '#050505'
       }),
+    []
+  );
+  const polygonCapMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: '#050505',
+        depthWrite: false,
+        opacity: 0,
+        transparent: true
+      }),
+    []
+  );
+
+  const updatePointOfView = useCallback(
+    (pov: GlobePointOfView, transitionMs = 0) => {
+      currentPovRef.current = pov;
+      setCurrentPov(pov);
+      globeRef.current?.pointOfView(pov, transitionMs);
+    },
     []
   );
 
   const focusBengaluru = useCallback(
     (transitionMs = POV_TRANSITION_MS) => {
-      const nextPov = {
-        ...BENGALURU_VIEW,
-        altitude: getInitialAltitude(size.width)
-      };
-
-      currentPovRef.current = nextPov;
-      globeRef.current?.pointOfView(nextPov, transitionMs);
+      updatePointOfView(
+        {
+          ...BENGALURU_VIEW,
+          altitude: getInitialAltitude(size.width)
+        },
+        transitionMs
+      );
     },
-    [size.width]
+    [size.width, updatePointOfView]
   );
 
-  const moveGlobe = useCallback((direction: GlobeDirection) => {
-    const currentPov = currentPovRef.current;
-    const nextPov = {
-      ...currentPov,
-      lat:
-        direction === 'up'
-          ? clampLatitude(currentPov.lat + 8)
-          : direction === 'down'
-          ? clampLatitude(currentPov.lat - 8)
-          : currentPov.lat,
-      lng:
-        direction === 'left'
-          ? normalizeLongitude(currentPov.lng - 12)
-          : direction === 'right'
-          ? normalizeLongitude(currentPov.lng + 12)
-          : currentPov.lng
-    };
+  const moveGlobe = useCallback(
+    (direction: GlobeDirection) => {
+      const currentPov = currentPovRef.current;
+      const nextPov = {
+        ...currentPov,
+        lat:
+          direction === 'up'
+            ? clampLatitude(currentPov.lat + 8)
+            : direction === 'down'
+            ? clampLatitude(currentPov.lat - 8)
+            : currentPov.lat,
+        lng:
+          direction === 'left'
+            ? normalizeLongitude(currentPov.lng - 12)
+            : direction === 'right'
+            ? normalizeLongitude(currentPov.lng + 12)
+            : currentPov.lng
+      };
 
-    currentPovRef.current = nextPov;
-    globeRef.current?.pointOfView(nextPov, 520);
-  }, []);
+      updatePointOfView(nextPov, 520);
+    },
+    [updatePointOfView]
+  );
 
-  const handleRotateControl = (direction: GlobeDirection) => {
-    window.dispatchEvent(
-      new CustomEvent<GlobeDirection>(GLOBE_ROTATE_EVENT, { detail: direction })
+  const handleZoomChange = (value: number) => {
+    updatePointOfView(
+      {
+        ...currentPovRef.current,
+        altitude: getAltitudeFromZoom(value)
+      },
+      0
     );
+  };
+
+  const handleResetNorth = () => {
+    updatePointOfView(currentPovRef.current, 420);
   };
 
   useEffect(() => {
@@ -238,7 +259,7 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       controls.enableDamping = true;
       controls.enablePan = false;
       controls.rotateSpeed = 0.55;
-      controls.minDistance = 175;
+      controls.minDistance = 80;
       controls.maxDistance = 420;
     }
 
@@ -251,6 +272,13 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest('[data-v2-dev-control="true"]')
+      ) {
+        return;
+      }
+
       if (
         event.key !== 'ArrowUp' &&
         event.key !== 'ArrowDown' &&
@@ -265,18 +293,10 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       moveGlobe(direction as GlobeDirection);
     };
 
-    const handleRotateEvent = (event: Event) => {
-      const { detail } = event as CustomEvent<GlobeDirection>;
-
-      moveGlobe(detail);
-    };
-
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener(GLOBE_ROTATE_EVENT, handleRotateEvent);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener(GLOBE_ROTATE_EVENT, handleRotateEvent);
     };
   }, [isActive, moveGlobe]);
 
@@ -299,6 +319,7 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
           polygonsData={countries}
           polygonGeoJsonGeometry={getCountryGeometry}
           polygonCapColor={getPolygonCapColor}
+          polygonCapMaterial={polygonCapMaterial}
           polygonSideColor={getPolygonSideColor}
           polygonStrokeColor={getPolygonStrokeColor}
           polygonAltitude={0.01}
@@ -309,30 +330,70 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
           }}
           onZoom={(pov) => {
             currentPovRef.current = pov;
+            setCurrentPov(pov);
           }}
         />
       )}
 
-      <div className='pointer-events-none absolute inset-x-0 bottom-10 z-10 flex justify-center'>
-        <div className='grid grid-cols-3 grid-rows-3 gap-2'>
-          {GLOBE_CONTROLS.map((control) => (
-            <button
-              key={control.direction}
-              type='button'
-              aria-label={control.label}
-              onClick={() => {
-                handleRotateControl(control.direction);
+      {IS_DEV_PANEL_ENABLED && isActive && (
+        <aside
+          data-v2-dev-control='true'
+          className='absolute top-24 right-5 z-20 w-[260px] rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
+        >
+          <div className='mb-4 flex items-center justify-between gap-3'>
+            <h2 className='text-xs font-medium tracking-[0.22em] text-white/70 uppercase'>
+              Dev controls
+            </h2>
+            <span className='rounded-sm border border-white/10 px-2 py-1 text-[10px] leading-none text-white/45'>
+              V2
+            </span>
+          </div>
+
+          <label className='block'>
+            <span className='mb-2 flex items-center justify-between text-xs text-white/65'>
+              <span>Zoom</span>
+              <span>{getZoomFromAltitude(currentPov.altitude)}%</span>
+            </span>
+            <input
+              type='range'
+              min='0'
+              max={MAX_ZOOM}
+              step='1'
+              value={getZoomFromAltitude(currentPov.altitude)}
+              onChange={(event) => {
+                handleZoomChange(Number(event.target.value));
               }}
-              className={cn(
-                'pointer-events-auto grid h-11 w-11 place-items-center rounded-md border border-white/15 bg-white/10 text-lg leading-none text-white backdrop-blur transition-colors hover:border-white/35 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white',
-                control.className
-              )}
+              className='w-full accent-white'
+            />
+          </label>
+
+          <div className='mt-5 border-t border-white/10 pt-4'>
+            <div className='mb-2 text-xs text-white/65'>North axis</div>
+            <button
+              type='button'
+              onClick={handleResetNorth}
+              className='min-h-9 w-full rounded-md border border-white/15 bg-white/5 px-3 text-left text-xs text-white transition-colors hover:border-white/35 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
             >
-              {control.symbol}
+              Reset north-up
             </button>
-          ))}
-        </div>
-      </div>
+          </div>
+
+          <dl className='mt-5 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/10 pt-4 text-xs'>
+            <dt className='text-white/45'>Lat</dt>
+            <dd className='text-right text-white/80 tabular-nums'>
+              {currentPov.lat.toFixed(4)}
+            </dd>
+            <dt className='text-white/45'>Lng</dt>
+            <dd className='text-right text-white/80 tabular-nums'>
+              {currentPov.lng.toFixed(4)}
+            </dd>
+            <dt className='text-white/45'>Alt</dt>
+            <dd className='text-right text-white/80 tabular-nums'>
+              {currentPov.altitude.toFixed(2)}
+            </dd>
+          </dl>
+        </aside>
+      )}
     </section>
   );
 }

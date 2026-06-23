@@ -37,8 +37,8 @@ export default function RootLayout({
 
           <AppNav />
 
-          <div className='overflow mx-auto flex w-full max-w-[1000px] grow flex-col'>
-            <div className='h-full flex-1 flex-col items-center px-4'>
+          <div className='app-shell overflow mx-auto flex w-full max-w-[1000px] grow flex-col'>
+            <div className='app-content h-full flex-1 flex-col items-center px-4'>
               {children}
             </div>
 

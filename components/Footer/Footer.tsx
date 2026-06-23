@@ -12,7 +12,7 @@ import SocialLinks from '../SocialLinks/SocialLinks';
 
 export default function Footer() {
   return (
-    <div className='mx-auto flex w-full max-w-[1000px] flex-col items-center justify-between gap-8 border-t-[1px] border-zinc-400 py-8 sm:flex-row dark:border-zinc-500'>
+    <div className='app-footer mx-auto flex w-full max-w-[1000px] flex-col items-center justify-between gap-8 border-t-[1px] border-zinc-400 py-8 sm:flex-row dark:border-zinc-500'>
       <div className='flex flex-col items-center gap-6 sm:items-start'>
         <Link href='/'>
           <div className='flex items-center gap-1'>

@@ -185,6 +185,27 @@ html {
   @apply text-muted-foreground mb-4 text-sm font-medium;
 }
 
+body.v2-route .app-nav {
+  display: none;
+}
+
+body.v2-route .app-footer {
+  display: none;
+}
+
+body.v2-route {
+  background: #000;
+}
+
+body.v2-route .app-shell {
+  margin: 0;
+  max-width: none;
+}
+
+body.v2-route .app-content {
+  padding-inline: 0;
+}
+
 /* Line clamp utilities */
 .line-clamp-1 {
   overflow: hidden;

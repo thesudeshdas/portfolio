@@ -31,11 +31,13 @@ const INDIA_VIEW = {
 };
 const MIN_ALTITUDE = 0.34;
 const MAX_ALTITUDE = 4.2;
+const MIN_EXTENDED_ALTITUDE = 0.12;
 const MAX_ZOOM = 1500;
 const INTRO_START_ZOOM = 250;
 const INTRO_END_ZOOM = 1425;
 const MIN_DISPLAY_ZOOM = 0;
-const MAX_DISPLAY_ZOOM = 100;
+const INTRO_END_DISPLAY_ZOOM = 100;
+const MAX_DISPLAY_ZOOM = 300;
 const MIN_OUTLINE_DETAIL = 10;
 const MAX_OUTLINE_DETAIL = 100;
 const DEFAULT_OUTLINE_DETAIL = MIN_OUTLINE_DETAIL;
@@ -54,7 +56,43 @@ const DEFAULT_GLOBE_COLOR = '#0e0e0e';
 const DEFAULT_BORDER_COLOR = '#f4f4f1';
 const INDIA_HOVER_GLOBE_COLOR = '#d8c7aa';
 const INDIA_HOVER_BORDER_COLOR = '#2f1d13';
+const LOCATION_MARKER_COLOR = INDIA_HOVER_BORDER_COLOR;
+const LOCATION_MARKER_PULSE_KEYFRAMES = 'v2-location-marker-breathe';
+const LOCATION_MARKER_PULSE_DURATION_MS = 3200;
+const LOCATION_MARKER_HINT_PULSE_COUNT = 3;
+const LOCATION_FOCUS_TRANSITION_MS = 1200;
+const LOCATION_CONTENT_TRANSITION_MS = 500;
+const LOCATION_SELECT_EVENT = 'v2-globe-location-select';
 const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
+const DEV_PANEL_WIDTH = 260;
+
+const V2_COLOR_TOKENS = [
+  {
+    name: 'Page black',
+    hex: '#000000',
+    useCase: 'V2 screen background'
+  },
+  {
+    name: 'Globe off black',
+    hex: DEFAULT_GLOBE_COLOR,
+    useCase: 'Default globe fill'
+  },
+  {
+    name: 'Outline off white',
+    hex: DEFAULT_BORDER_COLOR,
+    useCase: 'Default country borders and text callout copy'
+  },
+  {
+    name: 'India beige',
+    hex: INDIA_HOVER_GLOBE_COLOR,
+    useCase: 'Stage three / India focus globe fill'
+  },
+  {
+    name: 'Coffee',
+    hex: INDIA_HOVER_BORDER_COLOR,
+    useCase: 'India borders, marker, pulse, callout line'
+  }
+];
 
 type GlobeDirection = 'up' | 'down' | 'left' | 'right';
 type RotationDirection = 'east' | 'west';
@@ -112,6 +150,18 @@ type V2GlobeLocationMarker = V2GlobeLocation & {
 
 type LngLatPoint = [number, number];
 type ColorMaterial = THREE.Material & { color: THREE.Color };
+type DevPanelPosition = {
+  x: number;
+  y: number;
+};
+type DevPanelDragState = DevPanelPosition & {
+  pointerId: number;
+  offsetX: number;
+  offsetY: number;
+  width: number;
+  height: number;
+};
+type LocationSelectEvent = CustomEvent<{ id: string }>;
 
 const INDIA_HOVER_REGIONS: LngLatPoint[][] = [
   [
@@ -293,11 +343,14 @@ function clampLatitude(latitude: number) {
 }
 
 function clampAltitude(altitude: number) {
-  return Math.max(MIN_ALTITUDE, Math.min(MAX_ALTITUDE, altitude));
+  return Math.max(MIN_EXTENDED_ALTITUDE, Math.min(MAX_ALTITUDE, altitude));
 }
 
 function getZoomFromAltitude(altitude: number) {
-  const clampedAltitude = clampAltitude(altitude);
+  const clampedAltitude = Math.max(
+    MIN_ALTITUDE,
+    Math.min(MAX_ALTITUDE, altitude)
+  );
 
   return Math.round(
     ((MAX_ALTITUDE - clampedAltitude) / (MAX_ALTITUDE - MIN_ALTITUDE)) *
@@ -314,13 +367,27 @@ function getAltitudeFromZoom(zoom: number) {
 }
 
 function getDisplayZoomFromAltitude(altitude: number) {
-  const rawZoom = getZoomFromAltitude(altitude);
-  const displayZoom =
-    ((rawZoom - INTRO_START_ZOOM) / (INTRO_END_ZOOM - INTRO_START_ZOOM)) *
-    MAX_DISPLAY_ZOOM;
+  const clampedAltitude = clampAltitude(altitude);
+  const endAltitude = getAltitudeFromZoom(INTRO_END_ZOOM);
+
+  if (clampedAltitude >= endAltitude) {
+    const displayZoom =
+      ((getZoomFromAltitude(clampedAltitude) - INTRO_START_ZOOM) /
+        (INTRO_END_ZOOM - INTRO_START_ZOOM)) *
+      INTRO_END_DISPLAY_ZOOM;
+
+    return Math.round(
+      Math.max(MIN_DISPLAY_ZOOM, Math.min(INTRO_END_DISPLAY_ZOOM, displayZoom))
+    );
+  }
+
+  const extendedZoom =
+    INTRO_END_DISPLAY_ZOOM +
+    ((endAltitude - clampedAltitude) / (endAltitude - MIN_EXTENDED_ALTITUDE)) *
+      (MAX_DISPLAY_ZOOM - INTRO_END_DISPLAY_ZOOM);
 
   return Math.round(
-    Math.max(MIN_DISPLAY_ZOOM, Math.min(MAX_DISPLAY_ZOOM, displayZoom))
+    Math.max(INTRO_END_DISPLAY_ZOOM, Math.min(MAX_DISPLAY_ZOOM, extendedZoom))
   );
 }
 
@@ -329,9 +396,21 @@ function getAltitudeFromDisplayZoom(displayZoom: number) {
     MIN_DISPLAY_ZOOM,
     Math.min(MAX_DISPLAY_ZOOM, displayZoom)
   );
+
+  if (clampedDisplayZoom > INTRO_END_DISPLAY_ZOOM) {
+    const extendedProgress =
+      (clampedDisplayZoom - INTRO_END_DISPLAY_ZOOM) /
+      (MAX_DISPLAY_ZOOM - INTRO_END_DISPLAY_ZOOM);
+    const endAltitude = getAltitudeFromZoom(INTRO_END_ZOOM);
+
+    return (
+      endAltitude + (MIN_EXTENDED_ALTITUDE - endAltitude) * extendedProgress
+    );
+  }
+
   const rawZoom =
     INTRO_START_ZOOM +
-    (clampedDisplayZoom / MAX_DISPLAY_ZOOM) *
+    (clampedDisplayZoom / INTRO_END_DISPLAY_ZOOM) *
       (INTRO_END_ZOOM - INTRO_START_ZOOM);
 
   return getAltitudeFromZoom(rawZoom);
@@ -494,11 +573,30 @@ function disposeBorderLineSegments(lineSegments: THREE.LineSegments | null) {
 function createLocationMarkerElement(data: object) {
   const pin = data as V2GlobeLocationMarker;
   const element = document.createElement('div');
+  const style = document.createElement('style');
   const marker = document.createElement('div');
+  const hitArea = document.createElement('div');
+  const pulseSquare = document.createElement('div');
   const square = document.createElement('div');
+  const clickHint = document.createElement('div');
+  const clickHintText = document.createElement('span');
+  const clickHintLine = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'svg'
+  );
+  const clickHintPath = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'path'
+  );
   const callout = document.createElement('div');
-  const diagonalLine = document.createElement('div');
-  const horizontalLine = document.createElement('div');
+  const calloutLine = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'svg'
+  );
+  const calloutPath = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'path'
+  );
   const content = document.createElement('div');
   const title = document.createElement('div');
   const location = document.createElement('div');
@@ -519,7 +617,21 @@ function createLocationMarkerElement(data: object) {
   element.style.cursor = 'pointer';
   element.style.opacity = '0';
   element.style.outline = 'none';
-  element.style.transition = 'opacity 700ms ease';
+  element.style.transition = `opacity ${STAGE_THEME_TRANSITION_MS}ms ease`;
+
+  style.textContent = `
+    @keyframes ${LOCATION_MARKER_PULSE_KEYFRAMES} {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        background: rgba(47, 29, 19, 0.16);
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(2);
+        background: rgba(47, 29, 19, 0.22);
+      }
+    }
+  `;
 
   window.requestAnimationFrame(() => {
     element.style.opacity = '1';
@@ -534,17 +646,84 @@ function createLocationMarkerElement(data: object) {
   marker.style.transformOrigin = '0 0';
   marker.style.transition = 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1)';
 
-  square.style.position = 'absolute';
-  square.style.top = '0';
-  square.style.left = '0';
+  hitArea.style.position = 'absolute';
+  hitArea.style.top = '0';
+  hitArea.style.left = '0';
+  hitArea.style.display = 'grid';
+  hitArea.style.width = '40px';
+  hitArea.style.height = '40px';
+  hitArea.style.placeItems = 'center';
+  hitArea.style.cursor = 'pointer';
+  hitArea.style.pointerEvents = 'auto';
+  hitArea.style.transform = 'translate(-50%, -50%)';
+  hitArea.style.transition = 'transform 260ms ease';
+
+  pulseSquare.style.position = 'absolute';
+  pulseSquare.style.top = '50%';
+  pulseSquare.style.left = '50%';
+  pulseSquare.style.width = '12px';
+  pulseSquare.style.height = '12px';
+  pulseSquare.style.background = 'rgba(47, 29, 19, 0.16)';
+  pulseSquare.style.pointerEvents = 'none';
+  pulseSquare.style.transform = 'translate(-50%, -50%)';
+  pulseSquare.style.animation = `${LOCATION_MARKER_PULSE_KEYFRAMES} ${LOCATION_MARKER_PULSE_DURATION_MS}ms ease-in-out infinite`;
+  pulseSquare.style.transition = 'transform 260ms ease, background 260ms ease';
+
+  clickHint.style.position = 'absolute';
+  clickHint.style.left = '-210px';
+  clickHint.style.top = '-104px';
+  clickHint.style.width = '212px';
+  clickHint.style.height = '104px';
+  clickHint.style.color = LOCATION_MARKER_COLOR;
+  clickHint.style.opacity = '0';
+  clickHint.style.cursor = 'pointer';
+  clickHint.style.pointerEvents = 'auto';
+  clickHint.style.transform = 'translate3d(8px, 0, 0)';
+  clickHint.style.transition =
+    'opacity 360ms ease, transform 360ms cubic-bezier(0.22, 1, 0.36, 1)';
+
+  clickHintLine.setAttribute('viewBox', '0 0 212 104');
+  clickHintLine.style.position = 'absolute';
+  clickHintLine.style.left = '0';
+  clickHintLine.style.top = '0';
+  clickHintLine.style.width = '212px';
+  clickHintLine.style.height = '104px';
+  clickHintLine.style.overflow = 'visible';
+
+  clickHintPath.setAttribute('d', 'M212 104 L148 67 L12 67');
+  clickHintPath.setAttribute('fill', 'none');
+  clickHintPath.setAttribute('stroke', LOCATION_MARKER_COLOR);
+  clickHintPath.setAttribute('stroke-width', '2.5');
+  clickHintPath.setAttribute('stroke-linecap', 'square');
+  clickHintPath.setAttribute('stroke-linejoin', 'miter');
+  clickHintPath.setAttribute('pathLength', '1');
+  clickHintPath.style.filter = 'drop-shadow(0 0 12px rgba(47, 29, 19, 0.32))';
+  clickHintPath.style.strokeDasharray = '1';
+  clickHintPath.style.strokeDashoffset = '1';
+  clickHintPath.style.transition =
+    'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
+
+  clickHintText.textContent = 'Click me';
+  clickHintText.style.position = 'absolute';
+  clickHintText.style.left = '12px';
+  clickHintText.style.bottom = '48px';
+  clickHintText.style.fontSize = '11px';
+  clickHintText.style.fontWeight = '600';
+  clickHintText.style.letterSpacing = '0.12em';
+  clickHintText.style.lineHeight = '1';
+  clickHintText.style.opacity = '0';
+  clickHintText.style.textTransform = 'uppercase';
+  clickHintText.style.transform = 'translate3d(0, 10px, 0)';
+  clickHintText.style.transition =
+    'opacity 360ms ease 700ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) 700ms';
+
+  square.style.position = 'relative';
   square.style.width = '12px';
   square.style.height = '12px';
-  square.style.background = '#f4f4f1';
-  square.style.border = '1px solid rgba(0, 0, 0, 0.8)';
-  square.style.boxShadow = '0 0 0 4px rgba(244, 244, 241, 0.12)';
-  square.style.transform = 'translate(-50%, -50%)';
-  square.style.transition =
-    'transform 260ms ease, box-shadow 260ms ease, background 260ms ease';
+  square.style.background = LOCATION_MARKER_COLOR;
+  square.style.border = '1px solid rgba(216, 199, 170, 0.85)';
+  square.style.pointerEvents = 'none';
+  square.style.transition = 'background 260ms ease';
 
   callout.style.position = 'absolute';
   callout.style.left = '2px';
@@ -553,37 +732,34 @@ function createLocationMarkerElement(data: object) {
   callout.style.height = '104px';
   callout.style.pointerEvents = 'none';
 
-  diagonalLine.style.position = 'absolute';
-  diagonalLine.style.left = '0';
-  diagonalLine.style.bottom = '0';
-  diagonalLine.style.width = '74px';
-  diagonalLine.style.height = '2px';
-  diagonalLine.style.background = '#f4f4f1';
-  diagonalLine.style.boxShadow = '0 0 14px rgba(244, 244, 241, 0.18)';
-  diagonalLine.style.transform = 'rotate(-31deg) scaleX(0)';
-  diagonalLine.style.transformOrigin = 'left center';
-  diagonalLine.style.transition =
-    'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)';
+  calloutLine.setAttribute('viewBox', '0 0 212 104');
+  calloutLine.style.position = 'absolute';
+  calloutLine.style.left = '0';
+  calloutLine.style.top = '0';
+  calloutLine.style.width = '212px';
+  calloutLine.style.height = '104px';
+  calloutLine.style.overflow = 'visible';
 
-  horizontalLine.style.position = 'absolute';
-  horizontalLine.style.left = '62px';
-  horizontalLine.style.bottom = '37px';
-  horizontalLine.style.width = '138px';
-  horizontalLine.style.height = '2px';
-  horizontalLine.style.background = '#f4f4f1';
-  horizontalLine.style.boxShadow = '0 0 14px rgba(244, 244, 241, 0.18)';
-  horizontalLine.style.transform = 'scaleX(0)';
-  horizontalLine.style.transformOrigin = 'left center';
-  horizontalLine.style.transition =
-    'transform 460ms cubic-bezier(0.22, 1, 0.36, 1) 300ms';
+  calloutPath.setAttribute('d', 'M0 104 L64 67 L200 67');
+  calloutPath.setAttribute('fill', 'none');
+  calloutPath.setAttribute('stroke', LOCATION_MARKER_COLOR);
+  calloutPath.setAttribute('stroke-width', '2.5');
+  calloutPath.setAttribute('stroke-linecap', 'square');
+  calloutPath.setAttribute('stroke-linejoin', 'miter');
+  calloutPath.setAttribute('pathLength', '1');
+  calloutPath.style.filter = 'drop-shadow(0 0 12px rgba(47, 29, 19, 0.32))';
+  calloutPath.style.strokeDasharray = '1';
+  calloutPath.style.strokeDashoffset = '1';
+  calloutPath.style.transition =
+    'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
 
   content.style.position = 'absolute';
   content.style.left = '62px';
   content.style.bottom = '48px';
   content.style.minWidth = '170px';
-  content.style.color = '#f4f4f1';
+  content.style.color = LOCATION_MARKER_COLOR;
   content.style.opacity = '0';
-  content.style.transform = 'translate3d(-10px, 8px, 0)';
+  content.style.transform = 'translate3d(0, 10px, 0)';
   content.style.transition =
     'opacity 360ms ease 700ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) 700ms';
 
@@ -603,17 +779,42 @@ function createLocationMarkerElement(data: object) {
 
   coordinates.textContent = pin.coordinates;
   coordinates.style.marginTop = '5px';
-  coordinates.style.color = 'rgba(244, 244, 241, 0.58)';
+  coordinates.style.color = 'rgba(47, 29, 19, 0.62)';
   coordinates.style.fontSize = '11px';
   coordinates.style.lineHeight = '1.2';
   coordinates.style.textShadow = '0 10px 24px rgba(0, 0, 0, 0.85)';
 
   content.append(title, location, coordinates);
-  callout.append(diagonalLine, horizontalLine, content);
-  marker.append(square, callout);
-  element.append(marker);
+  calloutLine.append(calloutPath);
+  callout.append(calloutLine, content);
+  clickHintLine.append(clickHintPath);
+  clickHint.append(clickHintLine, clickHintText);
+  hitArea.append(pulseSquare, square);
+  marker.append(hitArea, clickHint, callout);
+  element.append(style, marker);
 
   let isTooltipVisible = false;
+  let pulseCount = 0;
+  let isClickHintDismissed = false;
+
+  const showClickHint = () => {
+    if (isClickHintDismissed) {
+      return;
+    }
+
+    clickHint.style.opacity = '1';
+    clickHint.style.transform = 'translate3d(0, 0, 0)';
+    clickHintPath.style.strokeDashoffset = '0';
+    clickHintText.style.opacity = '1';
+    clickHintText.style.transform = 'translate3d(0, 0, 0)';
+  };
+  const hideClickHint = () => {
+    clickHint.style.opacity = '0';
+    clickHint.style.transform = 'translate3d(8px, 0, 0)';
+    clickHintPath.style.strokeDashoffset = '1';
+    clickHintText.style.opacity = '0';
+    clickHintText.style.transform = 'translate3d(0, 10px, 0)';
+  };
 
   const showTooltip = () => {
     if (isTooltipVisible) {
@@ -621,11 +822,10 @@ function createLocationMarkerElement(data: object) {
     }
 
     isTooltipVisible = true;
-    square.style.background = '#ffffff';
-    square.style.boxShadow = '0 0 0 6px rgba(244, 244, 241, 0.16)';
-    square.style.transform = 'translate(-50%, -50%) scale(1.08)';
-    diagonalLine.style.transform = 'rotate(-31deg) scaleX(1)';
-    horizontalLine.style.transform = 'scaleX(1)';
+    isClickHintDismissed = true;
+    hideClickHint();
+    square.style.background = LOCATION_MARKER_COLOR;
+    calloutPath.style.strokeDashoffset = '0';
     content.style.opacity = '1';
     content.style.transform = 'translate3d(0, 0, 0)';
   };
@@ -635,13 +835,10 @@ function createLocationMarkerElement(data: object) {
     }
 
     isTooltipVisible = false;
-    square.style.background = '#f4f4f1';
-    square.style.boxShadow = '0 0 0 4px rgba(244, 244, 241, 0.12)';
-    square.style.transform = 'translate(-50%, -50%) scale(1)';
-    diagonalLine.style.transform = 'rotate(-31deg) scaleX(0)';
-    horizontalLine.style.transform = 'scaleX(0)';
+    square.style.background = LOCATION_MARKER_COLOR;
+    calloutPath.style.strokeDashoffset = '1';
     content.style.opacity = '0';
-    content.style.transform = 'translate3d(-10px, 8px, 0)';
+    content.style.transform = 'translate3d(0, 10px, 0)';
   };
   const handleWindowPointerMove = (event: PointerEvent) => {
     if (!element.isConnected) {
@@ -658,6 +855,40 @@ function createLocationMarkerElement(data: object) {
       hideTooltip();
     }
   };
+  const handleMarkerSelect = (event: MouseEvent | KeyboardEvent) => {
+    event.stopPropagation();
+    isClickHintDismissed = true;
+    hideClickHint();
+    window.dispatchEvent(
+      new CustomEvent(LOCATION_SELECT_EVENT, {
+        detail: {
+          id: pin.id
+        }
+      })
+    );
+  };
+  const handleMarkerKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    handleMarkerSelect(event);
+  };
+  const handlePulseIteration = () => {
+    if (isClickHintDismissed) {
+      return;
+    }
+
+    pulseCount += 1;
+
+    if (
+      !isClickHintDismissed &&
+      pulseCount >= LOCATION_MARKER_HINT_PULSE_COUNT
+    ) {
+      showClickHint();
+    }
+  };
 
   element.addEventListener('mouseenter', showTooltip);
   element.addEventListener('mouseleave', hideTooltip);
@@ -665,11 +896,15 @@ function createLocationMarkerElement(data: object) {
   element.addEventListener('pointerleave', hideTooltip);
   element.addEventListener('focus', showTooltip);
   element.addEventListener('blur', hideTooltip);
+  element.addEventListener('keydown', handleMarkerKeyDown);
   marker.addEventListener('mouseenter', showTooltip);
   marker.addEventListener('mouseleave', hideTooltip);
   marker.addEventListener('pointerenter', showTooltip);
   marker.addEventListener('pointerleave', hideTooltip);
-  square.addEventListener('pointerenter', showTooltip);
+  clickHint.addEventListener('click', handleMarkerSelect);
+  hitArea.addEventListener('click', handleMarkerSelect);
+  hitArea.addEventListener('pointerenter', showTooltip);
+  pulseSquare.addEventListener('animationiteration', handlePulseIteration);
   window.addEventListener('pointermove', handleWindowPointerMove, {
     passive: true
   });
@@ -698,6 +933,9 @@ export default function V2Globe({
   const isSecondStageRef = useRef(false);
   const themeAnimationFrameRef = useRef<number | null>(null);
   const themeProgressRef = useRef(0);
+  const devPanelDragRef = useRef<DevPanelDragState | null>(null);
+  const locationContentTimeoutRef = useRef<number | null>(null);
+  const previousLocationPovRef = useRef<GlobePointOfView | null>(null);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
     altitude: getAltitudeFromZoom(INTRO_START_ZOOM)
@@ -716,6 +954,13 @@ export default function V2Globe({
   const [rotationDirection, setRotationDirection] =
     useState<RotationDirection>('west');
   const [rotationSpeed, setRotationSpeed] = useState(DEFAULT_ROTATION_SPEED);
+  const [devPanelPosition, setDevPanelPosition] =
+    useState<DevPanelPosition | null>(null);
+  const [isColorsModalOpen, setIsColorsModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] =
+    useState<V2GlobeLocation | null>(null);
+  const [isLocationContentVisible, setIsLocationContentVisible] =
+    useState(false);
 
   const globeMaterial = useMemo(
     () =>
@@ -866,6 +1111,115 @@ export default function V2Globe({
       0
     );
   };
+  const openLocationContent = useCallback(
+    (location: V2GlobeLocation) => {
+      clearIntroTimeouts();
+
+      if (locationContentTimeoutRef.current !== null) {
+        window.clearTimeout(locationContentTimeoutRef.current);
+        locationContentTimeoutRef.current = null;
+      }
+
+      if (!selectedLocation) {
+        previousLocationPovRef.current = currentPovRef.current;
+      }
+
+      setSelectedLocation(location);
+      window.requestAnimationFrame(() => {
+        setIsLocationContentVisible(true);
+      });
+      updatePointOfView(
+        {
+          lat: location.focusView.lat,
+          lng: location.focusView.lng,
+          altitude: getAltitudeFromDisplayZoom(location.focusView.zoom)
+        },
+        LOCATION_FOCUS_TRANSITION_MS
+      );
+    },
+    [clearIntroTimeouts, selectedLocation, updatePointOfView]
+  );
+  const closeLocationContent = useCallback(() => {
+    setIsLocationContentVisible(false);
+
+    const previousPov = previousLocationPovRef.current;
+
+    if (previousPov) {
+      updatePointOfView(previousPov, LOCATION_FOCUS_TRANSITION_MS);
+      previousLocationPovRef.current = null;
+    }
+
+    if (locationContentTimeoutRef.current !== null) {
+      window.clearTimeout(locationContentTimeoutRef.current);
+    }
+
+    locationContentTimeoutRef.current = window.setTimeout(() => {
+      setSelectedLocation(null);
+      locationContentTimeoutRef.current = null;
+    }, LOCATION_CONTENT_TRANSITION_MS);
+  }, [updatePointOfView]);
+  const handleDevPanelDragStart = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      if (event.button !== 0) {
+        return;
+      }
+
+      const panel = event.currentTarget.closest('[data-v2-dev-control="true"]');
+
+      if (!(panel instanceof HTMLElement)) {
+        return;
+      }
+
+      const rect = panel.getBoundingClientRect();
+
+      devPanelDragRef.current = {
+        pointerId: event.pointerId,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        width: rect.width,
+        height: rect.height,
+        x: rect.left,
+        y: rect.top
+      };
+      setDevPanelPosition({ x: rect.left, y: rect.top });
+      event.currentTarget.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    },
+    []
+  );
+  const handleDevPanelDragMove = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      const dragState = devPanelDragRef.current;
+
+      if (!dragState || dragState.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const maxX = Math.max(0, window.innerWidth - dragState.width);
+      const maxY = Math.max(0, window.innerHeight - dragState.height);
+
+      setDevPanelPosition({
+        x: Math.max(0, Math.min(maxX, event.clientX - dragState.offsetX)),
+        y: Math.max(0, Math.min(maxY, event.clientY - dragState.offsetY))
+      });
+    },
+    []
+  );
+  const handleDevPanelDragEnd = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      const dragState = devPanelDragRef.current;
+
+      if (!dragState || dragState.pointerId !== event.pointerId) {
+        return;
+      }
+
+      devPanelDragRef.current = null;
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    },
+    []
+  );
   const setCursorIndiaState = useCallback((nextIsInsideIndia: boolean) => {
     if (isCursorInsideIndiaRef.current === nextIsInsideIndia) {
       return;
@@ -967,6 +1321,42 @@ export default function V2Globe({
       window.removeEventListener('pointermove', updateCursorIndiaState);
     };
   }, [isActive, isGlobeReady, updateCursorIndiaState]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setIsLocationContentVisible(false);
+      setSelectedLocation(null);
+      previousLocationPovRef.current = null;
+      return;
+    }
+
+    const handleLocationSelect = (event: Event) => {
+      const locationId = (event as LocationSelectEvent).detail.id;
+      const location = V2_GLOBE_LOCATIONS.find(
+        (candidateLocation) => candidateLocation.id === locationId
+      );
+
+      if (!location) {
+        return;
+      }
+
+      openLocationContent(location);
+    };
+
+    window.addEventListener(LOCATION_SELECT_EVENT, handleLocationSelect);
+
+    return () => {
+      window.removeEventListener(LOCATION_SELECT_EVENT, handleLocationSelect);
+    };
+  }, [isActive, openLocationContent]);
+
+  useEffect(() => {
+    return () => {
+      if (locationContentTimeoutRef.current !== null) {
+        window.clearTimeout(locationContentTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!isGlobeReady || visibleBorderPaths.length === 0) {
@@ -1261,18 +1651,102 @@ export default function V2Globe({
         </div>
       )}
 
+      {selectedLocation && (
+        <div
+          className={cn(
+            'pointer-events-none absolute inset-0 z-[11000] flex items-center justify-end px-6 pr-[8vw] transition-opacity duration-500',
+            isLocationContentVisible ? 'opacity-100' : 'opacity-0'
+          )}
+        >
+          <button
+            type='button'
+            aria-label='Close location content'
+            onClick={closeLocationContent}
+            className='pointer-events-auto absolute inset-0 bg-[#2f1d13]/35 backdrop-blur-[2px]'
+          />
+          <article
+            className={cn(
+              'pointer-events-auto relative h-[70vh] w-[60vw] max-w-[1100px] min-w-[320px] border border-[#2f1d13]/30 bg-[#d8c7aa]/90 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm transition-transform duration-500',
+              isLocationContentVisible ? 'translate-y-0' : 'translate-y-4'
+            )}
+          >
+            <div className='mb-5 flex items-start justify-between gap-4'>
+              <div>
+                <p className='text-xs font-semibold tracking-[0.22em] uppercase'>
+                  {selectedLocation.title}
+                </p>
+                <h2 className='mt-2 text-2xl font-semibold'>
+                  {selectedLocation.location}
+                </h2>
+              </div>
+              <button
+                type='button'
+                onClick={closeLocationContent}
+                className='grid size-8 place-items-center border border-[#2f1d13]/30 text-lg leading-none text-[#2f1d13] transition-colors hover:bg-[#2f1d13] hover:text-[#d8c7aa]'
+                aria-label='Close location content'
+              >
+                ×
+              </button>
+            </div>
+
+            <dl className='grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#2f1d13]/20 pt-6 text-sm'>
+              <dt className='text-[#2f1d13]/55'>Coordinates</dt>
+              <dd className='text-right font-mono text-[#2f1d13]/80'>
+                {selectedLocation.coordinates}
+              </dd>
+              <dt className='text-[#2f1d13]/55'>Focus</dt>
+              <dd className='text-right font-mono text-[#2f1d13]/80'>
+                {selectedLocation.focusView.zoom}%
+              </dd>
+            </dl>
+          </article>
+        </div>
+      )}
+
       {IS_DEV_PANEL_ENABLED && (
         <aside
           data-v2-dev-control='true'
-          className='absolute top-5 right-5 z-[10000] w-[260px] rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
+          style={{
+            width: `${DEV_PANEL_WIDTH}px`,
+            ...(devPanelPosition
+              ? {
+                  top: `${devPanelPosition.y}px`,
+                  bottom: 'auto',
+                  right: 'auto',
+                  left: `${devPanelPosition.x}px`
+                }
+              : undefined)
+          }}
+          className='absolute bottom-5 left-5 z-[10000] rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
         >
           <div className='mb-4 flex items-center justify-between gap-3'>
-            <h2 className='text-xs font-medium tracking-[0.22em] text-white/70 uppercase'>
-              Dev controls
-            </h2>
-            <span className='rounded-sm border border-white/10 px-2 py-1 text-[10px] leading-none text-white/45'>
-              V2
-            </span>
+            <button
+              type='button'
+              onPointerDown={handleDevPanelDragStart}
+              onPointerMove={handleDevPanelDragMove}
+              onPointerUp={handleDevPanelDragEnd}
+              onPointerCancel={handleDevPanelDragEnd}
+              className='min-h-8 flex-1 cursor-grab touch-none py-1 text-left active:cursor-grabbing'
+              aria-label='Drag dev controls'
+            >
+              <h2 className='text-xs font-medium tracking-[0.22em] text-white/70 uppercase'>
+                Dev controls
+              </h2>
+            </button>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={() => {
+                  setIsColorsModalOpen(true);
+                }}
+                className='rounded-sm border border-white/15 px-2 py-1 text-[10px] leading-none text-white/60 transition-colors hover:border-white/35 hover:text-white'
+              >
+                Colors
+              </button>
+              <span className='rounded-sm border border-white/10 px-2 py-1 text-[10px] leading-none text-white/45'>
+                V2
+              </span>
+            </div>
           </div>
 
           {flowSteps.length > 0 && activeStep && onStepChange && (
@@ -1427,6 +1901,69 @@ export default function V2Globe({
             </dd>
           </dl>
         </aside>
+      )}
+
+      {IS_DEV_PANEL_ENABLED && isColorsModalOpen && (
+        <div
+          data-v2-dev-control='true'
+          className='fixed inset-0 z-[10001] flex items-center justify-center bg-black/65 p-6 backdrop-blur-sm'
+        >
+          <div
+            role='dialog'
+            aria-modal='true'
+            aria-label='V2 color table'
+            className='w-full max-w-2xl rounded-md border border-white/15 bg-black/90 p-5 text-white shadow-2xl'
+          >
+            <div className='mb-4 flex items-center justify-between gap-4'>
+              <h2 className='text-xs font-medium tracking-[0.22em] text-white/70 uppercase'>
+                Colors
+              </h2>
+              <button
+                type='button'
+                onClick={() => {
+                  setIsColorsModalOpen(false);
+                }}
+                className='rounded-sm border border-white/15 px-2 py-1 text-xs text-white/65 transition-colors hover:border-white/35 hover:text-white'
+              >
+                Close
+              </button>
+            </div>
+
+            <div className='overflow-hidden rounded-md border border-white/10'>
+              <table className='w-full border-collapse text-left text-xs'>
+                <thead className='bg-white/10 text-white/55'>
+                  <tr>
+                    <th className='px-3 py-2 font-medium'>Color</th>
+                    <th className='px-3 py-2 font-medium'>Hex</th>
+                    <th className='px-3 py-2 font-medium'>Use case</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {V2_COLOR_TOKENS.map((colorToken) => (
+                    <tr
+                      key={colorToken.name}
+                      className='border-t border-white/10 text-white/75'
+                    >
+                      <td className='px-3 py-2'>
+                        <span className='flex items-center gap-2'>
+                          <span
+                            className='h-3 w-3 shrink-0 rounded-sm border border-white/20'
+                            style={{ backgroundColor: colorToken.hex }}
+                          />
+                          {colorToken.name}
+                        </span>
+                      </td>
+                      <td className='px-3 py-2 font-mono text-white/60'>
+                        {colorToken.hex}
+                      </td>
+                      <td className='px-3 py-2'>{colorToken.useCase}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

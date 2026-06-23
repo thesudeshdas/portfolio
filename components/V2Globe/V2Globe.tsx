@@ -47,6 +47,7 @@ const INTRO_FLIGHT_MS = 7800;
 const LOCATION_MARKER_ALTITUDE = 0.035;
 const INTRO_STATE_SYNC_MS = 120;
 const BORDER_LINE_ALTITUDE = 0.01;
+const STAGE_THEME_TRANSITION_MS = 900;
 const TARGET_RENDER_PIXEL_RATIO = 1;
 const LOW_FPS_RENDER_PIXEL_RATIO = 0.75;
 const DEFAULT_GLOBE_COLOR = '#0e0e0e';
@@ -162,6 +163,14 @@ const INTRO_FLIGHT_POINTS: Array<Pick<GlobePointOfView, 'lat' | 'lng'>> = [
 
 function normalizeLongitude(longitude: number) {
   return ((((longitude + 180) % 360) + 360) % 360) - 180;
+}
+
+function getInterpolatedHexColor(from: string, to: string, progress: number) {
+  const color = new THREE.Color(from);
+
+  color.lerp(new THREE.Color(to), Math.max(0, Math.min(1, progress)));
+
+  return `#${color.getHexString()}`;
 }
 
 function setMaterialColor(material: ColorMaterial, color: string) {
@@ -508,7 +517,13 @@ function createLocationMarkerElement(data: object) {
   element.style.height = '0';
   element.style.pointerEvents = 'auto';
   element.style.cursor = 'pointer';
+  element.style.opacity = '0';
   element.style.outline = 'none';
+  element.style.transition = 'opacity 700ms ease';
+
+  window.requestAnimationFrame(() => {
+    element.style.opacity = '1';
+  });
 
   marker.style.position = 'absolute';
   marker.style.left = '0';
@@ -680,6 +695,9 @@ export default function V2Globe({
   const borderLineRef = useRef<THREE.LineSegments | null>(null);
   const borderLineMaterialRef = useRef<THREE.LineBasicMaterial | null>(null);
   const isCursorInsideIndiaRef = useRef(false);
+  const isSecondStageRef = useRef(false);
+  const themeAnimationFrameRef = useRef<number | null>(null);
+  const themeProgressRef = useRef(0);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
     altitude: getAltitudeFromZoom(INTRO_START_ZOOM)
@@ -719,6 +737,7 @@ export default function V2Globe({
     () => getDetailedBorderPaths(borderPaths, outlineDetail),
     [borderPaths, outlineDetail]
   );
+  const isSecondStage = getDisplayZoomFromAltitude(currentPov.altitude) >= 100;
   const locationMarkers = useMemo(
     () =>
       V2_GLOBE_LOCATIONS.map((location) => ({
@@ -726,6 +745,31 @@ export default function V2Globe({
         altitude: LOCATION_MARKER_ALTITUDE
       })),
     []
+  );
+  const visibleLocationMarkers = useMemo(
+    () => (isSecondStage ? locationMarkers : []),
+    [isSecondStage, locationMarkers]
+  );
+  const applyThemeProgress = useCallback(
+    (progress: number) => {
+      const nextGlobeColor = getInterpolatedHexColor(
+        DEFAULT_GLOBE_COLOR,
+        INDIA_HOVER_GLOBE_COLOR,
+        progress
+      );
+      const nextBorderColor = getInterpolatedHexColor(
+        DEFAULT_BORDER_COLOR,
+        INDIA_HOVER_BORDER_COLOR,
+        progress
+      );
+
+      themeProgressRef.current = progress;
+      setMaterialColor(globeMaterial, nextGlobeColor);
+      if (borderLineMaterialRef.current) {
+        setMaterialColor(borderLineMaterialRef.current, nextBorderColor);
+      }
+    },
+    [globeMaterial]
   );
 
   const clearIntroTimeouts = useCallback(() => {
@@ -737,6 +781,11 @@ export default function V2Globe({
     if (introAnimationFrameRef.current !== null) {
       window.cancelAnimationFrame(introAnimationFrameRef.current);
       introAnimationFrameRef.current = null;
+    }
+
+    if (themeAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(themeAnimationFrameRef.current);
+      themeAnimationFrameRef.current = null;
     }
   }, []);
 
@@ -936,9 +985,11 @@ export default function V2Globe({
     const { lines, material } = createBorderLineSegments(
       visibleBorderPaths,
       globe.getCoords.bind(globe),
-      isCursorInsideIndiaRef.current
-        ? INDIA_HOVER_BORDER_COLOR
-        : DEFAULT_BORDER_COLOR
+      getInterpolatedHexColor(
+        DEFAULT_BORDER_COLOR,
+        INDIA_HOVER_BORDER_COLOR,
+        themeProgressRef.current
+      )
     );
 
     borderLineRef.current = lines;
@@ -957,18 +1008,49 @@ export default function V2Globe({
   }, [isGlobeReady, visibleBorderPaths]);
 
   useEffect(() => {
-    const nextGlobeColor = isCursorInsideIndia
-      ? INDIA_HOVER_GLOBE_COLOR
-      : DEFAULT_GLOBE_COLOR;
-    const nextBorderColor = isCursorInsideIndia
-      ? INDIA_HOVER_BORDER_COLOR
-      : DEFAULT_BORDER_COLOR;
-
-    setMaterialColor(globeMaterial, nextGlobeColor);
-    if (borderLineMaterialRef.current) {
-      setMaterialColor(borderLineMaterialRef.current, nextBorderColor);
+    if (themeAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(themeAnimationFrameRef.current);
+      themeAnimationFrameRef.current = null;
     }
-  }, [globeMaterial, isCursorInsideIndia]);
+
+    const shouldUseIndiaTheme = isSecondStage || isCursorInsideIndia;
+    const targetProgress = shouldUseIndiaTheme ? 1 : 0;
+    const shouldEaseTheme = isSecondStage || isSecondStageRef.current;
+
+    isSecondStageRef.current = isSecondStage;
+
+    if (!shouldEaseTheme) {
+      applyThemeProgress(targetProgress);
+      return;
+    }
+
+    const startProgress = themeProgressRef.current;
+    const startTime = performance.now();
+
+    const animateTheme = (currentTime: number) => {
+      const elapsedMs = currentTime - startTime;
+      const progress = Math.min(1, elapsedMs / STAGE_THEME_TRANSITION_MS);
+      const nextProgress =
+        startProgress +
+        (targetProgress - startProgress) * easeInOutCubic(progress);
+
+      applyThemeProgress(nextProgress);
+
+      if (progress < 1) {
+        themeAnimationFrameRef.current =
+          window.requestAnimationFrame(animateTheme);
+      }
+    };
+
+    themeAnimationFrameRef.current = window.requestAnimationFrame(animateTheme);
+
+    return () => {
+      if (themeAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(themeAnimationFrameRef.current);
+        themeAnimationFrameRef.current = null;
+      }
+    };
+  }, [applyThemeProgress, isCursorInsideIndia, isSecondStage]);
 
   useEffect(() => {
     if (!isGlobeReady) {
@@ -1154,7 +1236,7 @@ export default function V2Globe({
             backgroundColor='rgba(0,0,0,0)'
             globeMaterial={globeMaterial}
             showAtmosphere={false}
-            htmlElementsData={locationMarkers}
+            htmlElementsData={visibleLocationMarkers}
             htmlLat='lat'
             htmlLng='lng'
             htmlAltitude='altitude'
@@ -1236,6 +1318,11 @@ export default function V2Globe({
               className='w-full accent-white'
             />
           </label>
+
+          <div className='mt-3 flex items-center justify-between text-xs text-white/65'>
+            <span>Stage</span>
+            <span>{isSecondStage ? 'Second' : 'First'}</span>
+          </div>
 
           <label className='mt-5 block border-t border-white/10 pt-4'>
             <span className='mb-2 flex items-center justify-between text-xs text-white/65'>

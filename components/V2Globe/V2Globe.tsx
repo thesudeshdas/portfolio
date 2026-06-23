@@ -7,7 +7,8 @@ import {
   useMemo,
   useRef,
   useState,
-  type MutableRefObject
+  type MutableRefObject,
+  type PointerEvent as ReactPointerEvent
 } from 'react';
 import type { GlobeMethods, GlobeProps } from 'react-globe.gl';
 import * as THREE from 'three';
@@ -20,23 +21,33 @@ const Globe = dynamic<
   GlobeProps & { ref?: MutableRefObject<GlobeMethods | undefined> }
 >(() => import('react-globe.gl'), { ssr: false });
 
-const BENGALURU_VIEW = {
-  lat: 12.9716,
-  lng: 77.5946
+const MADRID_VIEW = {
+  lat: 40.4168,
+  lng: -3.7038
 };
-const DESKTOP_ALTITUDE = 2.2;
-const MOBILE_ALTITUDE = 2.85;
-const MIN_ALTITUDE = 0.45;
+const INDIA_VIEW = {
+  lat: 22.8,
+  lng: 78.9
+};
+const MIN_ALTITUDE = 1.05;
 const MAX_ALTITUDE = 4.2;
 const MAX_ZOOM = 500;
+const INTRO_START_ZOOM = 250;
+const INTRO_END_ZOOM = 500;
 const MIN_OUTLINE_DETAIL = 10;
 const MAX_OUTLINE_DETAIL = 100;
-const DEFAULT_OUTLINE_DETAIL = MAX_OUTLINE_DETAIL;
+const DEFAULT_OUTLINE_DETAIL = MIN_OUTLINE_DETAIL;
 const MIN_ROTATION_SPEED = 0.1;
 const MAX_ROTATION_SPEED = 3;
-const DEFAULT_ROTATION_SPEED = 0.6;
-const POV_TRANSITION_MS = 1600;
+const DEFAULT_ROTATION_SPEED = 0.35;
+const GLOBE_FADE_IN_MS = 700;
+const INTRO_FLIGHT_MS = 7800;
 const LOCATION_MARKER_ALTITUDE = 0.035;
+const INTRO_STATE_SYNC_MS = 120;
+const DEFAULT_GLOBE_COLOR = '#050505';
+const DEFAULT_BORDER_COLOR = '#f4f4f1';
+const INDIA_HOVER_GLOBE_COLOR = '#d8c7aa';
+const INDIA_HOVER_BORDER_COLOR = '#2f1d13';
 const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 
 type GlobeDirection = 'up' | 'down' | 'left' | 'right';
@@ -87,12 +98,178 @@ type V2GlobeLocationMarker = V2GlobeLocation & {
   altitude: number;
 };
 
-function getInitialAltitude(width: number) {
-  return width < 640 ? MOBILE_ALTITUDE : DESKTOP_ALTITUDE;
-}
+type LngLatPoint = [number, number];
+type ColorMaterial = THREE.Material & { color: THREE.Color };
+
+const INDIA_HOVER_REGIONS: LngLatPoint[][] = [
+  [
+    [68.0, 23.6],
+    [68.9, 24.9],
+    [71.3, 27.2],
+    [73.8, 32.8],
+    [75.7, 36.8],
+    [79.6, 35.6],
+    [83.5, 31.6],
+    [88.4, 28.2],
+    [91.4, 27.8],
+    [97.4, 28.4],
+    [96.0, 24.1],
+    [92.0, 22.0],
+    [88.0, 21.6],
+    [86.7, 20.4],
+    [84.1, 18.4],
+    [81.1, 16.5],
+    [80.3, 13.1],
+    [77.5, 7.8],
+    [75.2, 11.0],
+    [73.4, 15.4],
+    [72.6, 20.7]
+  ],
+  [
+    [92.4, 12.0],
+    [94.3, 13.9],
+    [93.2, 14.4],
+    [92.2, 13.3]
+  ]
+];
+const INTRO_FLIGHT_POINTS: Array<Pick<GlobePointOfView, 'lat' | 'lng'>> = [
+  {
+    ...MADRID_VIEW
+  },
+  {
+    lat: 34,
+    lng: 25
+  },
+  {
+    lat: 27,
+    lng: 57
+  },
+  {
+    ...INDIA_VIEW
+  }
+];
 
 function normalizeLongitude(longitude: number) {
   return ((((longitude + 180) % 360) + 360) % 360) - 180;
+}
+
+function isColorMaterial(material: THREE.Material): material is ColorMaterial {
+  return 'color' in material && material.color instanceof THREE.Color;
+}
+
+function setMaterialColor(material: ColorMaterial, color: string) {
+  material.color.set(color);
+  material.needsUpdate = true;
+}
+
+function easeInOutCubic(progress: number) {
+  return progress < 0.5
+    ? 4 * progress * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+}
+
+function getCatmullRomValue(
+  previousValue: number,
+  currentValue: number,
+  nextValue: number,
+  followingValue: number,
+  progress: number
+) {
+  const progressSquared = progress * progress;
+  const progressCubed = progressSquared * progress;
+
+  return (
+    0.5 *
+    (2 * currentValue +
+      (-previousValue + nextValue) * progress +
+      (2 * previousValue - 5 * currentValue + 4 * nextValue - followingValue) *
+        progressSquared +
+      (-previousValue + 3 * currentValue - 3 * nextValue + followingValue) *
+        progressCubed)
+  );
+}
+
+function getFlightPoint(index: number) {
+  return INTRO_FLIGHT_POINTS[
+    Math.max(0, Math.min(INTRO_FLIGHT_POINTS.length - 1, index))
+  ];
+}
+
+function getIntroPointOfView(progress: number) {
+  const clampedProgress = Math.max(0, Math.min(1, progress));
+  const timelineProgress = easeInOutCubic(clampedProgress);
+  const segmentCount = INTRO_FLIGHT_POINTS.length - 1;
+  const segmentProgress = timelineProgress * segmentCount;
+  const segmentIndex = Math.min(
+    Math.floor(segmentProgress),
+    INTRO_FLIGHT_POINTS.length - 2
+  );
+  const localProgress = segmentProgress - segmentIndex;
+  const previousPoint = getFlightPoint(segmentIndex - 1);
+  const currentPoint = getFlightPoint(segmentIndex);
+  const nextPoint = getFlightPoint(segmentIndex + 1);
+  const followingPoint = getFlightPoint(segmentIndex + 2);
+
+  return {
+    lat: getCatmullRomValue(
+      previousPoint.lat,
+      currentPoint.lat,
+      nextPoint.lat,
+      followingPoint.lat,
+      localProgress
+    ),
+    lng: getCatmullRomValue(
+      previousPoint.lng,
+      currentPoint.lng,
+      nextPoint.lng,
+      followingPoint.lng,
+      localProgress
+    ),
+    altitude:
+      getAltitudeFromZoom(INTRO_START_ZOOM) +
+      (getAltitudeFromZoom(INTRO_END_ZOOM) -
+        getAltitudeFromZoom(INTRO_START_ZOOM)) *
+        timelineProgress
+  };
+}
+
+function isPointInPolygon(
+  point: { lat: number; lng: number },
+  polygon: LngLatPoint[]
+) {
+  let isInside = false;
+
+  for (
+    let pointIndex = 0, previousPointIndex = polygon.length - 1;
+    pointIndex < polygon.length;
+    previousPointIndex = pointIndex++
+  ) {
+    const [currentLng, currentLat] = polygon[pointIndex];
+    const [previousLng, previousLat] = polygon[previousPointIndex];
+    const intersects =
+      currentLat > point.lat !== previousLat > point.lat &&
+      point.lng <
+        ((previousLng - currentLng) * (point.lat - currentLat)) /
+          (previousLat - currentLat) +
+          currentLng;
+
+    if (intersects) {
+      isInside = !isInside;
+    }
+  }
+
+  return isInside;
+}
+
+function isPointInIndia(point: { lat: number; lng: number }) {
+  const normalizedPoint = {
+    ...point,
+    lng: normalizeLongitude(point.lng)
+  };
+
+  return INDIA_HOVER_REGIONS.some((region) =>
+    isPointInPolygon(normalizedPoint, region)
+  );
 }
 
 function clampLatitude(latitude: number) {
@@ -127,8 +304,30 @@ function getLocationMarkerScale(altitude: number) {
   return 0.72 + zoomProgress * 0.9;
 }
 
-function getBorderLineColor() {
-  return 'rgba(244,244,241,0.92)';
+function updateLocationMarkerScale(altitude: number) {
+  const markerScale = getLocationMarkerScale(altitude);
+
+  document
+    .querySelectorAll<HTMLElement>('[data-v2-location-marker="true"]')
+    .forEach((markerElement) => {
+      markerElement.style.setProperty(
+        '--location-marker-scale',
+        markerScale.toFixed(3)
+      );
+    });
+}
+
+function isPointerNearElementAnchor(event: PointerEvent, element: HTMLElement) {
+  const rect = element.getBoundingClientRect();
+  const markerScale = Number(
+    element.style.getPropertyValue('--location-marker-scale') || 1
+  );
+  const hitRadius = 14 * markerScale;
+
+  return (
+    Math.abs(event.clientX - rect.left) <= hitRadius &&
+    Math.abs(event.clientY - rect.top) <= hitRadius
+  );
 }
 
 function getCountryBorderPaths(features: MapLineFeature[]) {
@@ -299,7 +498,14 @@ function createLocationMarkerElement(data: object) {
   marker.append(square, callout);
   element.append(marker);
 
+  let isTooltipVisible = false;
+
   const showTooltip = () => {
+    if (isTooltipVisible) {
+      return;
+    }
+
+    isTooltipVisible = true;
     square.style.background = '#ffffff';
     square.style.boxShadow = '0 0 0 6px rgba(244, 244, 241, 0.16)';
     square.style.transform = 'translate(-50%, -50%) scale(1.08)';
@@ -309,6 +515,11 @@ function createLocationMarkerElement(data: object) {
     content.style.transform = 'translate3d(0, 0, 0)';
   };
   const hideTooltip = () => {
+    if (!isTooltipVisible) {
+      return;
+    }
+
+    isTooltipVisible = false;
     square.style.background = '#f4f4f1';
     square.style.boxShadow = '0 0 0 4px rgba(244, 244, 241, 0.12)';
     square.style.transform = 'translate(-50%, -50%) scale(1)';
@@ -317,13 +528,36 @@ function createLocationMarkerElement(data: object) {
     content.style.opacity = '0';
     content.style.transform = 'translate3d(-10px, 8px, 0)';
   };
+  const handleWindowPointerMove = (event: PointerEvent) => {
+    if (!element.isConnected) {
+      window.removeEventListener('pointermove', handleWindowPointerMove);
+      return;
+    }
+
+    if (isPointerNearElementAnchor(event, element)) {
+      showTooltip();
+      return;
+    }
+
+    if (document.activeElement !== element) {
+      hideTooltip();
+    }
+  };
 
   element.addEventListener('mouseenter', showTooltip);
   element.addEventListener('mouseleave', hideTooltip);
+  element.addEventListener('pointerenter', showTooltip);
+  element.addEventListener('pointerleave', hideTooltip);
   element.addEventListener('focus', showTooltip);
   element.addEventListener('blur', hideTooltip);
   marker.addEventListener('mouseenter', showTooltip);
   marker.addEventListener('mouseleave', hideTooltip);
+  marker.addEventListener('pointerenter', showTooltip);
+  marker.addEventListener('pointerleave', hideTooltip);
+  square.addEventListener('pointerenter', showTooltip);
+  window.addEventListener('pointermove', handleWindowPointerMove, {
+    passive: true
+  });
 
   return element;
 }
@@ -331,26 +565,32 @@ function createLocationMarkerElement(data: object) {
 export default function V2Globe({ isActive }: { isActive: boolean }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
+  const introTimeoutsRef = useRef<number[]>([]);
+  const introAnimationFrameRef = useRef<number | null>(null);
+  const borderMaterialsRef = useRef<ColorMaterial[]>([]);
+  const isCursorInsideIndiaRef = useRef(false);
   const currentPovRef = useRef<GlobePointOfView>({
-    ...BENGALURU_VIEW,
-    altitude: DESKTOP_ALTITUDE
+    ...MADRID_VIEW,
+    altitude: getAltitudeFromZoom(INTRO_START_ZOOM)
   });
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [borderPaths, setBorderPaths] = useState<CountryBorderPath[]>([]);
   const [isGlobeReady, setIsGlobeReady] = useState(false);
+  const [isGlobeVisible, setIsGlobeVisible] = useState(false);
+  const [isCursorInsideIndia, setIsCursorInsideIndia] = useState(false);
   const [currentPov, setCurrentPov] = useState<GlobePointOfView>(
     currentPovRef.current
   );
   const [outlineDetail, setOutlineDetail] = useState(DEFAULT_OUTLINE_DETAIL);
   const [isRotationEnabled, setIsRotationEnabled] = useState(false);
   const [rotationDirection, setRotationDirection] =
-    useState<RotationDirection>('east');
+    useState<RotationDirection>('west');
   const [rotationSpeed, setRotationSpeed] = useState(DEFAULT_ROTATION_SPEED);
 
   const globeMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: '#050505'
+        color: DEFAULT_GLOBE_COLOR
       }),
     []
   );
@@ -358,6 +598,7 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
     (pov: GlobePointOfView, transitionMs = 0) => {
       currentPovRef.current = pov;
       setCurrentPov(pov);
+      updateLocationMarkerScale(pov.altitude);
       globeRef.current?.pointOfView(pov, transitionMs);
     },
     []
@@ -374,18 +615,89 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       })),
     []
   );
+  const collectBorderMaterials = useCallback(() => {
+    const scene = globeRef.current?.scene();
 
-  const focusBengaluru = useCallback(
-    (transitionMs = POV_TRANSITION_MS) => {
-      updatePointOfView(
-        {
-          ...BENGALURU_VIEW,
-          altitude: getInitialAltitude(size.width)
-        },
-        transitionMs
-      );
+    if (!scene) {
+      return [];
+    }
+
+    const borderMaterials = new Set<ColorMaterial>();
+
+    scene.traverse((object) => {
+      const material = (object as THREE.Mesh | THREE.Line).material;
+      const materials = Array.isArray(material) ? material : [material];
+
+      materials.forEach((candidateMaterial) => {
+        if (
+          candidateMaterial &&
+          candidateMaterial !== globeMaterial &&
+          isColorMaterial(candidateMaterial)
+        ) {
+          borderMaterials.add(candidateMaterial);
+        }
+      });
+    });
+
+    borderMaterialsRef.current = Array.from(borderMaterials);
+
+    return borderMaterialsRef.current;
+  }, [globeMaterial]);
+
+  const clearIntroTimeouts = useCallback(() => {
+    introTimeoutsRef.current.forEach((timeoutId) => {
+      window.clearTimeout(timeoutId);
+    });
+    introTimeoutsRef.current = [];
+
+    if (introAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(introAnimationFrameRef.current);
+      introAnimationFrameRef.current = null;
+    }
+  }, []);
+
+  const startIntroFlight = useCallback(() => {
+    if (introAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(introAnimationFrameRef.current);
+    }
+
+    const startTime = performance.now();
+    let lastStateSyncTime = startTime;
+
+    const animate = (currentTime: number) => {
+      const elapsedMs = currentTime - startTime;
+      const progress = Math.min(1, elapsedMs / INTRO_FLIGHT_MS);
+      const nextPov = getIntroPointOfView(progress);
+
+      currentPovRef.current = nextPov;
+      updateLocationMarkerScale(nextPov.altitude);
+      globeRef.current?.pointOfView(nextPov, 0);
+
+      if (
+        currentTime - lastStateSyncTime >= INTRO_STATE_SYNC_MS ||
+        progress === 1
+      ) {
+        setCurrentPov(nextPov);
+        lastStateSyncTime = currentTime;
+      }
+
+      if (progress < 1) {
+        introAnimationFrameRef.current = window.requestAnimationFrame(animate);
+      }
+    };
+
+    introAnimationFrameRef.current = window.requestAnimationFrame(animate);
+  }, []);
+
+  const queueIntroFlight = useCallback(
+    (delayMs: number) => {
+      const timeoutId = window.setTimeout(() => {
+        startIntroFlight();
+      }, delayMs);
+
+      introTimeoutsRef.current.push(timeoutId);
     },
-    [size.width, updatePointOfView]
+    [startIntroFlight]
   );
 
   const moveGlobe = useCallback(
@@ -421,6 +733,41 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       0
     );
   };
+  const setCursorIndiaState = useCallback((nextIsInsideIndia: boolean) => {
+    if (isCursorInsideIndiaRef.current === nextIsInsideIndia) {
+      return;
+    }
+
+    isCursorInsideIndiaRef.current = nextIsInsideIndia;
+    setIsCursorInsideIndia(nextIsInsideIndia);
+  }, []);
+  const updateCursorIndiaState = useCallback(
+    (event: PointerEvent | ReactPointerEvent<HTMLElement>) => {
+      const elementAtPointer = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      );
+
+      if (
+        elementAtPointer instanceof HTMLElement &&
+        elementAtPointer.closest('[data-v2-dev-control="true"]')
+      ) {
+        setCursorIndiaState(false);
+        return;
+      }
+
+      const globeCoords = globeRef.current?.toGlobeCoords(
+        event.clientX,
+        event.clientY
+      );
+
+      setCursorIndiaState(Boolean(globeCoords && isPointInIndia(globeCoords)));
+    },
+    [setCursorIndiaState]
+  );
+  const handlePointerLeave = useCallback(() => {
+    setCursorIndiaState(false);
+  }, [setCursorIndiaState]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -475,7 +822,43 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
   }, [borderPaths.length, isActive]);
 
   useEffect(() => {
-    if (!isGlobeReady || !isActive) {
+    if (!isActive || !isGlobeReady) {
+      return;
+    }
+
+    window.addEventListener('pointermove', updateCursorIndiaState, {
+      passive: true
+    });
+
+    return () => {
+      window.removeEventListener('pointermove', updateCursorIndiaState);
+    };
+  }, [isActive, isGlobeReady, updateCursorIndiaState]);
+
+  useEffect(() => {
+    borderMaterialsRef.current = [];
+  }, [visibleBorderPaths]);
+
+  useEffect(() => {
+    const nextGlobeColor = isCursorInsideIndia
+      ? INDIA_HOVER_GLOBE_COLOR
+      : DEFAULT_GLOBE_COLOR;
+    const nextBorderColor = isCursorInsideIndia
+      ? INDIA_HOVER_BORDER_COLOR
+      : DEFAULT_BORDER_COLOR;
+    const borderMaterials =
+      borderMaterialsRef.current.length > 0
+        ? borderMaterialsRef.current
+        : collectBorderMaterials();
+
+    setMaterialColor(globeMaterial, nextGlobeColor);
+    borderMaterials.forEach((material) => {
+      setMaterialColor(material, nextBorderColor);
+    });
+  }, [collectBorderMaterials, globeMaterial, isCursorInsideIndia]);
+
+  useEffect(() => {
+    if (!isGlobeReady) {
       return;
     }
 
@@ -490,8 +873,43 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       controls.maxDistance = 420;
     }
 
-    focusBengaluru();
-  }, [focusBengaluru, isActive, isGlobeReady]);
+    if (!isActive) {
+      clearIntroTimeouts();
+      setIsGlobeVisible(false);
+      return;
+    }
+
+    clearIntroTimeouts();
+    setIsGlobeVisible(false);
+    if (controls) {
+      controls.autoRotate = false;
+    }
+
+    updatePointOfView(
+      {
+        ...MADRID_VIEW,
+        altitude: getAltitudeFromZoom(INTRO_START_ZOOM)
+      },
+      0
+    );
+
+    const fadeTimeoutId = window.setTimeout(() => {
+      setIsGlobeVisible(true);
+    }, 80);
+    introTimeoutsRef.current.push(fadeTimeoutId);
+
+    queueIntroFlight(GLOBE_FADE_IN_MS);
+
+    return () => {
+      clearIntroTimeouts();
+    };
+  }, [
+    clearIntroTimeouts,
+    isActive,
+    isGlobeReady,
+    queueIntroFlight,
+    updatePointOfView
+  ]);
 
   useEffect(() => {
     if (!isGlobeReady || !isActive) {
@@ -554,24 +972,17 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
   }, [isActive, moveGlobe]);
 
   useEffect(() => {
-    const markerScale = getLocationMarkerScale(currentPov.altitude);
-
-    document
-      .querySelectorAll<HTMLElement>('[data-v2-location-marker="true"]')
-      .forEach((markerElement) => {
-        markerElement.style.setProperty(
-          '--location-marker-scale',
-          markerScale.toFixed(3)
-        );
-      });
+    updateLocationMarkerScale(currentPov.altitude);
   }, [currentPov.altitude]);
 
   return (
     <section
       ref={containerRef}
+      onPointerMove={updateCursorIndiaState}
+      onPointerLeave={handlePointerLeave}
       className={cn(
         'relative min-h-screen overflow-hidden bg-black transition-opacity duration-700',
-        isActive ? 'opacity-100' : 'opacity-0'
+        isActive && isGlobeVisible ? 'opacity-100' : 'opacity-0'
       )}
     >
       {size.width > 0 && size.height > 0 && (
@@ -587,7 +998,7 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
           pathPointLat='lat'
           pathPointLng='lng'
           pathPointAlt='altitude'
-          pathColor={getBorderLineColor}
+          pathColor={DEFAULT_BORDER_COLOR}
           pathStroke={0.32}
           pathResolution={2}
           pathTransitionDuration={0}

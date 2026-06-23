@@ -44,7 +44,10 @@ const GLOBE_FADE_IN_MS = 700;
 const INTRO_FLIGHT_MS = 7800;
 const LOCATION_MARKER_ALTITUDE = 0.035;
 const INTRO_STATE_SYNC_MS = 120;
-const DEFAULT_GLOBE_COLOR = '#050505';
+const BORDER_LINE_ALTITUDE = 0.01;
+const TARGET_RENDER_PIXEL_RATIO = 1;
+const LOW_FPS_RENDER_PIXEL_RATIO = 0.75;
+const DEFAULT_GLOBE_COLOR = '#0e0e0e';
 const DEFAULT_BORDER_COLOR = '#f4f4f1';
 const INDIA_HOVER_GLOBE_COLOR = '#d8c7aa';
 const INDIA_HOVER_BORDER_COLOR = '#2f1d13';
@@ -52,6 +55,12 @@ const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 
 type GlobeDirection = 'up' | 'down' | 'left' | 'right';
 type RotationDirection = 'east' | 'west';
+type V2FlowStep = 'loading' | 'globe';
+
+type V2FlowControl = {
+  id: V2FlowStep;
+  label: string;
+};
 
 type GeoJsonPosition = [number, number, ...number[]];
 type GeoJsonLineCoordinates = GeoJsonPosition[];
@@ -151,10 +160,6 @@ const INTRO_FLIGHT_POINTS: Array<Pick<GlobePointOfView, 'lat' | 'lng'>> = [
 
 function normalizeLongitude(longitude: number) {
   return ((((longitude + 180) % 360) + 360) % 360) - 180;
-}
-
-function isColorMaterial(material: THREE.Material): material is ColorMaterial {
-  return 'color' in material && material.color instanceof THREE.Color;
 }
 
 function setMaterialColor(material: ColorMaterial, color: string) {
@@ -382,6 +387,75 @@ function getDetailedBorderPaths(
   });
 }
 
+function createBorderLineSegments(
+  paths: CountryBorderPath[],
+  getCoords: GlobeMethods['getCoords'],
+  color: string
+) {
+  const segmentCount = paths.reduce(
+    (count, path) => count + Math.max(0, path.points.length - 1),
+    0
+  );
+  const positions = new Float32Array(segmentCount * 2 * 3);
+  let positionIndex = 0;
+
+  paths.forEach((path) => {
+    for (let pointIndex = 1; pointIndex < path.points.length; pointIndex += 1) {
+      const fromPoint = path.points[pointIndex - 1];
+      const toPoint = path.points[pointIndex];
+      const fromCoords = getCoords(
+        fromPoint.lat,
+        fromPoint.lng,
+        BORDER_LINE_ALTITUDE
+      );
+      const toCoords = getCoords(
+        toPoint.lat,
+        toPoint.lng,
+        BORDER_LINE_ALTITUDE
+      );
+
+      positions[positionIndex++] = fromCoords.x;
+      positions[positionIndex++] = fromCoords.y;
+      positions[positionIndex++] = fromCoords.z;
+      positions[positionIndex++] = toCoords.x;
+      positions[positionIndex++] = toCoords.y;
+      positions[positionIndex++] = toCoords.z;
+    }
+  });
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.computeBoundingSphere();
+
+  const material = new THREE.LineBasicMaterial({
+    color,
+    depthWrite: false,
+    transparent: true
+  });
+  const lines = new THREE.LineSegments(geometry, material);
+  lines.renderOrder = 2;
+
+  return { lines, material };
+}
+
+function disposeBorderLineSegments(lineSegments: THREE.LineSegments | null) {
+  if (!lineSegments) {
+    return;
+  }
+
+  lineSegments.geometry.dispose();
+  const material = lineSegments.material;
+
+  if (Array.isArray(material)) {
+    material.forEach((candidateMaterial) => {
+      candidateMaterial.dispose();
+    });
+    return;
+  }
+
+  material.dispose();
+}
+
 function createLocationMarkerElement(data: object) {
   const pin = data as V2GlobeLocationMarker;
   const element = document.createElement('div');
@@ -562,12 +636,23 @@ function createLocationMarkerElement(data: object) {
   return element;
 }
 
-export default function V2Globe({ isActive }: { isActive: boolean }) {
+export default function V2Globe({
+  activeStep,
+  flowSteps = [],
+  isActive,
+  onStepChange
+}: {
+  activeStep?: V2FlowStep;
+  flowSteps?: V2FlowControl[];
+  isActive: boolean;
+  onStepChange?: (step: V2FlowStep) => void;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const introTimeoutsRef = useRef<number[]>([]);
   const introAnimationFrameRef = useRef<number | null>(null);
-  const borderMaterialsRef = useRef<ColorMaterial[]>([]);
+  const borderLineRef = useRef<THREE.LineSegments | null>(null);
+  const borderLineMaterialRef = useRef<THREE.LineBasicMaterial | null>(null);
   const isCursorInsideIndiaRef = useRef(false);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
@@ -575,6 +660,7 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
   });
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [borderPaths, setBorderPaths] = useState<CountryBorderPath[]>([]);
+  const [fps, setFps] = useState(0);
   const [isGlobeReady, setIsGlobeReady] = useState(false);
   const [isGlobeVisible, setIsGlobeVisible] = useState(false);
   const [isCursorInsideIndia, setIsCursorInsideIndia] = useState(false);
@@ -615,34 +701,6 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       })),
     []
   );
-  const collectBorderMaterials = useCallback(() => {
-    const scene = globeRef.current?.scene();
-
-    if (!scene) {
-      return [];
-    }
-
-    const borderMaterials = new Set<ColorMaterial>();
-
-    scene.traverse((object) => {
-      const material = (object as THREE.Mesh | THREE.Line).material;
-      const materials = Array.isArray(material) ? material : [material];
-
-      materials.forEach((candidateMaterial) => {
-        if (
-          candidateMaterial &&
-          candidateMaterial !== globeMaterial &&
-          isColorMaterial(candidateMaterial)
-        ) {
-          borderMaterials.add(candidateMaterial);
-        }
-      });
-    });
-
-    borderMaterialsRef.current = Array.from(borderMaterials);
-
-    return borderMaterialsRef.current;
-  }, [globeMaterial]);
 
   const clearIntroTimeouts = useCallback(() => {
     introTimeoutsRef.current.forEach((timeoutId) => {
@@ -836,8 +894,41 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
   }, [isActive, isGlobeReady, updateCursorIndiaState]);
 
   useEffect(() => {
-    borderMaterialsRef.current = [];
-  }, [visibleBorderPaths]);
+    if (!isGlobeReady || visibleBorderPaths.length === 0) {
+      return;
+    }
+
+    const globe = globeRef.current;
+    const scene = globe?.scene();
+
+    if (!globe || !scene) {
+      return;
+    }
+
+    disposeBorderLineSegments(borderLineRef.current);
+
+    const { lines, material } = createBorderLineSegments(
+      visibleBorderPaths,
+      globe.getCoords.bind(globe),
+      isCursorInsideIndiaRef.current
+        ? INDIA_HOVER_BORDER_COLOR
+        : DEFAULT_BORDER_COLOR
+    );
+
+    borderLineRef.current = lines;
+    borderLineMaterialRef.current = material;
+    scene.add(lines);
+
+    return () => {
+      scene.remove(lines);
+      disposeBorderLineSegments(lines);
+
+      if (borderLineRef.current === lines) {
+        borderLineRef.current = null;
+        borderLineMaterialRef.current = null;
+      }
+    };
+  }, [isGlobeReady, visibleBorderPaths]);
 
   useEffect(() => {
     const nextGlobeColor = isCursorInsideIndia
@@ -846,16 +937,12 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
     const nextBorderColor = isCursorInsideIndia
       ? INDIA_HOVER_BORDER_COLOR
       : DEFAULT_BORDER_COLOR;
-    const borderMaterials =
-      borderMaterialsRef.current.length > 0
-        ? borderMaterialsRef.current
-        : collectBorderMaterials();
 
     setMaterialColor(globeMaterial, nextGlobeColor);
-    borderMaterials.forEach((material) => {
-      setMaterialColor(material, nextBorderColor);
-    });
-  }, [collectBorderMaterials, globeMaterial, isCursorInsideIndia]);
+    if (borderLineMaterialRef.current) {
+      setMaterialColor(borderLineMaterialRef.current, nextBorderColor);
+    }
+  }, [globeMaterial, isCursorInsideIndia]);
 
   useEffect(() => {
     if (!isGlobeReady) {
@@ -872,6 +959,8 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
       controls.minDistance = 80;
       controls.maxDistance = 420;
     }
+
+    globeRef.current?.renderer().setPixelRatio(TARGET_RENDER_PIXEL_RATIO);
 
     if (!isActive) {
       clearIntroTimeouts();
@@ -975,54 +1064,99 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
     updateLocationMarkerScale(currentPov.altitude);
   }, [currentPov.altitude]);
 
+  useEffect(() => {
+    if (!isGlobeReady || !isActive || fps === 0) {
+      return;
+    }
+
+    if (fps < 30) {
+      globeRef.current?.renderer().setPixelRatio(LOW_FPS_RENDER_PIXEL_RATIO);
+      setOutlineDetail((currentDetail) =>
+        currentDetail === MIN_OUTLINE_DETAIL
+          ? currentDetail
+          : Math.max(MIN_OUTLINE_DETAIL, Math.floor(currentDetail * 0.5))
+      );
+      return;
+    }
+
+    globeRef.current?.renderer().setPixelRatio(TARGET_RENDER_PIXEL_RATIO);
+  }, [fps, isActive, isGlobeReady]);
+
+  useEffect(() => {
+    let animationFrameId = 0;
+    let frameCount = 0;
+    let lastSampleTime = performance.now();
+
+    const measureFps = (currentTime: number) => {
+      frameCount += 1;
+
+      if (currentTime - lastSampleTime >= 1000) {
+        setFps(
+          Math.round((frameCount * 1000) / (currentTime - lastSampleTime))
+        );
+        frameCount = 0;
+        lastSampleTime = currentTime;
+      }
+
+      animationFrameId = window.requestAnimationFrame(measureFps);
+    };
+
+    animationFrameId = window.requestAnimationFrame(measureFps);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   return (
     <section
       ref={containerRef}
-      onPointerMove={updateCursorIndiaState}
       onPointerLeave={handlePointerLeave}
-      className={cn(
-        'relative min-h-screen overflow-hidden bg-black transition-opacity duration-700',
-        isActive && isGlobeVisible ? 'opacity-100' : 'opacity-0'
-      )}
+      className='relative min-h-screen overflow-hidden bg-black'
     >
-      {size.width > 0 && size.height > 0 && (
-        <Globe
-          ref={globeRef}
-          width={size.width}
-          height={size.height}
-          backgroundColor='rgba(0,0,0,0)'
-          globeMaterial={globeMaterial}
-          showAtmosphere={false}
-          pathsData={visibleBorderPaths}
-          pathPoints='points'
-          pathPointLat='lat'
-          pathPointLng='lng'
-          pathPointAlt='altitude'
-          pathColor={DEFAULT_BORDER_COLOR}
-          pathStroke={0.32}
-          pathResolution={2}
-          pathTransitionDuration={0}
-          htmlElementsData={locationMarkers}
-          htmlLat='lat'
-          htmlLng='lng'
-          htmlAltitude='altitude'
-          htmlElement={createLocationMarkerElement}
-          htmlTransitionDuration={400}
-          enablePointerInteraction
-          onGlobeReady={() => {
-            setIsGlobeReady(true);
-          }}
-          onZoom={(pov) => {
-            currentPovRef.current = pov;
-            setCurrentPov(pov);
-          }}
-        />
+      <div
+        className={cn(
+          'transition-opacity duration-700',
+          isActive && isGlobeVisible ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        {size.width > 0 && size.height > 0 && (
+          <Globe
+            ref={globeRef}
+            width={size.width}
+            height={size.height}
+            backgroundColor='rgba(0,0,0,0)'
+            globeMaterial={globeMaterial}
+            showAtmosphere={false}
+            htmlElementsData={locationMarkers}
+            htmlLat='lat'
+            htmlLng='lng'
+            htmlAltitude='altitude'
+            htmlElement={createLocationMarkerElement}
+            htmlTransitionDuration={400}
+            enablePointerInteraction
+            onGlobeReady={() => {
+              setIsGlobeReady(true);
+            }}
+            onZoom={(pov) => {
+              currentPovRef.current = pov;
+              setCurrentPov(pov);
+            }}
+          />
+        )}
+      </div>
+
+      {IS_DEV_PANEL_ENABLED && (
+        <div className='absolute top-5 left-5 z-[10000] rounded-md border border-white/15 bg-black/75 px-3 py-2 font-mono text-xs text-white shadow-2xl backdrop-blur-md'>
+          <span className='text-white/45'>FPS</span>{' '}
+          <span className='tabular-nums'>{fps}</span>
+        </div>
       )}
 
-      {IS_DEV_PANEL_ENABLED && isActive && (
+      {IS_DEV_PANEL_ENABLED && (
         <aside
           data-v2-dev-control='true'
-          className='absolute top-24 right-5 z-20 w-[260px] rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
+          className='absolute top-5 right-5 z-[10000] w-[260px] rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
         >
           <div className='mb-4 flex items-center justify-between gap-3'>
             <h2 className='text-xs font-medium tracking-[0.22em] text-white/70 uppercase'>
@@ -1032,6 +1166,32 @@ export default function V2Globe({ isActive }: { isActive: boolean }) {
               V2
             </span>
           </div>
+
+          {flowSteps.length > 0 && activeStep && onStepChange && (
+            <div className='mb-5 border-b border-white/10 pb-4'>
+              <div className='mb-2 text-xs text-white/65'>Flow</div>
+              <div className='grid grid-cols-2 overflow-hidden rounded-md border border-white/15'>
+                {flowSteps.map((step) => (
+                  <button
+                    key={step.id}
+                    type='button'
+                    onClick={() => {
+                      onStepChange(step.id);
+                    }}
+                    className={cn(
+                      'min-h-9 px-3 text-xs transition-colors',
+                      activeStep === step.id
+                        ? 'bg-white text-black'
+                        : 'bg-white/0 text-white/65 hover:bg-white/10',
+                      step.id !== flowSteps[0]?.id && 'border-l border-white/15'
+                    )}
+                  >
+                    {step.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <label className='block'>
             <span className='mb-2 flex items-center justify-between text-xs text-white/65'>

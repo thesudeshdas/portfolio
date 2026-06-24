@@ -61,7 +61,12 @@ const LOCATION_MARKER_PULSE_KEYFRAMES = 'v2-location-marker-breathe';
 const LOCATION_MARKER_PULSE_DURATION_MS = 3200;
 const LOCATION_MARKER_HINT_PULSE_COUNT = 3;
 const LOCATION_FOCUS_TRANSITION_MS = 1200;
-const LOCATION_CONTENT_TRANSITION_MS = 500;
+const LOCATION_CONTENT_TRANSITION_MS = 1100;
+const LOCATION_CONTENT_LINE_MS = 620;
+const LOCATION_CONTENT_REVEAL_MS = 620;
+const LOCATION_MODAL_WIDTH_RATIO = 0.6;
+const LOCATION_MODAL_HEIGHT_RATIO = 0.7;
+const LOCATION_MODAL_RIGHT_OFFSET_RATIO = 0.08;
 const LOCATION_SELECT_EVENT = 'v2-globe-location-select';
 const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 const DEV_PANEL_WIDTH = 260;
@@ -148,7 +153,6 @@ type V2GlobeLocationMarker = V2GlobeLocation & {
   altitude: number;
 };
 
-type LngLatPoint = [number, number];
 type ColorMaterial = THREE.Material & { color: THREE.Color };
 type DevPanelPosition = {
   x: number;
@@ -161,39 +165,12 @@ type DevPanelDragState = DevPanelPosition & {
   width: number;
   height: number;
 };
-type LocationSelectEvent = CustomEvent<{ id: string }>;
+type ScreenPoint = {
+  x: number;
+  y: number;
+};
+type LocationSelectEvent = CustomEvent<{ id: string; anchor: ScreenPoint }>;
 
-const INDIA_HOVER_REGIONS: LngLatPoint[][] = [
-  [
-    [68.0, 23.6],
-    [68.9, 24.9],
-    [71.3, 27.2],
-    [73.8, 32.8],
-    [75.7, 36.8],
-    [79.6, 35.6],
-    [83.5, 31.6],
-    [88.4, 28.2],
-    [91.4, 27.8],
-    [97.4, 28.4],
-    [96.0, 24.1],
-    [92.0, 22.0],
-    [88.0, 21.6],
-    [86.7, 20.4],
-    [84.1, 18.4],
-    [81.1, 16.5],
-    [80.3, 13.1],
-    [77.5, 7.8],
-    [75.2, 11.0],
-    [73.4, 15.4],
-    [72.6, 20.7]
-  ],
-  [
-    [92.4, 12.0],
-    [94.3, 13.9],
-    [93.2, 14.4],
-    [92.2, 13.3]
-  ]
-];
 const INTRO_FLIGHT_POINTS: Array<Pick<GlobePointOfView, 'lat' | 'lng'>> = [
   {
     ...MADRID_VIEW
@@ -297,45 +274,6 @@ function getIntroPointOfView(progress: number) {
         getAltitudeFromZoom(INTRO_START_ZOOM)) *
         timelineProgress
   };
-}
-
-function isPointInPolygon(
-  point: { lat: number; lng: number },
-  polygon: LngLatPoint[]
-) {
-  let isInside = false;
-
-  for (
-    let pointIndex = 0, previousPointIndex = polygon.length - 1;
-    pointIndex < polygon.length;
-    previousPointIndex = pointIndex++
-  ) {
-    const [currentLng, currentLat] = polygon[pointIndex];
-    const [previousLng, previousLat] = polygon[previousPointIndex];
-    const intersects =
-      currentLat > point.lat !== previousLat > point.lat &&
-      point.lng <
-        ((previousLng - currentLng) * (point.lat - currentLat)) /
-          (previousLat - currentLat) +
-          currentLng;
-
-    if (intersects) {
-      isInside = !isInside;
-    }
-  }
-
-  return isInside;
-}
-
-function isPointInIndia(point: { lat: number; lng: number }) {
-  const normalizedPoint = {
-    ...point,
-    lng: normalizeLongitude(point.lng)
-  };
-
-  return INDIA_HOVER_REGIONS.some((region) =>
-    isPointInPolygon(normalizedPoint, region)
-  );
 }
 
 function clampLatitude(latitude: number) {
@@ -447,6 +385,38 @@ function isPointerNearElementAnchor(event: PointerEvent, element: HTMLElement) {
     Math.abs(event.clientX - rect.left) <= hitRadius &&
     Math.abs(event.clientY - rect.top) <= hitRadius
   );
+}
+
+function getLocationContentLayout(
+  size: { width: number; height: number },
+  anchor: ScreenPoint | null
+) {
+  const modalWidth = Math.max(
+    320,
+    Math.min(1100, size.width * LOCATION_MODAL_WIDTH_RATIO)
+  );
+  const modalHeight = Math.max(320, size.height * LOCATION_MODAL_HEIGHT_RATIO);
+  const modalRightOffset = size.width * LOCATION_MODAL_RIGHT_OFFSET_RATIO;
+  const modalLeft = Math.max(24, size.width - modalRightOffset - modalWidth);
+  const centeredTop = (size.height - modalHeight) / 2;
+  const anchorTop = anchor ? anchor.y - modalHeight / 2 : centeredTop;
+  const modalTop = Math.max(
+    24,
+    Math.min(size.height - modalHeight - 24, anchorTop)
+  );
+  const lineY = modalTop + modalHeight / 2;
+  const lineStartX = anchor?.x ?? modalLeft;
+  const lineWidth = Math.max(0, modalLeft - lineStartX);
+
+  return {
+    lineStartX,
+    lineWidth,
+    lineY,
+    modalHeight,
+    modalLeft,
+    modalTop,
+    modalWidth
+  };
 }
 
 function getCountryBorderPaths(features: MapLineFeature[]) {
@@ -859,9 +829,17 @@ function createLocationMarkerElement(data: object) {
     event.stopPropagation();
     isClickHintDismissed = true;
     hideClickHint();
+
+    const elementRect = element.getBoundingClientRect();
+    const anchor = {
+      x: elementRect.left,
+      y: elementRect.top
+    };
+
     window.dispatchEvent(
       new CustomEvent(LOCATION_SELECT_EVENT, {
         detail: {
+          anchor,
           id: pin.id
         }
       })
@@ -890,17 +868,10 @@ function createLocationMarkerElement(data: object) {
     }
   };
 
-  element.addEventListener('mouseenter', showTooltip);
-  element.addEventListener('mouseleave', hideTooltip);
-  element.addEventListener('pointerenter', showTooltip);
-  element.addEventListener('pointerleave', hideTooltip);
   element.addEventListener('focus', showTooltip);
   element.addEventListener('blur', hideTooltip);
   element.addEventListener('keydown', handleMarkerKeyDown);
-  marker.addEventListener('mouseenter', showTooltip);
   marker.addEventListener('mouseleave', hideTooltip);
-  marker.addEventListener('pointerenter', showTooltip);
-  marker.addEventListener('pointerleave', hideTooltip);
   clickHint.addEventListener('click', handleMarkerSelect);
   hitArea.addEventListener('click', handleMarkerSelect);
   hitArea.addEventListener('pointerenter', showTooltip);
@@ -929,7 +900,6 @@ export default function V2Globe({
   const introAnimationFrameRef = useRef<number | null>(null);
   const borderLineRef = useRef<THREE.LineSegments | null>(null);
   const borderLineMaterialRef = useRef<THREE.LineBasicMaterial | null>(null);
-  const isCursorInsideIndiaRef = useRef(false);
   const isSecondStageRef = useRef(false);
   const themeAnimationFrameRef = useRef<number | null>(null);
   const themeProgressRef = useRef(0);
@@ -945,7 +915,6 @@ export default function V2Globe({
   const [fps, setFps] = useState(0);
   const [isGlobeReady, setIsGlobeReady] = useState(false);
   const [isGlobeVisible, setIsGlobeVisible] = useState(false);
-  const [isCursorInsideIndia, setIsCursorInsideIndia] = useState(false);
   const [currentPov, setCurrentPov] = useState<GlobePointOfView>(
     currentPovRef.current
   );
@@ -959,6 +928,8 @@ export default function V2Globe({
   const [isColorsModalOpen, setIsColorsModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<V2GlobeLocation | null>(null);
+  const [selectedLocationAnchor, setSelectedLocationAnchor] =
+    useState<ScreenPoint | null>(null);
   const [isLocationContentVisible, setIsLocationContentVisible] =
     useState(false);
 
@@ -994,6 +965,10 @@ export default function V2Globe({
   const visibleLocationMarkers = useMemo(
     () => (isSecondStage ? locationMarkers : []),
     [isSecondStage, locationMarkers]
+  );
+  const locationContentLayout = useMemo(
+    () => getLocationContentLayout(size, selectedLocationAnchor),
+    [selectedLocationAnchor, size]
   );
   const applyThemeProgress = useCallback(
     (progress: number) => {
@@ -1112,7 +1087,7 @@ export default function V2Globe({
     );
   };
   const openLocationContent = useCallback(
-    (location: V2GlobeLocation) => {
+    (location: V2GlobeLocation, anchor: ScreenPoint) => {
       clearIntroTimeouts();
 
       if (locationContentTimeoutRef.current !== null) {
@@ -1124,7 +1099,16 @@ export default function V2Globe({
         previousLocationPovRef.current = currentPovRef.current;
       }
 
+      const containerRect = containerRef.current?.getBoundingClientRect();
+      const relativeAnchor = containerRect
+        ? {
+            x: anchor.x - containerRect.left,
+            y: anchor.y - containerRect.top
+          }
+        : anchor;
+
       setSelectedLocation(location);
+      setSelectedLocationAnchor(relativeAnchor);
       window.requestAnimationFrame(() => {
         setIsLocationContentVisible(true);
       });
@@ -1155,6 +1139,7 @@ export default function V2Globe({
 
     locationContentTimeoutRef.current = window.setTimeout(() => {
       setSelectedLocation(null);
+      setSelectedLocationAnchor(null);
       locationContentTimeoutRef.current = null;
     }, LOCATION_CONTENT_TRANSITION_MS);
   }, [updatePointOfView]);
@@ -1220,42 +1205,6 @@ export default function V2Globe({
     },
     []
   );
-  const setCursorIndiaState = useCallback((nextIsInsideIndia: boolean) => {
-    if (isCursorInsideIndiaRef.current === nextIsInsideIndia) {
-      return;
-    }
-
-    isCursorInsideIndiaRef.current = nextIsInsideIndia;
-    setIsCursorInsideIndia(nextIsInsideIndia);
-  }, []);
-  const updateCursorIndiaState = useCallback(
-    (event: PointerEvent | ReactPointerEvent<HTMLElement>) => {
-      const elementAtPointer = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      );
-
-      if (
-        elementAtPointer instanceof HTMLElement &&
-        elementAtPointer.closest('[data-v2-dev-control="true"]')
-      ) {
-        setCursorIndiaState(false);
-        return;
-      }
-
-      const globeCoords = globeRef.current?.toGlobeCoords(
-        event.clientX,
-        event.clientY
-      );
-
-      setCursorIndiaState(Boolean(globeCoords && isPointInIndia(globeCoords)));
-    },
-    [setCursorIndiaState]
-  );
-  const handlePointerLeave = useCallback(() => {
-    setCursorIndiaState(false);
-  }, [setCursorIndiaState]);
-
   useEffect(() => {
     const container = containerRef.current;
 
@@ -1309,29 +1258,16 @@ export default function V2Globe({
   }, [borderPaths.length, isActive]);
 
   useEffect(() => {
-    if (!isActive || !isGlobeReady) {
-      return;
-    }
-
-    window.addEventListener('pointermove', updateCursorIndiaState, {
-      passive: true
-    });
-
-    return () => {
-      window.removeEventListener('pointermove', updateCursorIndiaState);
-    };
-  }, [isActive, isGlobeReady, updateCursorIndiaState]);
-
-  useEffect(() => {
     if (!isActive) {
       setIsLocationContentVisible(false);
       setSelectedLocation(null);
+      setSelectedLocationAnchor(null);
       previousLocationPovRef.current = null;
       return;
     }
 
     const handleLocationSelect = (event: Event) => {
-      const locationId = (event as LocationSelectEvent).detail.id;
+      const { anchor, id: locationId } = (event as LocationSelectEvent).detail;
       const location = V2_GLOBE_LOCATIONS.find(
         (candidateLocation) => candidateLocation.id === locationId
       );
@@ -1340,7 +1276,7 @@ export default function V2Globe({
         return;
       }
 
-      openLocationContent(location);
+      openLocationContent(location, anchor);
     };
 
     window.addEventListener(LOCATION_SELECT_EVENT, handleLocationSelect);
@@ -1403,8 +1339,7 @@ export default function V2Globe({
       themeAnimationFrameRef.current = null;
     }
 
-    const shouldUseIndiaTheme = isSecondStage || isCursorInsideIndia;
-    const targetProgress = shouldUseIndiaTheme ? 1 : 0;
+    const targetProgress = isSecondStage ? 1 : 0;
     const shouldEaseTheme = isSecondStage || isSecondStageRef.current;
 
     isSecondStageRef.current = isSecondStage;
@@ -1440,7 +1375,7 @@ export default function V2Globe({
         themeAnimationFrameRef.current = null;
       }
     };
-  }, [applyThemeProgress, isCursorInsideIndia, isSecondStage]);
+  }, [applyThemeProgress, isSecondStage]);
 
   useEffect(() => {
     if (!isGlobeReady) {
@@ -1609,7 +1544,6 @@ export default function V2Globe({
   return (
     <section
       ref={containerRef}
-      onPointerLeave={handlePointerLeave}
       className='relative min-h-screen overflow-hidden bg-black'
     >
       <div
@@ -1654,7 +1588,7 @@ export default function V2Globe({
       {selectedLocation && (
         <div
           className={cn(
-            'pointer-events-none absolute inset-0 z-[11000] flex items-center justify-end px-6 pr-[8vw] transition-opacity duration-500',
+            'pointer-events-none absolute inset-0 z-[11000] transition-opacity duration-500',
             isLocationContentVisible ? 'opacity-100' : 'opacity-0'
           )}
         >
@@ -1664,41 +1598,68 @@ export default function V2Globe({
             onClick={closeLocationContent}
             className='pointer-events-auto absolute inset-0 bg-[#2f1d13]/35 backdrop-blur-[2px]'
           />
+          <div
+            className='pointer-events-none absolute h-0.5 origin-left bg-[#2f1d13]'
+            style={{
+              left: `${locationContentLayout.lineStartX}px`,
+              top: `${locationContentLayout.lineY}px`,
+              transform: isLocationContentVisible ? 'scaleX(1)' : 'scaleX(0)',
+              transition: `transform ${LOCATION_CONTENT_LINE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`,
+              width: `${locationContentLayout.lineWidth}px`
+            }}
+          />
           <article
-            className={cn(
-              'pointer-events-auto relative h-[70vh] w-[60vw] max-w-[1100px] min-w-[320px] border border-[#2f1d13]/30 bg-[#d8c7aa]/90 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm transition-transform duration-500',
-              isLocationContentVisible ? 'translate-y-0' : 'translate-y-4'
-            )}
+            className='pointer-events-auto absolute overflow-hidden border border-[#2f1d13]/30 bg-[#d8c7aa]/90 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm'
+            style={{
+              clipPath: isLocationContentVisible
+                ? 'inset(0 0 0 0)'
+                : 'inset(50% 0 50% 0)',
+              height: `${locationContentLayout.modalHeight}px`,
+              left: `${locationContentLayout.modalLeft}px`,
+              top: `${locationContentLayout.modalTop}px`,
+              transition: `clip-path ${LOCATION_CONTENT_REVEAL_MS}ms cubic-bezier(0.22, 1, 0.36, 1) ${
+                isLocationContentVisible ? LOCATION_CONTENT_LINE_MS : 0
+              }ms`,
+              width: `${locationContentLayout.modalWidth}px`
+            }}
           >
-            <div className='mb-5 flex items-start justify-between gap-4'>
-              <div>
-                <p className='text-xs font-semibold tracking-[0.22em] uppercase'>
-                  {selectedLocation.title}
-                </p>
-                <h2 className='mt-2 text-2xl font-semibold'>
-                  {selectedLocation.location}
-                </h2>
+            <div className='pointer-events-none absolute top-1/2 right-0 left-0 h-0.5 -translate-y-1/2 bg-[#2f1d13]' />
+            <div
+              className={cn(
+                'relative transition-opacity duration-300',
+                isLocationContentVisible ? 'opacity-100 delay-700' : 'opacity-0'
+              )}
+            >
+              <div className='mb-5 flex items-start justify-between gap-4'>
+                <div>
+                  <p className='text-xs font-semibold tracking-[0.22em] uppercase'>
+                    {selectedLocation.title}
+                  </p>
+                  <h2 className='mt-2 text-2xl font-semibold'>
+                    {selectedLocation.location}
+                  </h2>
+                </div>
+                <button
+                  type='button'
+                  onClick={closeLocationContent}
+                  className='grid size-8 place-items-center border border-[#2f1d13]/30 text-lg leading-none text-[#2f1d13] transition-colors hover:bg-[#2f1d13] hover:text-[#d8c7aa]'
+                  aria-label='Close location content'
+                >
+                  ×
+                </button>
               </div>
-              <button
-                type='button'
-                onClick={closeLocationContent}
-                className='grid size-8 place-items-center border border-[#2f1d13]/30 text-lg leading-none text-[#2f1d13] transition-colors hover:bg-[#2f1d13] hover:text-[#d8c7aa]'
-                aria-label='Close location content'
-              >
-                ×
-              </button>
-            </div>
 
-            <dl className='grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#2f1d13]/20 pt-6 text-sm'>
-              <dt className='text-[#2f1d13]/55'>Coordinates</dt>
-              <dd className='text-right font-mono text-[#2f1d13]/80'>
-                {selectedLocation.coordinates}
-              </dd>
-              <dt className='text-[#2f1d13]/55'>Focus</dt>
-              <dd className='text-right font-mono text-[#2f1d13]/80'>
-                {selectedLocation.focusView.zoom}%
-              </dd>
-            </dl>
+              <dl className='grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#2f1d13]/20 pt-6 text-sm'>
+                <dt className='text-[#2f1d13]/55'>Coordinates</dt>
+                <dd className='text-right font-mono text-[#2f1d13]/80'>
+                  {selectedLocation.coordinates}
+                </dd>
+                <dt className='text-[#2f1d13]/55'>Focus</dt>
+                <dd className='text-right font-mono text-[#2f1d13]/80'>
+                  {selectedLocation.focusView.zoom}%
+                </dd>
+              </dl>
+            </div>
           </article>
         </div>
       )}

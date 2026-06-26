@@ -24,7 +24,7 @@ export const V2_GLOBE_LOCATIONS: V2GlobeLocation[] = [
     location: 'Bangalore, India',
     coordinates: '12.9716° N, 77.5946° E',
     calloutSide: 'right',
-    showClickHint: true,
+    showClickHint: false,
     focusView: {
       lat: 12.8234,
       lng: 85.7327,

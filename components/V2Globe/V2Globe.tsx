@@ -69,10 +69,12 @@ const LOCATION_CALLOUT_BASE_LENGTH =
 const LOCATION_CALLOUT_BASE_FRACTION =
   LOCATION_CALLOUT_BASE_LENGTH /
   (LOCATION_CALLOUT_BASE_LENGTH + LOCATION_CALLOUT_EXTENSION_LENGTH);
+const LOCATION_CALLOUT_OPEN_MS = 1200;
+const LOCATION_CALLOUT_CLOSE_MS = 200;
 const LOCATION_FOCUS_TRANSITION_MS = 1200;
 const LOCATION_FOCUS_TIMING_FUNCTION = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-const LOCATION_CONTENT_TRANSITION_MS = 1100;
-const LOCATION_CONTENT_REVEAL_MS = 1100;
+const LOCATION_CONTENT_TRANSITION_MS = 100;
+const LOCATION_CONTENT_REVEAL_MS = 100;
 const LOCATION_MODAL_WIDTH_RATIO = 0.6;
 const LOCATION_MODAL_HEIGHT_RATIO = 0.7;
 const LOCATION_MODAL_RIGHT_OFFSET_RATIO = 0.08;
@@ -866,7 +868,7 @@ function createLocationMarkerElement(data: object) {
     isClickHintDismissed = true;
     hideClickHint();
     square.style.background = LOCATION_MARKER_COLOR;
-    setCalloutState('base', 680);
+    setCalloutState('base', LOCATION_CALLOUT_CLOSE_MS);
     content.style.transition =
       'opacity 360ms ease 700ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) 700ms';
     content.style.opacity = '1';
@@ -884,7 +886,7 @@ function createLocationMarkerElement(data: object) {
     hideTooltipContent();
     setCalloutState(
       'hidden',
-      LOCATION_FOCUS_TRANSITION_MS,
+      LOCATION_CALLOUT_CLOSE_MS,
       LOCATION_FOCUS_TIMING_FUNCTION
     );
   };
@@ -895,7 +897,7 @@ function createLocationMarkerElement(data: object) {
 
     if (isLocationContentOpen) {
       hideTooltipContent();
-      setCalloutState('full', LOCATION_FOCUS_TRANSITION_MS);
+      setCalloutState('full', LOCATION_CALLOUT_OPEN_MS);
       return;
     }
 
@@ -937,7 +939,7 @@ function createLocationMarkerElement(data: object) {
     isTooltipVisible = true;
     setCalloutState(
       'full',
-      LOCATION_FOCUS_TRANSITION_MS,
+      LOCATION_CALLOUT_OPEN_MS,
       LOCATION_FOCUS_TIMING_FUNCTION
     );
     hideTooltipContent();
@@ -1358,7 +1360,7 @@ export default function V2Globe({
 
           isLocationContentClosingRef.current = false;
           locationContentTimeoutRef.current = null;
-        }, LOCATION_FOCUS_TRANSITION_MS);
+        }, LOCATION_CALLOUT_CLOSE_MS);
       }
     );
   }, [
@@ -1882,7 +1884,10 @@ export default function V2Globe({
             type='button'
             aria-label='Close location content'
             onClick={closeLocationContent}
-            className='pointer-events-auto absolute inset-0 bg-[#2f1d13]/35 backdrop-blur-[2px]'
+            className='pointer-events-auto absolute inset-0 bg-[#2f1d13] backdrop-blur-[2px]'
+            style={{
+              opacity: locationContentProgress * 0.35
+            }}
           />
           <article
             className='pointer-events-auto absolute overflow-hidden border border-[#2f1d13]/30 bg-[#d8c7aa]/50 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm'
@@ -1898,7 +1903,7 @@ export default function V2Globe({
           >
             <div
               className={cn(
-                'relative transition-opacity duration-300',
+                'relative transition-opacity duration-100',
                 isLocationContentVisible && locationContentProgress >= 0.9
                   ? 'opacity-100'
                   : 'opacity-0'

@@ -64,10 +64,15 @@ const LOCATION_CALLOUT_EXTENSION_START = 200;
 const LOCATION_CALLOUT_EXTENSION_END = 760;
 const LOCATION_CALLOUT_EXTENSION_LENGTH =
   LOCATION_CALLOUT_EXTENSION_END - LOCATION_CALLOUT_EXTENSION_START;
+const LOCATION_CALLOUT_BASE_LENGTH =
+  Math.hypot(64, 37) + (LOCATION_CALLOUT_EXTENSION_START - 64);
+const LOCATION_CALLOUT_BASE_FRACTION =
+  LOCATION_CALLOUT_BASE_LENGTH /
+  (LOCATION_CALLOUT_BASE_LENGTH + LOCATION_CALLOUT_EXTENSION_LENGTH);
 const LOCATION_FOCUS_TRANSITION_MS = 1200;
 const LOCATION_FOCUS_TIMING_FUNCTION = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-const LOCATION_CONTENT_TRANSITION_MS = 3000;
-const LOCATION_CONTENT_REVEAL_MS = 3000;
+const LOCATION_CONTENT_TRANSITION_MS = 1100;
+const LOCATION_CONTENT_REVEAL_MS = 1100;
 const LOCATION_MODAL_WIDTH_RATIO = 0.6;
 const LOCATION_MODAL_HEIGHT_RATIO = 0.7;
 const LOCATION_MODAL_RIGHT_OFFSET_RATIO = 0.08;
@@ -606,10 +611,6 @@ function createLocationMarkerElement(data: object) {
     'http://www.w3.org/2000/svg',
     'path'
   );
-  const calloutExtensionPath = document.createElementNS(
-    'http://www.w3.org/2000/svg',
-    'path'
-  );
   const content = document.createElement('div');
   const title = document.createElement('div');
   const location = document.createElement('div');
@@ -754,7 +755,10 @@ function createLocationMarkerElement(data: object) {
   calloutLine.style.height = '104px';
   calloutLine.style.overflow = 'visible';
 
-  calloutPath.setAttribute('d', 'M0 104 L64 67 L200 67');
+  calloutPath.setAttribute(
+    'd',
+    `M0 104 L64 67 L${LOCATION_CALLOUT_EXTENSION_END} 67`
+  );
   calloutPath.setAttribute('fill', 'none');
   calloutPath.setAttribute('stroke', LOCATION_MARKER_COLOR);
   calloutPath.setAttribute('stroke-width', '2.5');
@@ -762,25 +766,10 @@ function createLocationMarkerElement(data: object) {
   calloutPath.setAttribute('stroke-linejoin', 'miter');
   calloutPath.setAttribute('pathLength', '1');
   calloutPath.style.filter = 'drop-shadow(0 0 12px rgba(47, 29, 19, 0.32))';
-  calloutPath.style.strokeDasharray = '1';
-  calloutPath.style.strokeDashoffset = '1';
+  calloutPath.style.strokeDasharray = `${LOCATION_CALLOUT_BASE_FRACTION} 1`;
+  calloutPath.style.strokeDashoffset = `${LOCATION_CALLOUT_BASE_FRACTION}`;
   calloutPath.style.transition =
-    'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
-
-  calloutExtensionPath.setAttribute(
-    'd',
-    `M${LOCATION_CALLOUT_EXTENSION_START} 67 L${LOCATION_CALLOUT_EXTENSION_END} 67`
-  );
-  calloutExtensionPath.setAttribute('fill', 'none');
-  calloutExtensionPath.setAttribute('stroke', LOCATION_MARKER_COLOR);
-  calloutExtensionPath.setAttribute('stroke-width', '2.5');
-  calloutExtensionPath.setAttribute('stroke-linecap', 'square');
-  calloutExtensionPath.setAttribute('pathLength', '1');
-  calloutExtensionPath.style.filter =
-    'drop-shadow(0 0 12px rgba(47, 29, 19, 0.32))';
-  calloutExtensionPath.style.strokeDasharray = '1';
-  calloutExtensionPath.style.strokeDashoffset = '1';
-  calloutExtensionPath.style.transition = `stroke-dashoffset ${LOCATION_FOCUS_TRANSITION_MS}ms ${LOCATION_FOCUS_TIMING_FUNCTION}`;
+    'stroke-dasharray 680ms cubic-bezier(0.22, 1, 0.36, 1), stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
 
   content.style.position = 'absolute';
   content.style.left = '62px';
@@ -814,7 +803,7 @@ function createLocationMarkerElement(data: object) {
   coordinates.style.textShadow = '0 10px 24px rgba(0, 0, 0, 0.85)';
 
   content.append(title, location, coordinates);
-  calloutLine.append(calloutPath, calloutExtensionPath);
+  calloutLine.append(calloutPath);
   callout.append(calloutLine, content);
   clickHintLine.append(clickHintPath);
   clickHint.append(clickHintLine, clickHintText);
@@ -846,6 +835,27 @@ function createLocationMarkerElement(data: object) {
     clickHintText.style.opacity = '0';
     clickHintText.style.transform = 'translate3d(0, 10px, 0)';
   };
+  const setCalloutState = (
+    state: 'hidden' | 'base' | 'full',
+    durationMs: number,
+    timingFunction = 'cubic-bezier(0.22, 1, 0.36, 1)',
+    delayMs = 0
+  ) => {
+    calloutPath.style.transition = [
+      `stroke-dasharray ${durationMs}ms ${timingFunction} ${delayMs}ms`,
+      `stroke-dashoffset ${durationMs}ms ${timingFunction} ${delayMs}ms`
+    ].join(', ');
+
+    if (state === 'full') {
+      calloutPath.style.strokeDasharray = '1 0';
+      calloutPath.style.strokeDashoffset = '0';
+      return;
+    }
+
+    calloutPath.style.strokeDasharray = `${LOCATION_CALLOUT_BASE_FRACTION} 1`;
+    calloutPath.style.strokeDashoffset =
+      state === 'base' ? '0' : `${LOCATION_CALLOUT_BASE_FRACTION}`;
+  };
 
   const showTooltip = () => {
     if (isTooltipVisible || isTooltipSuppressed) {
@@ -856,12 +866,9 @@ function createLocationMarkerElement(data: object) {
     isClickHintDismissed = true;
     hideClickHint();
     square.style.background = LOCATION_MARKER_COLOR;
-    calloutPath.style.transition =
-      'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
-    calloutExtensionPath.style.strokeDashoffset = '1';
+    setCalloutState('base', 680);
     content.style.transition =
       'opacity 360ms ease 700ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) 700ms';
-    calloutPath.style.strokeDashoffset = '0';
     content.style.opacity = '1';
     content.style.transform = 'translate3d(0, 0, 0)';
   };
@@ -871,6 +878,16 @@ function createLocationMarkerElement(data: object) {
     content.style.opacity = '0';
     content.style.transform = 'translate3d(0, 10px, 0)';
   };
+  const retractCallout = () => {
+    isTooltipVisible = false;
+    square.style.background = LOCATION_MARKER_COLOR;
+    hideTooltipContent();
+    setCalloutState(
+      'hidden',
+      LOCATION_FOCUS_TRANSITION_MS,
+      LOCATION_FOCUS_TIMING_FUNCTION
+    );
+  };
   const hideTooltip = () => {
     if (!isTooltipVisible) {
       return;
@@ -878,20 +895,11 @@ function createLocationMarkerElement(data: object) {
 
     if (isLocationContentOpen) {
       hideTooltipContent();
-      calloutPath.style.transition =
-        'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
-      calloutPath.style.strokeDashoffset = '0';
-      calloutExtensionPath.style.strokeDashoffset = '0';
+      setCalloutState('full', LOCATION_FOCUS_TRANSITION_MS);
       return;
     }
 
-    isTooltipVisible = false;
-    square.style.background = LOCATION_MARKER_COLOR;
-    hideTooltipContent();
-    calloutPath.style.transition =
-      'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1) 360ms';
-    calloutPath.style.strokeDashoffset = '1';
-    calloutExtensionPath.style.strokeDashoffset = '1';
+    retractCallout();
   };
   const handleWindowPointerMove = (event: PointerEvent) => {
     if (!element.isConnected) {
@@ -910,8 +918,7 @@ function createLocationMarkerElement(data: object) {
 
     if (isLocationContentOpen) {
       hideTooltipContent();
-      calloutPath.style.strokeDashoffset = '0';
-      calloutExtensionPath.style.strokeDashoffset = '0';
+      setCalloutState('full', 0);
       return;
     }
 
@@ -928,10 +935,11 @@ function createLocationMarkerElement(data: object) {
     isLocationContentOpen = true;
     hideClickHint();
     isTooltipVisible = true;
-    calloutPath.style.transition =
-      'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
-    calloutPath.style.strokeDashoffset = '0';
-    calloutExtensionPath.style.strokeDashoffset = '0';
+    setCalloutState(
+      'full',
+      LOCATION_FOCUS_TRANSITION_MS,
+      LOCATION_FOCUS_TIMING_FUNCTION
+    );
     hideTooltipContent();
 
     const elementRect = element.getBoundingClientRect();
@@ -982,9 +990,9 @@ function createLocationMarkerElement(data: object) {
       return;
     }
 
-    isTooltipSuppressed = false;
+    isTooltipSuppressed = true;
     isLocationContentOpen = false;
-    hideTooltip();
+    retractCallout();
   };
 
   element.addEventListener('focus', showTooltip);
@@ -1030,6 +1038,7 @@ export default function V2Globe({
   const locationContentAnimationFrameRef = useRef<number | null>(null);
   const locationContentTimeoutRef = useRef<number | null>(null);
   const locationContentRevealTimeoutRef = useRef<number | null>(null);
+  const isLocationContentClosingRef = useRef(false);
   const previousLocationPovRef = useRef<GlobePointOfView | null>(null);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
@@ -1259,6 +1268,7 @@ export default function V2Globe({
         window.clearTimeout(locationContentTimeoutRef.current);
         locationContentTimeoutRef.current = null;
       }
+      isLocationContentClosingRef.current = false;
 
       if (locationContentRevealTimeoutRef.current !== null) {
         window.clearTimeout(locationContentRevealTimeoutRef.current);
@@ -1310,20 +1320,18 @@ export default function V2Globe({
     ]
   );
   const closeLocationContent = useCallback(() => {
+    if (!selectedLocation || isLocationContentClosingRef.current) {
+      return;
+    }
+
     if (locationContentRevealTimeoutRef.current !== null) {
       window.clearTimeout(locationContentRevealTimeoutRef.current);
       locationContentRevealTimeoutRef.current = null;
     }
 
-    if (selectedLocation) {
-      window.dispatchEvent(
-        new CustomEvent(LOCATION_CONTENT_CLOSE_EVENT, {
-          detail: {
-            id: selectedLocation.id
-          }
-        })
-      );
-    }
+    const closingLocation = selectedLocation;
+    const previousPov = previousLocationPovRef.current;
+    isLocationContentClosingRef.current = true;
 
     setIsLocationContentVisible(false);
     animateLocationContentProgress(
@@ -1331,22 +1339,28 @@ export default function V2Globe({
       0,
       LOCATION_CONTENT_TRANSITION_MS,
       () => {
-        setSelectedLocation(null);
-        setSelectedLocationAnchor(null);
-        locationContentTimeoutRef.current = null;
+        window.dispatchEvent(
+          new CustomEvent(LOCATION_CONTENT_CLOSE_EVENT, {
+            detail: {
+              id: closingLocation.id
+            }
+          })
+        );
+
+        locationContentTimeoutRef.current = window.setTimeout(() => {
+          setSelectedLocation(null);
+          setSelectedLocationAnchor(null);
+
+          if (previousPov) {
+            updatePointOfView(previousPov, LOCATION_FOCUS_TRANSITION_MS);
+            previousLocationPovRef.current = null;
+          }
+
+          isLocationContentClosingRef.current = false;
+          locationContentTimeoutRef.current = null;
+        }, LOCATION_FOCUS_TRANSITION_MS);
       }
     );
-
-    const previousPov = previousLocationPovRef.current;
-
-    if (previousPov) {
-      updatePointOfView(previousPov, LOCATION_FOCUS_TRANSITION_MS);
-      previousLocationPovRef.current = null;
-    }
-
-    if (locationContentTimeoutRef.current !== null) {
-      window.clearTimeout(locationContentTimeoutRef.current);
-    }
   }, [
     animateLocationContentProgress,
     locationContentProgress,
@@ -1505,6 +1519,7 @@ export default function V2Globe({
       setLocationContentProgress(0);
       setSelectedLocation(null);
       setSelectedLocationAnchor(null);
+      isLocationContentClosingRef.current = false;
       previousLocationPovRef.current = null;
       return;
     }

@@ -60,6 +60,10 @@ const LOCATION_MARKER_COLOR = INDIA_HOVER_BORDER_COLOR;
 const LOCATION_MARKER_PULSE_KEYFRAMES = 'v2-location-marker-breathe';
 const LOCATION_MARKER_PULSE_DURATION_MS = 3200;
 const LOCATION_MARKER_HINT_PULSE_COUNT = 3;
+const LOCATION_CALLOUT_EXTENSION_START = 200;
+const LOCATION_CALLOUT_EXTENSION_END = 760;
+const LOCATION_CALLOUT_EXTENSION_LENGTH =
+  LOCATION_CALLOUT_EXTENSION_END - LOCATION_CALLOUT_EXTENSION_START;
 const LOCATION_FOCUS_TRANSITION_MS = 1200;
 const LOCATION_FOCUS_TIMING_FUNCTION = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 const LOCATION_CONTENT_TRANSITION_MS = 3000;
@@ -170,6 +174,7 @@ type DevPanelDragState = DevPanelPosition & {
 type ScreenPoint = {
   x: number;
   y: number;
+  calloutWidth?: number;
 };
 type LocationSelectEvent = CustomEvent<{ id: string; anchor: ScreenPoint }>;
 type LocationContentCloseEvent = CustomEvent<{ id: string }>;
@@ -392,7 +397,8 @@ function getLocationMarkerLineEndpoint(locationId: string) {
   );
 
   return {
-    x: markerRect.left + 762 * markerScale,
+    calloutWidth: LOCATION_CALLOUT_EXTENSION_LENGTH * markerScale,
+    x: markerRect.left + (LOCATION_CALLOUT_EXTENSION_END + 2) * markerScale,
     y: markerRect.top - 37 * markerScale
   };
 }
@@ -414,15 +420,24 @@ function getLocationContentLayout(
   size: { width: number; height: number },
   anchor: ScreenPoint | null
 ) {
-  const modalWidth = Math.max(
+  const desiredModalWidth = Math.max(
     320,
-    Math.min(1100, size.width * LOCATION_MODAL_WIDTH_RATIO)
+    Math.min(
+      1100,
+      anchor?.calloutWidth ?? size.width * LOCATION_MODAL_WIDTH_RATIO
+    )
   );
+  const modalWidth = anchor
+    ? Math.min(desiredModalWidth, Math.max(320, anchor.x - 24))
+    : desiredModalWidth;
   const modalHeight = Math.max(320, size.height * LOCATION_MODAL_HEIGHT_RATIO);
   const modalRightOffset = size.width * LOCATION_MODAL_RIGHT_OFFSET_RATIO;
   const fallbackLeft = Math.max(24, size.width - modalRightOffset - modalWidth);
   const modalLeft = anchor
-    ? Math.max(24, Math.min(size.width - modalWidth - 24, anchor.x))
+    ? Math.max(
+        24,
+        Math.min(size.width - modalWidth - 24, anchor.x - modalWidth)
+      )
     : fallbackLeft;
   const centeredTop = (size.height - modalHeight) / 2;
   const anchorTop = anchor ? anchor.y - modalHeight / 2 : centeredTop;
@@ -752,7 +767,10 @@ function createLocationMarkerElement(data: object) {
   calloutPath.style.transition =
     'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
 
-  calloutExtensionPath.setAttribute('d', 'M200 67 L760 67');
+  calloutExtensionPath.setAttribute(
+    'd',
+    `M${LOCATION_CALLOUT_EXTENSION_START} 67 L${LOCATION_CALLOUT_EXTENSION_END} 67`
+  );
   calloutExtensionPath.setAttribute('fill', 'none');
   calloutExtensionPath.setAttribute('stroke', LOCATION_MARKER_COLOR);
   calloutExtensionPath.setAttribute('stroke-width', '2.5');
@@ -921,7 +939,8 @@ function createLocationMarkerElement(data: object) {
       element.style.getPropertyValue('--location-marker-scale') || 1
     );
     const anchor = {
-      x: elementRect.left + 762 * markerScale,
+      calloutWidth: LOCATION_CALLOUT_EXTENSION_LENGTH * markerScale,
+      x: elementRect.left + (LOCATION_CALLOUT_EXTENSION_END + 2) * markerScale,
       y: elementRect.top - 37 * markerScale
     };
 
@@ -1268,6 +1287,7 @@ export default function V2Globe({
         const containerRect = containerRef.current?.getBoundingClientRect();
         const relativeAnchor = containerRect
           ? {
+              calloutWidth: liveAnchor.calloutWidth,
               x: liveAnchor.x - containerRect.left,
               y: liveAnchor.y - containerRect.top
             }
@@ -1850,7 +1870,7 @@ export default function V2Globe({
             className='pointer-events-auto absolute inset-0 bg-[#2f1d13]/35 backdrop-blur-[2px]'
           />
           <article
-            className='pointer-events-auto absolute overflow-hidden border border-[#2f1d13]/30 bg-[#d8c7aa]/90 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm'
+            className='pointer-events-auto absolute overflow-hidden border border-[#2f1d13]/30 bg-[#d8c7aa]/50 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm'
             style={{
               clipPath: `inset(${(1 - locationContentProgress) * 50}% 0 ${
                 (1 - locationContentProgress) * 50
@@ -1900,14 +1920,6 @@ export default function V2Globe({
               </dl>
             </div>
           </article>
-          <div
-            className='pointer-events-none absolute z-10 h-0.5 origin-left bg-[#2f1d13]'
-            style={{
-              left: `${locationContentLayout.modalLeft}px`,
-              top: `${locationContentLayout.lineY}px`,
-              width: `${locationContentLayout.modalWidth}px`
-            }}
-          />
         </div>
       )}
 

@@ -780,8 +780,7 @@ function createLocationMarkerElement(data: object) {
   content.style.color = LOCATION_MARKER_COLOR;
   content.style.opacity = '0';
   content.style.transform = 'translate3d(0, 10px, 0)';
-  content.style.transition =
-    'opacity 360ms ease 700ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) 700ms';
+  content.style.transition = `opacity 360ms ease ${LOCATION_CALLOUT_CLOSE_MS}ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) ${LOCATION_CALLOUT_CLOSE_MS}ms`;
 
   title.textContent = pin.title;
   title.style.fontSize = '11px';
@@ -869,8 +868,7 @@ function createLocationMarkerElement(data: object) {
     hideClickHint();
     square.style.background = LOCATION_MARKER_COLOR;
     setCalloutState('base', LOCATION_CALLOUT_CLOSE_MS);
-    content.style.transition =
-      'opacity 360ms ease 700ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) 700ms';
+    content.style.transition = `opacity 360ms ease ${LOCATION_CALLOUT_CLOSE_MS}ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) ${LOCATION_CALLOUT_CLOSE_MS}ms`;
     content.style.opacity = '1';
     content.style.transform = 'translate3d(0, 0, 0)';
   };

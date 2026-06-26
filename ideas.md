@@ -2,6 +2,7 @@
 
 - Add a small corner section on one edge of the screen titled “small corner for me in the digital world”.
 - Add an onboarding hint that tells users: move the cursor around for interactive mode, or keep scrolling for story mode.
+- At the V2 start, offer two choices: “Story mode” with supporting copy “I want to see this as a story”, and “Interactive mode” with supporting copy “I want to explore myself”. If the user clicks, treat that as interactive mode, tell them their choice, and move ahead. If the user scrolls, treat that as story mode, tell them their choice, and move forward.
 - In V2 story mode, continuous scrolling should progress through the full story from the user’s current point. If the user wants to interact at any time, mouse movement, hover, and clicks should switch into interactive behavior without resetting story progress; scrolling should resume from where they left off.
 - Show childhood photo from Jorhat with eyes redacted for family privacy, animated with a shimmer effect.
 - V2 globe story stages: first stage is the loading text; second stage is the globe appearing, rotating, and zooming into India; third stage is India changing colors.

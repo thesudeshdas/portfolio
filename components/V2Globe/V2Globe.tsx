@@ -179,6 +179,7 @@ type DevPanelDragState = DevPanelPosition & {
   height: number;
 };
 type ScreenPoint = {
+  calloutSide?: 'left' | 'right';
   x: number;
   y: number;
   calloutWidth?: number;
@@ -402,10 +403,16 @@ function getLocationMarkerLineEndpoint(locationId: string) {
   const markerScale = Number(
     markerElement.style.getPropertyValue('--location-marker-scale') || 1
   );
+  const calloutSide: ScreenPoint['calloutSide'] =
+    markerElement.dataset.v2LocationCalloutSide === 'left' ? 'left' : 'right';
+  const directionMultiplier = calloutSide === 'left' ? -1 : 1;
 
   return {
+    calloutSide,
     calloutWidth: LOCATION_CALLOUT_EXTENSION_LENGTH * markerScale,
-    x: markerRect.left + (LOCATION_CALLOUT_EXTENSION_END + 2) * markerScale,
+    x:
+      markerRect.left +
+      directionMultiplier * (LOCATION_CALLOUT_EXTENSION_END + 2) * markerScale,
     y: markerRect.top - 37 * markerScale
   };
 }
@@ -435,16 +442,20 @@ function getLocationContentLayout(
     )
   );
   const modalWidth = anchor
-    ? Math.min(desiredModalWidth, Math.max(320, anchor.x - 24))
+    ? anchor.calloutSide === 'left'
+      ? Math.min(desiredModalWidth, Math.max(320, size.width - anchor.x - 24))
+      : Math.min(desiredModalWidth, Math.max(320, anchor.x - 24))
     : desiredModalWidth;
   const modalHeight = Math.max(320, size.height * LOCATION_MODAL_HEIGHT_RATIO);
   const modalRightOffset = size.width * LOCATION_MODAL_RIGHT_OFFSET_RATIO;
   const fallbackLeft = Math.max(24, size.width - modalRightOffset - modalWidth);
   const modalLeft = anchor
-    ? Math.max(
-        24,
-        Math.min(size.width - modalWidth - 24, anchor.x - modalWidth)
-      )
+    ? anchor.calloutSide === 'left'
+      ? Math.max(24, Math.min(size.width - modalWidth - 24, anchor.x))
+      : Math.max(
+          24,
+          Math.min(size.width - modalWidth - 24, anchor.x - modalWidth)
+        )
     : fallbackLeft;
   const centeredTop = (size.height - modalHeight) / 2;
   const anchorTop = anchor ? anchor.y - modalHeight / 2 : centeredTop;
@@ -588,6 +599,10 @@ function disposeBorderLineSegments(lineSegments: THREE.LineSegments | null) {
 
 function createLocationMarkerElement(data: object) {
   const pin = data as V2GlobeLocationMarker;
+  const calloutSide = pin.calloutSide ?? 'right';
+  const isLeftCallout = calloutSide === 'left';
+  const isClickHintEnabled = pin.showClickHint !== false;
+  const directionMultiplier = isLeftCallout ? -1 : 1;
   const element = document.createElement('div');
   const style = document.createElement('style');
   const marker = document.createElement('div');
@@ -615,6 +630,7 @@ function createLocationMarkerElement(data: object) {
   );
   const content = document.createElement('div');
   const title = document.createElement('div');
+  const date = document.createElement('div');
   const location = document.createElement('div');
   const coordinates = document.createElement('div');
 
@@ -625,6 +641,7 @@ function createLocationMarkerElement(data: object) {
   );
   element.dataset.v2LocationMarker = 'true';
   element.dataset.v2LocationId = pin.id;
+  element.dataset.v2LocationCalloutSide = calloutSide;
   element.style.setProperty('--location-marker-scale', '1');
   element.tabIndex = 0;
   element.style.position = 'relative';
@@ -692,6 +709,7 @@ function createLocationMarkerElement(data: object) {
   clickHint.style.width = '212px';
   clickHint.style.height = '104px';
   clickHint.style.color = LOCATION_MARKER_COLOR;
+  clickHint.style.display = isClickHintEnabled ? 'block' : 'none';
   clickHint.style.opacity = '0';
   clickHint.style.cursor = 'pointer';
   clickHint.style.pointerEvents = 'auto';
@@ -720,7 +738,7 @@ function createLocationMarkerElement(data: object) {
   clickHintPath.style.transition =
     'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
 
-  clickHintText.textContent = 'Click me';
+  clickHintText.textContent = isClickHintEnabled ? 'Click me' : '';
   clickHintText.style.position = 'absolute';
   clickHintText.style.left = '12px';
   clickHintText.style.bottom = '48px';
@@ -759,7 +777,9 @@ function createLocationMarkerElement(data: object) {
 
   calloutPath.setAttribute(
     'd',
-    `M0 104 L64 67 L${LOCATION_CALLOUT_EXTENSION_END} 67`
+    `M0 104 L${64 * directionMultiplier} 67 L${
+      LOCATION_CALLOUT_EXTENSION_END * directionMultiplier
+    } 67`
   );
   calloutPath.setAttribute('fill', 'none');
   calloutPath.setAttribute('stroke', LOCATION_MARKER_COLOR);
@@ -774,7 +794,12 @@ function createLocationMarkerElement(data: object) {
     'stroke-dasharray 680ms cubic-bezier(0.22, 1, 0.36, 1), stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
 
   content.style.position = 'absolute';
-  content.style.left = '62px';
+  if (isLeftCallout) {
+    content.style.right = '274px';
+    content.style.textAlign = 'right';
+  } else {
+    content.style.left = '62px';
+  }
   content.style.bottom = '48px';
   content.style.minWidth = '170px';
   content.style.color = LOCATION_MARKER_COLOR;
@@ -788,38 +813,46 @@ function createLocationMarkerElement(data: object) {
   title.style.letterSpacing = '0.16em';
   title.style.lineHeight = '1.2';
   title.style.textTransform = 'uppercase';
-  title.style.textShadow = '0 10px 24px rgba(0, 0, 0, 0.85)';
+
+  date.textContent = pin.date ?? '';
+  date.style.display = pin.date ? 'block' : 'none';
+  date.style.marginTop = '5px';
+  date.style.color = 'rgba(47, 29, 19, 0.72)';
+  date.style.fontSize = '11px';
+  date.style.lineHeight = '1.2';
 
   location.textContent = pin.location;
   location.style.marginTop = '6px';
   location.style.fontSize = '13px';
   location.style.lineHeight = '1.2';
-  location.style.textShadow = '0 10px 24px rgba(0, 0, 0, 0.85)';
 
   coordinates.textContent = pin.coordinates;
   coordinates.style.marginTop = '5px';
   coordinates.style.color = 'rgba(47, 29, 19, 0.62)';
   coordinates.style.fontSize = '11px';
   coordinates.style.lineHeight = '1.2';
-  coordinates.style.textShadow = '0 10px 24px rgba(0, 0, 0, 0.85)';
 
-  content.append(title, location, coordinates);
+  content.append(title, date, location, coordinates);
   calloutLine.append(calloutPath);
   callout.append(calloutLine, content);
   clickHintLine.append(clickHintPath);
-  clickHint.append(clickHintLine, clickHintText);
+  if (isClickHintEnabled) {
+    clickHint.append(clickHintLine, clickHintText);
+  }
   hitArea.append(pulseSquare, square);
-  marker.append(hitArea, clickHint, callout);
+  marker.append(hitArea, ...(isClickHintEnabled ? [clickHint] : []), callout);
   element.append(style, marker);
 
   let isTooltipVisible = false;
   let isTooltipSuppressed = false;
   let isLocationContentOpen = false;
+  let isCalloutRetracting = false;
+  let calloutRetractTimeout: number | null = null;
   let pulseCount = 0;
-  let isClickHintDismissed = false;
+  let isClickHintDismissed = !isClickHintEnabled;
 
   const showClickHint = () => {
-    if (isClickHintDismissed) {
+    if (!isClickHintEnabled || isClickHintDismissed) {
       return;
     }
 
@@ -830,6 +863,10 @@ function createLocationMarkerElement(data: object) {
     clickHintText.style.transform = 'translate3d(0, 0, 0)';
   };
   const hideClickHint = () => {
+    if (!isClickHintEnabled) {
+      return;
+    }
+
     clickHint.style.opacity = '0';
     clickHint.style.transform = 'translate3d(8px, 0, 0)';
     clickHintPath.style.strokeDashoffset = '1';
@@ -859,7 +896,7 @@ function createLocationMarkerElement(data: object) {
   };
 
   const showTooltip = () => {
-    if (isTooltipVisible || isTooltipSuppressed) {
+    if (isTooltipVisible || isTooltipSuppressed || isCalloutRetracting) {
       return;
     }
 
@@ -878,7 +915,20 @@ function createLocationMarkerElement(data: object) {
     content.style.opacity = '0';
     content.style.transform = 'translate3d(0, 10px, 0)';
   };
-  const retractCallout = () => {
+  const retractCallout = (lockHover = false) => {
+    if (calloutRetractTimeout !== null) {
+      window.clearTimeout(calloutRetractTimeout);
+      calloutRetractTimeout = null;
+    }
+
+    if (lockHover) {
+      isCalloutRetracting = true;
+      calloutRetractTimeout = window.setTimeout(() => {
+        isCalloutRetracting = false;
+        calloutRetractTimeout = null;
+      }, LOCATION_CALLOUT_CLOSE_MS + 50);
+    }
+
     isTooltipVisible = false;
     square.style.background = LOCATION_MARKER_COLOR;
     hideTooltipContent();
@@ -903,11 +953,19 @@ function createLocationMarkerElement(data: object) {
   };
   const handleWindowPointerMove = (event: PointerEvent) => {
     if (!element.isConnected) {
+      if (calloutRetractTimeout !== null) {
+        window.clearTimeout(calloutRetractTimeout);
+      }
+
       window.removeEventListener('pointermove', handleWindowPointerMove);
       window.removeEventListener(
         LOCATION_CONTENT_CLOSE_EVENT,
         handleLocationContentClose
       );
+      return;
+    }
+
+    if (isCalloutRetracting) {
       return;
     }
 
@@ -930,6 +988,12 @@ function createLocationMarkerElement(data: object) {
   };
   const handleMarkerSelect = (event: MouseEvent | KeyboardEvent) => {
     event.stopPropagation();
+    if (calloutRetractTimeout !== null) {
+      window.clearTimeout(calloutRetractTimeout);
+      calloutRetractTimeout = null;
+    }
+
+    isCalloutRetracting = false;
     isClickHintDismissed = true;
     isTooltipSuppressed = true;
     isLocationContentOpen = true;
@@ -947,8 +1011,13 @@ function createLocationMarkerElement(data: object) {
       element.style.getPropertyValue('--location-marker-scale') || 1
     );
     const anchor = {
+      calloutSide,
       calloutWidth: LOCATION_CALLOUT_EXTENSION_LENGTH * markerScale,
-      x: elementRect.left + (LOCATION_CALLOUT_EXTENSION_END + 2) * markerScale,
+      x:
+        elementRect.left +
+        directionMultiplier *
+          (LOCATION_CALLOUT_EXTENSION_END + 2) *
+          markerScale,
       y: elementRect.top - 37 * markerScale
     };
 
@@ -970,7 +1039,7 @@ function createLocationMarkerElement(data: object) {
     handleMarkerSelect(event);
   };
   const handlePulseIteration = () => {
-    if (isClickHintDismissed) {
+    if (!isClickHintEnabled || isClickHintDismissed) {
       return;
     }
 
@@ -992,14 +1061,16 @@ function createLocationMarkerElement(data: object) {
 
     isTooltipSuppressed = true;
     isLocationContentOpen = false;
-    retractCallout();
+    retractCallout(true);
   };
 
   element.addEventListener('focus', showTooltip);
   element.addEventListener('blur', hideTooltip);
   element.addEventListener('keydown', handleMarkerKeyDown);
   marker.addEventListener('mouseleave', hideTooltip);
-  clickHint.addEventListener('click', handleMarkerSelect);
+  if (isClickHintEnabled) {
+    clickHint.addEventListener('click', handleMarkerSelect);
+  }
   hitArea.addEventListener('click', handleMarkerSelect);
   hitArea.addEventListener('pointerenter', showTooltip);
   pulseSquare.addEventListener('animationiteration', handlePulseIteration);
@@ -1297,6 +1368,7 @@ export default function V2Globe({
         const containerRect = containerRef.current?.getBoundingClientRect();
         const relativeAnchor = containerRect
           ? {
+              calloutSide: liveAnchor.calloutSide,
               calloutWidth: liveAnchor.calloutWidth,
               x: liveAnchor.x - containerRect.left,
               y: liveAnchor.y - containerRect.top
@@ -1855,7 +1927,7 @@ export default function V2Globe({
       </div>
 
       {IS_DEV_PANEL_ENABLED && (
-        <div className='absolute top-5 left-5 z-[10000] rounded-md border border-white/15 bg-black/75 px-3 py-2 font-mono text-xs text-white shadow-2xl backdrop-blur-md'>
+        <div className='absolute top-5 left-5 z-[12000] rounded-md border border-white/15 bg-black/75 px-3 py-2 font-mono text-xs text-white shadow-2xl backdrop-blur-md'>
           <span className='text-white/45'>FPS</span>{' '}
           <span className='tabular-nums'>{fps}</span>
         </div>
@@ -1870,7 +1942,7 @@ export default function V2Globe({
           onClick={() => {
             setIsDevPanelOpen((isOpen) => !isOpen);
           }}
-          className='absolute top-16 left-5 z-[10000] grid size-11 place-items-center rounded-full border border-white/15 bg-black/75 text-xs font-semibold tracking-[0.12em] text-white shadow-2xl backdrop-blur-md transition-colors hover:border-white/35 hover:bg-white hover:text-black'
+          className='absolute top-16 left-5 z-[12000] grid size-11 place-items-center rounded-full border border-white/15 bg-black/75 text-xs font-semibold tracking-[0.12em] text-white shadow-2xl backdrop-blur-md transition-colors hover:border-white/35 hover:bg-white hover:text-black'
         >
           V2
         </button>
@@ -1915,6 +1987,11 @@ export default function V2Globe({
                   <h2 className='mt-2 text-2xl font-semibold'>
                     {selectedLocation.location}
                   </h2>
+                  {selectedLocation.date && (
+                    <p className='mt-2 text-sm text-[#2f1d13]/65'>
+                      {selectedLocation.date}
+                    </p>
+                  )}
                 </div>
                 <button
                   type='button'
@@ -1960,7 +2037,7 @@ export default function V2Globe({
                   left: '20px'
                 })
           }}
-          className='absolute z-[10000] max-h-[calc(100vh-132px)] overflow-y-auto rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
+          className='absolute z-[12000] max-h-[calc(100vh-132px)] overflow-y-auto rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
         >
           <div className='mb-4 flex items-center justify-between gap-3'>
             <button
@@ -2161,7 +2238,7 @@ export default function V2Globe({
       {IS_DEV_PANEL_ENABLED && isColorsModalOpen && (
         <div
           data-v2-dev-control='true'
-          className='fixed inset-0 z-[10001] flex items-center justify-center bg-black/65 p-6 backdrop-blur-sm'
+          className='fixed inset-0 z-[12001] flex items-center justify-center bg-black/65 p-6 backdrop-blur-sm'
         >
           <div
             role='dialog'

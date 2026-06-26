@@ -61,14 +61,16 @@ const LOCATION_MARKER_PULSE_KEYFRAMES = 'v2-location-marker-breathe';
 const LOCATION_MARKER_PULSE_DURATION_MS = 3200;
 const LOCATION_MARKER_HINT_PULSE_COUNT = 3;
 const LOCATION_FOCUS_TRANSITION_MS = 1200;
-const LOCATION_CONTENT_TRANSITION_MS = 1100;
-const LOCATION_CONTENT_LINE_MS = 620;
-const LOCATION_CONTENT_REVEAL_MS = 620;
+const LOCATION_FOCUS_TIMING_FUNCTION = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+const LOCATION_CONTENT_TRANSITION_MS = 3000;
+const LOCATION_CONTENT_REVEAL_MS = 3000;
 const LOCATION_MODAL_WIDTH_RATIO = 0.6;
 const LOCATION_MODAL_HEIGHT_RATIO = 0.7;
 const LOCATION_MODAL_RIGHT_OFFSET_RATIO = 0.08;
 const LOCATION_SELECT_EVENT = 'v2-globe-location-select';
+const LOCATION_CONTENT_CLOSE_EVENT = 'v2-globe-location-content-close';
 const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
+const SKIP_INITIAL_TRANSITION_STORAGE_KEY = 'v2-skip-initial-transition';
 const DEV_PANEL_WIDTH = 260;
 
 const V2_COLOR_TOKENS = [
@@ -170,6 +172,7 @@ type ScreenPoint = {
   y: number;
 };
 type LocationSelectEvent = CustomEvent<{ id: string; anchor: ScreenPoint }>;
+type LocationContentCloseEvent = CustomEvent<{ id: string }>;
 
 const INTRO_FLIGHT_POINTS: Array<Pick<GlobePointOfView, 'lat' | 'lng'>> = [
   {
@@ -374,6 +377,26 @@ function updateLocationMarkerScale(altitude: number) {
     });
 }
 
+function getLocationMarkerLineEndpoint(locationId: string) {
+  const markerElement = document.querySelector<HTMLElement>(
+    `[data-v2-location-id="${locationId}"]`
+  );
+
+  if (!markerElement) {
+    return null;
+  }
+
+  const markerRect = markerElement.getBoundingClientRect();
+  const markerScale = Number(
+    markerElement.style.getPropertyValue('--location-marker-scale') || 1
+  );
+
+  return {
+    x: markerRect.left + 762 * markerScale,
+    y: markerRect.top - 37 * markerScale
+  };
+}
+
 function isPointerNearElementAnchor(event: PointerEvent, element: HTMLElement) {
   const rect = element.getBoundingClientRect();
   const markerScale = Number(
@@ -397,7 +420,10 @@ function getLocationContentLayout(
   );
   const modalHeight = Math.max(320, size.height * LOCATION_MODAL_HEIGHT_RATIO);
   const modalRightOffset = size.width * LOCATION_MODAL_RIGHT_OFFSET_RATIO;
-  const modalLeft = Math.max(24, size.width - modalRightOffset - modalWidth);
+  const fallbackLeft = Math.max(24, size.width - modalRightOffset - modalWidth);
+  const modalLeft = anchor
+    ? Math.max(24, Math.min(size.width - modalWidth - 24, anchor.x))
+    : fallbackLeft;
   const centeredTop = (size.height - modalHeight) / 2;
   const anchorTop = anchor ? anchor.y - modalHeight / 2 : centeredTop;
   const modalTop = Math.max(
@@ -406,11 +432,9 @@ function getLocationContentLayout(
   );
   const lineY = modalTop + modalHeight / 2;
   const lineStartX = anchor?.x ?? modalLeft;
-  const lineWidth = Math.max(0, modalLeft - lineStartX);
 
   return {
     lineStartX,
-    lineWidth,
     lineY,
     modalHeight,
     modalLeft,
@@ -567,6 +591,10 @@ function createLocationMarkerElement(data: object) {
     'http://www.w3.org/2000/svg',
     'path'
   );
+  const calloutExtensionPath = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'path'
+  );
   const content = document.createElement('div');
   const title = document.createElement('div');
   const location = document.createElement('div');
@@ -578,6 +606,7 @@ function createLocationMarkerElement(data: object) {
     `${pin.title}. ${pin.location}. ${pin.coordinates}`
   );
   element.dataset.v2LocationMarker = 'true';
+  element.dataset.v2LocationId = pin.id;
   element.style.setProperty('--location-marker-scale', '1');
   element.tabIndex = 0;
   element.style.position = 'relative';
@@ -723,6 +752,18 @@ function createLocationMarkerElement(data: object) {
   calloutPath.style.transition =
     'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
 
+  calloutExtensionPath.setAttribute('d', 'M200 67 L760 67');
+  calloutExtensionPath.setAttribute('fill', 'none');
+  calloutExtensionPath.setAttribute('stroke', LOCATION_MARKER_COLOR);
+  calloutExtensionPath.setAttribute('stroke-width', '2.5');
+  calloutExtensionPath.setAttribute('stroke-linecap', 'square');
+  calloutExtensionPath.setAttribute('pathLength', '1');
+  calloutExtensionPath.style.filter =
+    'drop-shadow(0 0 12px rgba(47, 29, 19, 0.32))';
+  calloutExtensionPath.style.strokeDasharray = '1';
+  calloutExtensionPath.style.strokeDashoffset = '1';
+  calloutExtensionPath.style.transition = `stroke-dashoffset ${LOCATION_FOCUS_TRANSITION_MS}ms ${LOCATION_FOCUS_TIMING_FUNCTION}`;
+
   content.style.position = 'absolute';
   content.style.left = '62px';
   content.style.bottom = '48px';
@@ -755,7 +796,7 @@ function createLocationMarkerElement(data: object) {
   coordinates.style.textShadow = '0 10px 24px rgba(0, 0, 0, 0.85)';
 
   content.append(title, location, coordinates);
-  calloutLine.append(calloutPath);
+  calloutLine.append(calloutPath, calloutExtensionPath);
   callout.append(calloutLine, content);
   clickHintLine.append(clickHintPath);
   clickHint.append(clickHintLine, clickHintText);
@@ -764,6 +805,8 @@ function createLocationMarkerElement(data: object) {
   element.append(style, marker);
 
   let isTooltipVisible = false;
+  let isTooltipSuppressed = false;
+  let isLocationContentOpen = false;
   let pulseCount = 0;
   let isClickHintDismissed = false;
 
@@ -787,7 +830,7 @@ function createLocationMarkerElement(data: object) {
   };
 
   const showTooltip = () => {
-    if (isTooltipVisible) {
+    if (isTooltipVisible || isTooltipSuppressed) {
       return;
     }
 
@@ -795,24 +838,50 @@ function createLocationMarkerElement(data: object) {
     isClickHintDismissed = true;
     hideClickHint();
     square.style.background = LOCATION_MARKER_COLOR;
+    calloutPath.style.transition =
+      'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
+    calloutExtensionPath.style.strokeDashoffset = '1';
+    content.style.transition =
+      'opacity 360ms ease 700ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) 700ms';
     calloutPath.style.strokeDashoffset = '0';
     content.style.opacity = '1';
     content.style.transform = 'translate3d(0, 0, 0)';
+  };
+  const hideTooltipContent = () => {
+    content.style.transition =
+      'opacity 320ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
+    content.style.opacity = '0';
+    content.style.transform = 'translate3d(0, 10px, 0)';
   };
   const hideTooltip = () => {
     if (!isTooltipVisible) {
       return;
     }
 
+    if (isLocationContentOpen) {
+      hideTooltipContent();
+      calloutPath.style.transition =
+        'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
+      calloutPath.style.strokeDashoffset = '0';
+      calloutExtensionPath.style.strokeDashoffset = '0';
+      return;
+    }
+
     isTooltipVisible = false;
     square.style.background = LOCATION_MARKER_COLOR;
+    hideTooltipContent();
+    calloutPath.style.transition =
+      'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1) 360ms';
     calloutPath.style.strokeDashoffset = '1';
-    content.style.opacity = '0';
-    content.style.transform = 'translate3d(0, 10px, 0)';
+    calloutExtensionPath.style.strokeDashoffset = '1';
   };
   const handleWindowPointerMove = (event: PointerEvent) => {
     if (!element.isConnected) {
       window.removeEventListener('pointermove', handleWindowPointerMove);
+      window.removeEventListener(
+        LOCATION_CONTENT_CLOSE_EVENT,
+        handleLocationContentClose
+      );
       return;
     }
 
@@ -821,6 +890,15 @@ function createLocationMarkerElement(data: object) {
       return;
     }
 
+    if (isLocationContentOpen) {
+      hideTooltipContent();
+      calloutPath.style.strokeDashoffset = '0';
+      calloutExtensionPath.style.strokeDashoffset = '0';
+      return;
+    }
+
+    isTooltipSuppressed = false;
+
     if (document.activeElement !== element) {
       hideTooltip();
     }
@@ -828,12 +906,23 @@ function createLocationMarkerElement(data: object) {
   const handleMarkerSelect = (event: MouseEvent | KeyboardEvent) => {
     event.stopPropagation();
     isClickHintDismissed = true;
+    isTooltipSuppressed = true;
+    isLocationContentOpen = true;
     hideClickHint();
+    isTooltipVisible = true;
+    calloutPath.style.transition =
+      'stroke-dashoffset 680ms cubic-bezier(0.22, 1, 0.36, 1)';
+    calloutPath.style.strokeDashoffset = '0';
+    calloutExtensionPath.style.strokeDashoffset = '0';
+    hideTooltipContent();
 
     const elementRect = element.getBoundingClientRect();
+    const markerScale = Number(
+      element.style.getPropertyValue('--location-marker-scale') || 1
+    );
     const anchor = {
-      x: elementRect.left,
-      y: elementRect.top
+      x: elementRect.left + 762 * markerScale,
+      y: elementRect.top - 37 * markerScale
     };
 
     window.dispatchEvent(
@@ -867,6 +956,17 @@ function createLocationMarkerElement(data: object) {
       showClickHint();
     }
   };
+  const handleLocationContentClose = (event: Event) => {
+    const { id: locationId } = (event as LocationContentCloseEvent).detail;
+
+    if (locationId !== pin.id) {
+      return;
+    }
+
+    isTooltipSuppressed = false;
+    isLocationContentOpen = false;
+    hideTooltip();
+  };
 
   element.addEventListener('focus', showTooltip);
   element.addEventListener('blur', hideTooltip);
@@ -876,6 +976,10 @@ function createLocationMarkerElement(data: object) {
   hitArea.addEventListener('click', handleMarkerSelect);
   hitArea.addEventListener('pointerenter', showTooltip);
   pulseSquare.addEventListener('animationiteration', handlePulseIteration);
+  window.addEventListener(
+    LOCATION_CONTENT_CLOSE_EVENT,
+    handleLocationContentClose
+  );
   window.addEventListener('pointermove', handleWindowPointerMove, {
     passive: true
   });
@@ -904,7 +1008,9 @@ export default function V2Globe({
   const themeAnimationFrameRef = useRef<number | null>(null);
   const themeProgressRef = useRef(0);
   const devPanelDragRef = useRef<DevPanelDragState | null>(null);
+  const locationContentAnimationFrameRef = useRef<number | null>(null);
   const locationContentTimeoutRef = useRef<number | null>(null);
+  const locationContentRevealTimeoutRef = useRef<number | null>(null);
   const previousLocationPovRef = useRef<GlobePointOfView | null>(null);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
@@ -925,11 +1031,18 @@ export default function V2Globe({
   const [rotationSpeed, setRotationSpeed] = useState(DEFAULT_ROTATION_SPEED);
   const [devPanelPosition, setDevPanelPosition] =
     useState<DevPanelPosition | null>(null);
+  const [isDevPanelOpen, setIsDevPanelOpen] = useState(false);
   const [isColorsModalOpen, setIsColorsModalOpen] = useState(false);
+  const [hasLoadedDevPreferences, setHasLoadedDevPreferences] = useState(
+    !IS_DEV_PANEL_ENABLED
+  );
+  const [shouldSkipInitialTransition, setShouldSkipInitialTransition] =
+    useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<V2GlobeLocation | null>(null);
   const [selectedLocationAnchor, setSelectedLocationAnchor] =
     useState<ScreenPoint | null>(null);
+  const [locationContentProgress, setLocationContentProgress] = useState(0);
   const [isLocationContentVisible, setIsLocationContentVisible] =
     useState(false);
 
@@ -1086,6 +1199,39 @@ export default function V2Globe({
       0
     );
   };
+  const animateLocationContentProgress = useCallback(
+    (from: number, to: number, durationMs: number, onComplete?: () => void) => {
+      if (locationContentAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(locationContentAnimationFrameRef.current);
+        locationContentAnimationFrameRef.current = null;
+      }
+
+      const startTime = performance.now();
+
+      const animate = (currentTime: number) => {
+        const elapsedMs = currentTime - startTime;
+        const progress = Math.min(1, elapsedMs / durationMs);
+        const nextProgress = from + (to - from) * progress;
+
+        setLocationContentProgress(nextProgress);
+
+        if (progress < 1) {
+          locationContentAnimationFrameRef.current =
+            window.requestAnimationFrame(animate);
+          return;
+        }
+
+        setLocationContentProgress(to);
+        locationContentAnimationFrameRef.current = null;
+        onComplete?.();
+      };
+
+      setLocationContentProgress(from);
+      locationContentAnimationFrameRef.current =
+        window.requestAnimationFrame(animate);
+    },
+    []
+  );
   const openLocationContent = useCallback(
     (location: V2GlobeLocation, anchor: ScreenPoint) => {
       clearIntroTimeouts();
@@ -1095,23 +1241,19 @@ export default function V2Globe({
         locationContentTimeoutRef.current = null;
       }
 
-      if (!selectedLocation) {
+      if (locationContentRevealTimeoutRef.current !== null) {
+        window.clearTimeout(locationContentRevealTimeoutRef.current);
+        locationContentRevealTimeoutRef.current = null;
+      }
+
+      if (!selectedLocation && !previousLocationPovRef.current) {
         previousLocationPovRef.current = currentPovRef.current;
       }
 
-      const containerRect = containerRef.current?.getBoundingClientRect();
-      const relativeAnchor = containerRect
-        ? {
-            x: anchor.x - containerRect.left,
-            y: anchor.y - containerRect.top
-          }
-        : anchor;
-
-      setSelectedLocation(location);
-      setSelectedLocationAnchor(relativeAnchor);
-      window.requestAnimationFrame(() => {
-        setIsLocationContentVisible(true);
-      });
+      setIsLocationContentVisible(false);
+      setLocationContentProgress(0);
+      setSelectedLocation(null);
+      setSelectedLocationAnchor(null);
       updatePointOfView(
         {
           lat: location.focusView.lat,
@@ -1120,11 +1262,60 @@ export default function V2Globe({
         },
         LOCATION_FOCUS_TRANSITION_MS
       );
+
+      locationContentRevealTimeoutRef.current = window.setTimeout(() => {
+        const liveAnchor = getLocationMarkerLineEndpoint(location.id) ?? anchor;
+        const containerRect = containerRef.current?.getBoundingClientRect();
+        const relativeAnchor = containerRect
+          ? {
+              x: liveAnchor.x - containerRect.left,
+              y: liveAnchor.y - containerRect.top
+            }
+          : liveAnchor;
+
+        setSelectedLocation(location);
+        setSelectedLocationAnchor(relativeAnchor);
+        window.requestAnimationFrame(() => {
+          setIsLocationContentVisible(true);
+          animateLocationContentProgress(0, 1, LOCATION_CONTENT_REVEAL_MS);
+        });
+        locationContentRevealTimeoutRef.current = null;
+      }, LOCATION_FOCUS_TRANSITION_MS);
     },
-    [clearIntroTimeouts, selectedLocation, updatePointOfView]
+    [
+      animateLocationContentProgress,
+      clearIntroTimeouts,
+      selectedLocation,
+      updatePointOfView
+    ]
   );
   const closeLocationContent = useCallback(() => {
+    if (locationContentRevealTimeoutRef.current !== null) {
+      window.clearTimeout(locationContentRevealTimeoutRef.current);
+      locationContentRevealTimeoutRef.current = null;
+    }
+
+    if (selectedLocation) {
+      window.dispatchEvent(
+        new CustomEvent(LOCATION_CONTENT_CLOSE_EVENT, {
+          detail: {
+            id: selectedLocation.id
+          }
+        })
+      );
+    }
+
     setIsLocationContentVisible(false);
+    animateLocationContentProgress(
+      locationContentProgress,
+      0,
+      LOCATION_CONTENT_TRANSITION_MS,
+      () => {
+        setSelectedLocation(null);
+        setSelectedLocationAnchor(null);
+        locationContentTimeoutRef.current = null;
+      }
+    );
 
     const previousPov = previousLocationPovRef.current;
 
@@ -1136,13 +1327,12 @@ export default function V2Globe({
     if (locationContentTimeoutRef.current !== null) {
       window.clearTimeout(locationContentTimeoutRef.current);
     }
-
-    locationContentTimeoutRef.current = window.setTimeout(() => {
-      setSelectedLocation(null);
-      setSelectedLocationAnchor(null);
-      locationContentTimeoutRef.current = null;
-    }, LOCATION_CONTENT_TRANSITION_MS);
-  }, [updatePointOfView]);
+  }, [
+    animateLocationContentProgress,
+    locationContentProgress,
+    selectedLocation,
+    updatePointOfView
+  ]);
   const handleDevPanelDragStart = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       if (event.button !== 0) {
@@ -1205,6 +1395,16 @@ export default function V2Globe({
     },
     []
   );
+  const handleSkipInitialTransitionChange = useCallback(
+    (isChecked: boolean) => {
+      setShouldSkipInitialTransition(isChecked);
+      window.localStorage.setItem(
+        SKIP_INITIAL_TRANSITION_STORAGE_KEY,
+        isChecked ? 'true' : 'false'
+      );
+    },
+    []
+  );
   useEffect(() => {
     const container = containerRef.current;
 
@@ -1258,8 +1458,31 @@ export default function V2Globe({
   }, [borderPaths.length, isActive]);
 
   useEffect(() => {
+    if (!IS_DEV_PANEL_ENABLED) {
+      return;
+    }
+
+    setShouldSkipInitialTransition(
+      window.localStorage.getItem(SKIP_INITIAL_TRANSITION_STORAGE_KEY) ===
+        'true'
+    );
+    setHasLoadedDevPreferences(true);
+  }, []);
+
+  useEffect(() => {
     if (!isActive) {
+      if (locationContentAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(locationContentAnimationFrameRef.current);
+        locationContentAnimationFrameRef.current = null;
+      }
+
+      if (locationContentRevealTimeoutRef.current !== null) {
+        window.clearTimeout(locationContentRevealTimeoutRef.current);
+        locationContentRevealTimeoutRef.current = null;
+      }
+
       setIsLocationContentVisible(false);
+      setLocationContentProgress(0);
       setSelectedLocation(null);
       setSelectedLocationAnchor(null);
       previousLocationPovRef.current = null;
@@ -1290,6 +1513,14 @@ export default function V2Globe({
     return () => {
       if (locationContentTimeoutRef.current !== null) {
         window.clearTimeout(locationContentTimeoutRef.current);
+      }
+
+      if (locationContentAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(locationContentAnimationFrameRef.current);
+      }
+
+      if (locationContentRevealTimeoutRef.current !== null) {
+        window.clearTimeout(locationContentRevealTimeoutRef.current);
       }
     };
   }, []);
@@ -1378,7 +1609,7 @@ export default function V2Globe({
   }, [applyThemeProgress, isSecondStage]);
 
   useEffect(() => {
-    if (!isGlobeReady) {
+    if (!isGlobeReady || (IS_DEV_PANEL_ENABLED && !hasLoadedDevPreferences)) {
       return;
     }
 
@@ -1407,6 +1638,13 @@ export default function V2Globe({
       controls.autoRotate = false;
     }
 
+    if (IS_DEV_PANEL_ENABLED && shouldSkipInitialTransition) {
+      updatePointOfView(getIntroPointOfView(1), 0);
+      applyThemeProgress(1);
+      setIsGlobeVisible(true);
+      return;
+    }
+
     updatePointOfView(
       {
         ...MADRID_VIEW,
@@ -1427,9 +1665,12 @@ export default function V2Globe({
     };
   }, [
     clearIntroTimeouts,
+    hasLoadedDevPreferences,
     isActive,
     isGlobeReady,
+    applyThemeProgress,
     queueIntroFlight,
+    shouldSkipInitialTransition,
     updatePointOfView
   ]);
 
@@ -1585,49 +1826,47 @@ export default function V2Globe({
         </div>
       )}
 
-      {selectedLocation && (
-        <div
-          className={cn(
-            'pointer-events-none absolute inset-0 z-[11000] transition-opacity duration-500',
-            isLocationContentVisible ? 'opacity-100' : 'opacity-0'
-          )}
+      {IS_DEV_PANEL_ENABLED && (
+        <button
+          type='button'
+          aria-label={
+            isDevPanelOpen ? 'Close dev controls' : 'Open dev controls'
+          }
+          onClick={() => {
+            setIsDevPanelOpen((isOpen) => !isOpen);
+          }}
+          className='absolute top-16 left-5 z-[10000] grid size-11 place-items-center rounded-full border border-white/15 bg-black/75 text-xs font-semibold tracking-[0.12em] text-white shadow-2xl backdrop-blur-md transition-colors hover:border-white/35 hover:bg-white hover:text-black'
         >
+          V2
+        </button>
+      )}
+
+      {selectedLocation && (
+        <div className='pointer-events-none absolute inset-0 z-[11000]'>
           <button
             type='button'
             aria-label='Close location content'
             onClick={closeLocationContent}
             className='pointer-events-auto absolute inset-0 bg-[#2f1d13]/35 backdrop-blur-[2px]'
           />
-          <div
-            className='pointer-events-none absolute h-0.5 origin-left bg-[#2f1d13]'
-            style={{
-              left: `${locationContentLayout.lineStartX}px`,
-              top: `${locationContentLayout.lineY}px`,
-              transform: isLocationContentVisible ? 'scaleX(1)' : 'scaleX(0)',
-              transition: `transform ${LOCATION_CONTENT_LINE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`,
-              width: `${locationContentLayout.lineWidth}px`
-            }}
-          />
           <article
             className='pointer-events-auto absolute overflow-hidden border border-[#2f1d13]/30 bg-[#d8c7aa]/90 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm'
             style={{
-              clipPath: isLocationContentVisible
-                ? 'inset(0 0 0 0)'
-                : 'inset(50% 0 50% 0)',
+              clipPath: `inset(${(1 - locationContentProgress) * 50}% 0 ${
+                (1 - locationContentProgress) * 50
+              }% 0)`,
               height: `${locationContentLayout.modalHeight}px`,
               left: `${locationContentLayout.modalLeft}px`,
               top: `${locationContentLayout.modalTop}px`,
-              transition: `clip-path ${LOCATION_CONTENT_REVEAL_MS}ms cubic-bezier(0.22, 1, 0.36, 1) ${
-                isLocationContentVisible ? LOCATION_CONTENT_LINE_MS : 0
-              }ms`,
               width: `${locationContentLayout.modalWidth}px`
             }}
           >
-            <div className='pointer-events-none absolute top-1/2 right-0 left-0 h-0.5 -translate-y-1/2 bg-[#2f1d13]' />
             <div
               className={cn(
                 'relative transition-opacity duration-300',
-                isLocationContentVisible ? 'opacity-100 delay-700' : 'opacity-0'
+                isLocationContentVisible && locationContentProgress >= 0.9
+                  ? 'opacity-100'
+                  : 'opacity-0'
               )}
             >
               <div className='mb-5 flex items-start justify-between gap-4'>
@@ -1661,10 +1900,18 @@ export default function V2Globe({
               </dl>
             </div>
           </article>
+          <div
+            className='pointer-events-none absolute z-10 h-0.5 origin-left bg-[#2f1d13]'
+            style={{
+              left: `${locationContentLayout.modalLeft}px`,
+              top: `${locationContentLayout.lineY}px`,
+              width: `${locationContentLayout.modalWidth}px`
+            }}
+          />
         </div>
       )}
 
-      {IS_DEV_PANEL_ENABLED && (
+      {IS_DEV_PANEL_ENABLED && isDevPanelOpen && (
         <aside
           data-v2-dev-control='true'
           style={{
@@ -1676,9 +1923,14 @@ export default function V2Globe({
                   right: 'auto',
                   left: `${devPanelPosition.x}px`
                 }
-              : undefined)
+              : {
+                  top: '112px',
+                  bottom: 'auto',
+                  right: 'auto',
+                  left: '20px'
+                })
           }}
-          className='absolute bottom-5 left-5 z-[10000] rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
+          className='absolute z-[10000] max-h-[calc(100vh-132px)] overflow-y-auto rounded-md border border-white/15 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-md'
         >
           <div className='mb-4 flex items-center justify-between gap-3'>
             <button
@@ -1735,6 +1987,18 @@ export default function V2Globe({
               </div>
             </div>
           )}
+
+          <label className='mb-5 flex items-center justify-between gap-3 border-b border-white/10 pb-4 text-xs text-white/65'>
+            <span>Skip initial transition</span>
+            <input
+              type='checkbox'
+              checked={shouldSkipInitialTransition}
+              onChange={(event) => {
+                handleSkipInitialTransitionChange(event.target.checked);
+              }}
+              className='h-4 w-4 accent-white'
+            />
+          </label>
 
           <label className='block'>
             <span className='mb-2 flex items-center justify-between text-xs text-white/65'>

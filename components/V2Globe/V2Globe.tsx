@@ -83,6 +83,7 @@ const LOCATION_CONTENT_CLOSE_EVENT = 'v2-globe-location-content-close';
 const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 const SKIP_INITIAL_TRANSITION_STORAGE_KEY = 'v2-skip-initial-transition';
 const DEV_PANEL_WIDTH = 260;
+let currentLocationMarkerScale = 1;
 
 const V2_COLOR_TOKENS = [
   {
@@ -379,6 +380,7 @@ function getLocationMarkerScale(altitude: number) {
 
 function updateLocationMarkerScale(altitude: number) {
   const markerScale = getLocationMarkerScale(altitude);
+  currentLocationMarkerScale = markerScale;
 
   document
     .querySelectorAll<HTMLElement>('[data-v2-location-marker="true"]')
@@ -642,7 +644,10 @@ function createLocationMarkerElement(data: object) {
   element.dataset.v2LocationMarker = 'true';
   element.dataset.v2LocationId = pin.id;
   element.dataset.v2LocationCalloutSide = calloutSide;
-  element.style.setProperty('--location-marker-scale', '1');
+  element.style.setProperty(
+    '--location-marker-scale',
+    currentLocationMarkerScale.toFixed(3)
+  );
   element.tabIndex = 0;
   element.style.position = 'relative';
   element.style.width = '0';
@@ -1843,7 +1848,7 @@ export default function V2Globe({
 
   useEffect(() => {
     updateLocationMarkerScale(currentPov.altitude);
-  }, [currentPov.altitude]);
+  }, [currentPov.altitude, visibleLocationMarkers.length]);
 
   useEffect(() => {
     if (!isGlobeReady || !isActive || fps === 0) {
@@ -1921,6 +1926,7 @@ export default function V2Globe({
             onZoom={(pov) => {
               currentPovRef.current = pov;
               setCurrentPov(pov);
+              updateLocationMarkerScale(pov.altitude);
             }}
           />
         )}

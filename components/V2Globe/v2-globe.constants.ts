@@ -64,6 +64,8 @@ export const LOCATION_MARKER_WHEEL_EVENT = 'v2-globe-location-marker-wheel';
 export const LOCATION_MARKER_SELECTED_EVENT =
   'v2-globe-location-marker-selected';
 export const LOCATION_MARKER_RESET_EVENT = 'v2-globe-location-marker-reset';
+export const LOCATION_MARKER_CALLOUT_EVENT = 'v2-globe-location-marker-callout';
+export const LOCATION_MARKER_OPEN_EVENT = 'v2-globe-location-marker-open';
 export const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 export const SKIP_INITIAL_TRANSITION_STORAGE_KEY = 'v2-skip-initial-transition';
 export const ACTIVE_LOCATION_MARKER_DATA_KEY = 'v2ActiveLocationMarkerId';

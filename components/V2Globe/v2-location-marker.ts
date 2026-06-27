@@ -8,6 +8,8 @@ import {
   LOCATION_CONTENT_CLOSE_EVENT,
   LOCATION_FOCUS_TIMING_FUNCTION,
   LOCATION_MARKER_COLOR,
+  LOCATION_MARKER_CALLOUT_EVENT,
+  LOCATION_MARKER_OPEN_EVENT,
   LOCATION_MARKER_HINT_PULSE_COUNT,
   LOCATION_MARKER_PULSE_DURATION_MS,
   LOCATION_MARKER_PULSE_KEYFRAMES,
@@ -123,6 +125,18 @@ function setActiveLocationMarkerId(locationId: string | null) {
 export function resetLocationMarkerState() {
   setActiveLocationMarkerId(null);
   window.dispatchEvent(new CustomEvent(LOCATION_MARKER_RESET_EVENT));
+}
+
+export function showLocationMarkerCallout(locationId: string) {
+  document
+    .querySelector<HTMLElement>(`[data-v2-location-id="${locationId}"]`)
+    ?.dispatchEvent(new CustomEvent(LOCATION_MARKER_CALLOUT_EVENT));
+}
+
+export function openLocationMarker(locationId: string) {
+  document
+    .querySelector<HTMLElement>(`[data-v2-location-id="${locationId}"]`)
+    ?.dispatchEvent(new CustomEvent(LOCATION_MARKER_OPEN_EVENT));
 }
 
 export function createLocationMarkerElement(data: object) {
@@ -583,7 +597,7 @@ export function createLocationMarkerElement(data: object) {
       hideTooltip();
     }
   };
-  const handleMarkerSelect = (event: MouseEvent | KeyboardEvent) => {
+  const handleMarkerSelect = (event: Event) => {
     event.stopPropagation();
     if (calloutRetractTimeout !== null) {
       window.clearTimeout(calloutRetractTimeout);
@@ -708,10 +722,19 @@ export function createLocationMarkerElement(data: object) {
     isLocationContentOpen = false;
     retractCallout(true);
   };
+  const handleLocationMarkerCallout = () => {
+    isTooltipSuppressed = false;
+    showTooltip();
+  };
 
   element.addEventListener('focus', showTooltip);
   element.addEventListener('blur', hideTooltip);
   element.addEventListener('keydown', handleMarkerKeyDown);
+  element.addEventListener(
+    LOCATION_MARKER_CALLOUT_EVENT,
+    handleLocationMarkerCallout
+  );
+  element.addEventListener(LOCATION_MARKER_OPEN_EVENT, handleMarkerSelect);
   marker.addEventListener('mouseleave', hideTooltip);
   if (isClickHintEnabled) {
     clickHint.addEventListener('click', handleMarkerSelect);

@@ -63,7 +63,9 @@ import { V2_GLOBE_LOCATIONS, type V2GlobeLocation } from './v2-globe-locations';
 import {
   createLocationMarkerElement,
   getLocationMarkerLineEndpoint,
+  openLocationMarker,
   resetLocationMarkerState,
+  showLocationMarkerCallout,
   updateLocationMarkerScale
 } from './v2-location-marker';
 import {
@@ -167,6 +169,8 @@ export default function V2Globe({
   const locationContentTimeoutRef = useRef<number | null>(null);
   const locationContentRevealTimeoutRef = useRef<number | null>(null);
   const isLocationContentClosingRef = useRef(false);
+  const isScrollFlowLockedRef = useRef(false);
+  const scrollFlowUnlockTimeoutRef = useRef<number | null>(null);
   const previousLocationPovRef = useRef<GlobePointOfView | null>(null);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
@@ -201,6 +205,11 @@ export default function V2Globe({
   const [locationContentProgress, setLocationContentProgress] = useState(0);
   const [isLocationContentVisible, setIsLocationContentVisible] =
     useState(false);
+  const [isIntroFlightComplete, setIsIntroFlightComplete] = useState(false);
+  const [revealedLocationIds, setRevealedLocationIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [scrollFlowStep, setScrollFlowStep] = useState(0);
 
   const globeMaterial = useMemo(
     () =>
@@ -231,9 +240,21 @@ export default function V2Globe({
       })),
     []
   );
+  const scrollFlowLocations = useMemo(
+    () =>
+      V2_GLOBE_LOCATIONS.filter(
+        (location) => location.id !== 'current-home-bangalore'
+      ),
+    []
+  );
   const visibleLocationMarkers = useMemo(
-    () => (isSecondStage ? locationMarkers : []),
-    [isSecondStage, locationMarkers]
+    () =>
+      isSecondStage
+        ? locationMarkers.filter((location) =>
+            revealedLocationIds.has(location.id)
+          )
+        : [],
+    [isSecondStage, locationMarkers, revealedLocationIds]
   );
   const locationContentLayout = useMemo(
     () => getLocationContentLayout(size, selectedLocationAnchor),
@@ -305,7 +326,10 @@ export default function V2Globe({
 
       if (progress < 1) {
         introAnimationFrameRef.current = window.requestAnimationFrame(animate);
+        return;
       }
+
+      setIsIntroFlightComplete(true);
     };
 
     introAnimationFrameRef.current = window.requestAnimationFrame(animate);
@@ -497,6 +521,70 @@ export default function V2Globe({
     selectedLocation,
     updatePointOfView
   ]);
+  const scheduleScrollFlowUnlock = useCallback((delayMs: number) => {
+    if (scrollFlowUnlockTimeoutRef.current !== null) {
+      window.clearTimeout(scrollFlowUnlockTimeoutRef.current);
+    }
+
+    scrollFlowUnlockTimeoutRef.current = window.setTimeout(() => {
+      isScrollFlowLockedRef.current = false;
+      scrollFlowUnlockTimeoutRef.current = null;
+    }, delayMs);
+  }, []);
+  const advanceScrollFlow = useCallback(() => {
+    if (isScrollFlowLockedRef.current || !isIntroFlightComplete) {
+      return;
+    }
+
+    const locationIndex = Math.floor(scrollFlowStep / 4);
+    const locationPhase = scrollFlowStep % 4;
+    const location = scrollFlowLocations[locationIndex];
+
+    if (!location) {
+      return;
+    }
+
+    isScrollFlowLockedRef.current = true;
+
+    if (locationPhase === 0) {
+      setRevealedLocationIds((currentIds) => {
+        const nextIds = new Set(currentIds);
+        nextIds.add(location.id);
+        return nextIds;
+      });
+      setScrollFlowStep((currentStep) => currentStep + 1);
+      scheduleScrollFlowUnlock(520);
+      return;
+    }
+
+    if (locationPhase === 1) {
+      showLocationMarkerCallout(location.id);
+      setScrollFlowStep((currentStep) => currentStep + 1);
+      scheduleScrollFlowUnlock(720);
+      return;
+    }
+
+    if (locationPhase === 2) {
+      openLocationMarker(location.id);
+      setScrollFlowStep((currentStep) => currentStep + 1);
+      scheduleScrollFlowUnlock(
+        LOCATION_FOCUS_TRANSITION_MS + LOCATION_CONTENT_REVEAL_MS + 220
+      );
+      return;
+    }
+
+    closeLocationContent();
+    setScrollFlowStep((currentStep) => currentStep + 1);
+    scheduleScrollFlowUnlock(
+      LOCATION_FOCUS_TRANSITION_MS + LOCATION_CALLOUT_CLOSE_MS + 220
+    );
+  }, [
+    closeLocationContent,
+    isIntroFlightComplete,
+    scheduleScrollFlowUnlock,
+    scrollFlowLocations,
+    scrollFlowStep
+  ]);
   const handleDevPanelDragStart = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       if (event.button !== 0) {
@@ -649,6 +737,9 @@ export default function V2Globe({
       setLocationContentProgress(0);
       setSelectedLocation(null);
       setSelectedLocationAnchor(null);
+      setIsIntroFlightComplete(false);
+      setRevealedLocationIds(new Set());
+      setScrollFlowStep(0);
       isLocationContentClosingRef.current = false;
       previousLocationPovRef.current = null;
       resetLocationMarkerState();
@@ -676,6 +767,37 @@ export default function V2Globe({
   }, [isActive, openLocationContent]);
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      if (event.deltaY <= 0) {
+        return;
+      }
+
+      advanceScrollFlow();
+    };
+
+    const wheelListenerOptions = {
+      capture: true,
+      passive: false
+    } satisfies AddEventListenerOptions;
+
+    window.addEventListener('wheel', handleWheel, wheelListenerOptions);
+    document.addEventListener('wheel', handleWheel, wheelListenerOptions);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel, { capture: true });
+      document.removeEventListener('wheel', handleWheel, { capture: true });
+    };
+  }, [advanceScrollFlow, isActive]);
+
+  useEffect(() => {
     return () => {
       if (locationContentTimeoutRef.current !== null) {
         window.clearTimeout(locationContentTimeoutRef.current);
@@ -687,6 +809,10 @@ export default function V2Globe({
 
       if (locationContentRevealTimeoutRef.current !== null) {
         window.clearTimeout(locationContentRevealTimeoutRef.current);
+      }
+
+      if (scrollFlowUnlockTimeoutRef.current !== null) {
+        window.clearTimeout(scrollFlowUnlockTimeoutRef.current);
       }
     };
   }, []);
@@ -785,6 +911,7 @@ export default function V2Globe({
       controls.autoRotate = false;
       controls.enableDamping = true;
       controls.enablePan = false;
+      controls.enableZoom = false;
       controls.rotateSpeed = 0.55;
       controls.minDistance = 80;
       controls.maxDistance = 420;
@@ -800,6 +927,10 @@ export default function V2Globe({
 
     clearIntroTimeouts();
     setIsGlobeVisible(false);
+    setIsIntroFlightComplete(false);
+    setRevealedLocationIds(new Set());
+    setScrollFlowStep(0);
+    isScrollFlowLockedRef.current = false;
     if (controls) {
       controls.autoRotate = false;
     }
@@ -903,21 +1034,12 @@ export default function V2Globe({
 
     const handleLocationMarkerWheel = (event: Event) => {
       const { deltaY } = (event as LocationMarkerWheelEvent).detail;
-      const currentZoom = getDisplayZoomFromAltitude(
-        currentPovRef.current.altitude
-      );
-      const nextZoom = Math.max(
-        MIN_DISPLAY_ZOOM,
-        Math.min(MAX_DISPLAY_ZOOM, currentZoom - deltaY * 0.08)
-      );
 
-      updatePointOfView(
-        {
-          ...currentPovRef.current,
-          altitude: getAltitudeFromDisplayZoom(nextZoom)
-        },
-        0
-      );
+      if (deltaY <= 0) {
+        return;
+      }
+
+      advanceScrollFlow();
     };
 
     window.addEventListener(
@@ -931,7 +1053,7 @@ export default function V2Globe({
         handleLocationMarkerWheel
       );
     };
-  }, [isActive, updatePointOfView]);
+  }, [advanceScrollFlow, isActive]);
 
   useEffect(() => {
     if (!isGlobeReady || !isActive || fps === 0) {

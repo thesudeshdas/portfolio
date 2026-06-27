@@ -13,7 +13,7 @@ const FLOW_STEPS: Array<{ id: FlowStep; label: string }> = [
 ];
 
 export default function V2Experience() {
-  const [activeStep, setActiveStep] = useState<FlowStep>('globe');
+  const [activeStep, setActiveStep] = useState<FlowStep>('loading');
   const [loaderRunId, setLoaderRunId] = useState(0);
 
   const handleStepChange = (step: FlowStep) => {
@@ -40,6 +40,7 @@ export default function V2Experience() {
       {activeStep === 'loading' && (
         <PortfolioLoader
           key={loaderRunId}
+          isLockedOnTextStage
           onComplete={handleLoaderComplete}
         />
       )}

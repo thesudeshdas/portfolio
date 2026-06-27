@@ -206,6 +206,52 @@ body.v2-route .app-content {
   padding-inline: 0;
 }
 
+.v2-scroll-dot {
+  animation: v2-scroll-dot var(--v2-scroll-animation-ms, 2.6s) ease-in-out
+    infinite;
+}
+
+.v2-scroll-arrow {
+  animation: v2-scroll-arrow var(--v2-scroll-animation-ms, 2.6s) ease-in-out
+    infinite;
+}
+
+.v2-scroll-arrow-delay-1 {
+  animation-delay: var(--v2-scroll-arrow-delay-1, 0.32s);
+}
+
+.v2-scroll-arrow-delay-2 {
+  animation-delay: var(--v2-scroll-arrow-delay-2, 0.64s);
+}
+
+@keyframes v2-scroll-dot {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes v2-scroll-arrow {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) rotate(45deg);
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(8px) rotate(45deg);
+  }
+}
+
 /* Line clamp utilities */
 .line-clamp-1 {
   overflow: hidden;

@@ -5,6 +5,8 @@
 - At the V2 start, offer two choices: “Story mode” with supporting copy “I want to see this as a story”, and “Interactive mode” with supporting copy “I want to explore myself”. If the user clicks, treat that as interactive mode, tell them their choice, and move ahead. If the user scrolls, treat that as story mode, tell them their choice, and move forward.
 - In V2 story mode, continuous scrolling should progress through the full story from the user’s current point. If the user wants to interact at any time, mouse movement, hover, and clicks should switch into interactive behavior without resetting story progress; scrolling should resume from where they left off.
 - In V2 interactive mode, reveal location markers one by one as a journey path so users know which location to click next.
+- Let visitors plant a flag on the globe for their own home. The flag can show their name publicly in a playful “you were here” way, making the experience feel shared and giving people a reason to interact beyond viewing my story.
+- Treasure hunt idea: hide small “memory fragments” around the globe. Visitors unlock clues by finding markers, routes, or tiny visual artifacts; completing the hunt reveals a secret personal note, photo, or alternate story path.
 - Add a V2 “Ride mode” that turns on only the places I have ridden to. Include Kolar in this mode, but reveal it only when the user zooms in deeply.
 - Show childhood photo from Jorhat with eyes redacted for family privacy, animated with a shimmer effect.
 - Future V2 journey locations: Cuttack, Odisha, India as “the OG home - the teenage”; Kanpur, Uttar Pradesh, India as “childhood”; Munnar, Kerala, India as “The first long ride”; BR Hills, Karnataka, India as “The first solo”; Udupi, Karnataka, India as “Road trip”.
@@ -23,8 +25,8 @@
 - Portfolio loader post-decrypt hold: 1000ms.
 - Portfolio loader text exit: 1200ms.
 - Portfolio loader overlay exit: 800ms visual fade, 900ms unmount wait.
-- Globe fade in: 700ms.
-- Globe Madrid-to-India intro flight: 7800ms.
+- Globe fade in: 200ms.
+- Globe Madrid-to-India intro flight: 3000ms.
 - Globe intro state sync: 120ms.
 - Globe India color/theme transition: 900ms.
 - Bangalore marker fade in: 900ms.

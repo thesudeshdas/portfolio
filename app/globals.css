@@ -195,6 +195,11 @@ body.v2-route .app-footer {
 
 body.v2-route {
   background: #000;
+  cursor: none;
+}
+
+body.v2-route * {
+  cursor: none !important;
 }
 
 body.v2-route .app-shell {

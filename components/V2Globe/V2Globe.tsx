@@ -274,6 +274,10 @@ export default function V2Globe({
       );
 
       themeProgressRef.current = progress;
+      document.body.style.setProperty(
+        '--v2-cursor-canvas-color',
+        nextBorderColor
+      );
       setMaterialColor(globeMaterial, nextGlobeColor);
       if (borderLineMaterialRef.current) {
         setMaterialColor(borderLineMaterialRef.current, nextBorderColor);
@@ -855,6 +859,12 @@ export default function V2Globe({
       }
     };
   }, [isGlobeReady, visibleBorderPaths]);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.removeProperty('--v2-cursor-canvas-color');
+    };
+  }, []);
 
   useEffect(() => {
     if (themeAnimationFrameRef.current !== null) {

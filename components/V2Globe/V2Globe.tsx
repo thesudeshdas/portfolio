@@ -46,7 +46,7 @@ const MAX_ROTATION_SPEED = 3;
 const DEFAULT_ROTATION_SPEED = 0.35;
 const GLOBE_FADE_IN_MS = 700;
 const INTRO_FLIGHT_MS = 7800;
-const LOCATION_MARKER_ALTITUDE = 0.035;
+const LOCATION_MARKER_ALTITUDE = 0.01;
 const INTRO_STATE_SYNC_MS = 120;
 const BORDER_LINE_ALTITUDE = 0.01;
 const STAGE_THEME_TRANSITION_MS = 900;
@@ -80,10 +80,15 @@ const LOCATION_MODAL_HEIGHT_RATIO = 0.7;
 const LOCATION_MODAL_RIGHT_OFFSET_RATIO = 0.08;
 const LOCATION_SELECT_EVENT = 'v2-globe-location-select';
 const LOCATION_CONTENT_CLOSE_EVENT = 'v2-globe-location-content-close';
+const LOCATION_MARKER_WHEEL_EVENT = 'v2-globe-location-marker-wheel';
+const LOCATION_MARKER_SELECTED_EVENT = 'v2-globe-location-marker-selected';
+const LOCATION_MARKER_RESET_EVENT = 'v2-globe-location-marker-reset';
 const IS_DEV_PANEL_ENABLED = process.env.NODE_ENV === 'development';
 const SKIP_INITIAL_TRANSITION_STORAGE_KEY = 'v2-skip-initial-transition';
+const ACTIVE_LOCATION_MARKER_DATA_KEY = 'v2ActiveLocationMarkerId';
 const DEV_PANEL_WIDTH = 260;
 let currentLocationMarkerScale = 1;
+let activeLocationMarkerId: string | null = null;
 
 const V2_COLOR_TOKENS = [
   {
@@ -187,6 +192,8 @@ type ScreenPoint = {
 };
 type LocationSelectEvent = CustomEvent<{ id: string; anchor: ScreenPoint }>;
 type LocationContentCloseEvent = CustomEvent<{ id: string }>;
+type LocationMarkerWheelEvent = CustomEvent<{ deltaY: number }>;
+type LocationMarkerSelectedEvent = CustomEvent<{ id: string }>;
 
 const INTRO_FLIGHT_POINTS: Array<Pick<GlobePointOfView, 'lat' | 'lng'>> = [
   {
@@ -419,17 +426,56 @@ function getLocationMarkerLineEndpoint(locationId: string) {
   };
 }
 
-function isPointerNearElementAnchor(event: PointerEvent, element: HTMLElement) {
-  const rect = element.getBoundingClientRect();
-  const markerScale = Number(
-    element.style.getPropertyValue('--location-marker-scale') || 1
-  );
-  const hitRadius = 14 * markerScale;
+function getNearestLocationMarkerElement(event: PointerEvent) {
+  let nearestMarker: HTMLElement | null = null;
+  let nearestDistance = Number.POSITIVE_INFINITY;
 
+  document
+    .querySelectorAll<HTMLElement>('[data-v2-location-marker="true"]')
+    .forEach((markerElement) => {
+      const rect = markerElement.getBoundingClientRect();
+      const markerScale = Number(
+        markerElement.style.getPropertyValue('--location-marker-scale') || 1
+      );
+      const hitRadius = 14 * markerScale;
+      const distance = Math.hypot(
+        event.clientX - rect.left,
+        event.clientY - rect.top
+      );
+
+      if (distance > hitRadius || distance >= nearestDistance) {
+        return;
+      }
+
+      nearestMarker = markerElement;
+      nearestDistance = distance;
+    });
+
+  return nearestMarker;
+}
+
+function getActiveLocationMarkerId() {
   return (
-    Math.abs(event.clientX - rect.left) <= hitRadius &&
-    Math.abs(event.clientY - rect.top) <= hitRadius
+    document.documentElement.dataset[ACTIVE_LOCATION_MARKER_DATA_KEY] ??
+    activeLocationMarkerId
   );
+}
+
+function setActiveLocationMarkerId(locationId: string | null) {
+  activeLocationMarkerId = locationId;
+
+  if (locationId) {
+    document.documentElement.dataset[ACTIVE_LOCATION_MARKER_DATA_KEY] =
+      locationId;
+    return;
+  }
+
+  delete document.documentElement.dataset[ACTIVE_LOCATION_MARKER_DATA_KEY];
+}
+
+function resetLocationMarkerState() {
+  setActiveLocationMarkerId(null);
+  window.dispatchEvent(new CustomEvent(LOCATION_MARKER_RESET_EVENT));
 }
 
 function getLocationContentLayout(
@@ -681,6 +727,7 @@ function createLocationMarkerElement(data: object) {
   marker.style.top = '0';
   marker.style.width = '220px';
   marker.style.height = '112px';
+  marker.style.pointerEvents = 'none';
   marker.style.transform = 'scale(var(--location-marker-scale))';
   marker.style.transformOrigin = '0 0';
   marker.style.transition = 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1)';
@@ -805,37 +852,70 @@ function createLocationMarkerElement(data: object) {
   } else {
     content.style.left = '62px';
   }
-  content.style.bottom = '48px';
-  content.style.minWidth = '170px';
+  content.style.top = '0';
+  content.style.height = '104px';
+  content.style.minWidth = '360px';
   content.style.color = LOCATION_MARKER_COLOR;
   content.style.opacity = '0';
   content.style.transform = 'translate3d(0, 10px, 0)';
   content.style.transition = `opacity 360ms ease ${LOCATION_CALLOUT_CLOSE_MS}ms, transform 360ms cubic-bezier(0.22, 1, 0.36, 1) ${LOCATION_CALLOUT_CLOSE_MS}ms`;
 
   title.textContent = pin.title;
-  title.style.fontSize = '11px';
+  title.style.fontSize = '13px';
   title.style.fontWeight = '600';
-  title.style.letterSpacing = '0.16em';
+  title.style.letterSpacing = '0';
   title.style.lineHeight = '1.2';
-  title.style.textTransform = 'uppercase';
+  title.style.position = 'absolute';
+  title.style.bottom = pin.date ? '84px' : '68px';
+  title.style.textTransform = 'none';
+  if (isLeftCallout) {
+    title.style.right = '0';
+  } else {
+    title.style.left = '0';
+  }
 
   date.textContent = pin.date ?? '';
   date.style.display = pin.date ? 'block' : 'none';
-  date.style.marginTop = '5px';
+  date.style.position = 'absolute';
+  date.style.bottom = '70px';
+  date.style.marginTop = '0';
   date.style.color = 'rgba(47, 29, 19, 0.72)';
-  date.style.fontSize = '11px';
+  date.style.fontSize = '10px';
   date.style.lineHeight = '1.2';
+  if (isLeftCallout) {
+    date.style.right = '0';
+  } else {
+    date.style.left = '0';
+  }
 
   location.textContent = pin.location;
-  location.style.marginTop = '6px';
-  location.style.fontSize = '13px';
+  location.style.position = 'absolute';
+  location.style.bottom = '45px';
+  location.style.marginTop = '0';
+  location.style.fontSize = '16px';
+  location.style.fontWeight = '700';
+  location.style.letterSpacing = '0.08em';
   location.style.lineHeight = '1.2';
+  location.style.textTransform = 'uppercase';
+  if (isLeftCallout) {
+    location.style.right = '0';
+  } else {
+    location.style.left = '0';
+  }
 
   coordinates.textContent = pin.coordinates;
-  coordinates.style.marginTop = '5px';
+  coordinates.style.position = 'absolute';
+  coordinates.style.top = '75px';
+  coordinates.style.marginTop = '0';
   coordinates.style.color = 'rgba(47, 29, 19, 0.62)';
-  coordinates.style.fontSize = '11px';
+  coordinates.style.fontSize = '10px';
+  coordinates.style.fontWeight = '600';
   coordinates.style.lineHeight = '1.2';
+  if (isLeftCallout) {
+    coordinates.style.right = '0';
+  } else {
+    coordinates.style.left = '0';
+  }
 
   content.append(title, date, location, coordinates);
   calloutLine.append(calloutPath);
@@ -901,7 +981,14 @@ function createLocationMarkerElement(data: object) {
   };
 
   const showTooltip = () => {
-    if (isTooltipVisible || isTooltipSuppressed || isCalloutRetracting) {
+    const selectedLocationMarkerId = getActiveLocationMarkerId();
+
+    if (
+      isTooltipVisible ||
+      isTooltipSuppressed ||
+      isCalloutRetracting ||
+      (selectedLocationMarkerId !== null && selectedLocationMarkerId !== pin.id)
+    ) {
       return;
     }
 
@@ -967,6 +1054,14 @@ function createLocationMarkerElement(data: object) {
         LOCATION_CONTENT_CLOSE_EVENT,
         handleLocationContentClose
       );
+      window.removeEventListener(
+        LOCATION_MARKER_SELECTED_EVENT,
+        handleLocationMarkerSelected
+      );
+      window.removeEventListener(
+        LOCATION_MARKER_RESET_EVENT,
+        handleLocationMarkerReset
+      );
       return;
     }
 
@@ -974,7 +1069,24 @@ function createLocationMarkerElement(data: object) {
       return;
     }
 
-    if (isPointerNearElementAnchor(event, element)) {
+    const selectedLocationMarkerId = getActiveLocationMarkerId();
+
+    if (
+      selectedLocationMarkerId !== null &&
+      selectedLocationMarkerId !== pin.id
+    ) {
+      retractCallout(true);
+      return;
+    }
+
+    const nearestMarkerElement = getNearestLocationMarkerElement(event);
+
+    if (nearestMarkerElement && nearestMarkerElement !== element) {
+      hideTooltip();
+      return;
+    }
+
+    if (nearestMarkerElement === element) {
       showTooltip();
       return;
     }
@@ -1002,6 +1114,7 @@ function createLocationMarkerElement(data: object) {
     isClickHintDismissed = true;
     isTooltipSuppressed = true;
     isLocationContentOpen = true;
+    setActiveLocationMarkerId(pin.id);
     hideClickHint();
     isTooltipVisible = true;
     setCalloutState(
@@ -1027,6 +1140,14 @@ function createLocationMarkerElement(data: object) {
     };
 
     window.dispatchEvent(
+      new CustomEvent(LOCATION_MARKER_SELECTED_EVENT, {
+        detail: {
+          id: pin.id
+        }
+      })
+    );
+
+    window.dispatchEvent(
       new CustomEvent(LOCATION_SELECT_EVENT, {
         detail: {
           anchor,
@@ -1034,6 +1155,25 @@ function createLocationMarkerElement(data: object) {
         }
       })
     );
+  };
+  const handleMarkerWheel = (event: WheelEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    window.dispatchEvent(
+      new CustomEvent(LOCATION_MARKER_WHEEL_EVENT, {
+        detail: {
+          deltaY: event.deltaY
+        }
+      })
+    );
+  };
+  const handleHitAreaPointerEnter = (event: PointerEvent) => {
+    if (getNearestLocationMarkerElement(event) !== element) {
+      return;
+    }
+
+    showTooltip();
   };
   const handleMarkerKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Enter' && event.key !== ' ') {
@@ -1060,11 +1200,31 @@ function createLocationMarkerElement(data: object) {
   const handleLocationContentClose = (event: Event) => {
     const { id: locationId } = (event as LocationContentCloseEvent).detail;
 
+    if (locationId === getActiveLocationMarkerId()) {
+      setActiveLocationMarkerId(null);
+    }
+
     if (locationId !== pin.id) {
       return;
     }
 
     isTooltipSuppressed = true;
+    isLocationContentOpen = false;
+    retractCallout(true);
+  };
+  const handleLocationMarkerSelected = (event: Event) => {
+    const { id: locationId } = (event as LocationMarkerSelectedEvent).detail;
+
+    if (locationId === pin.id) {
+      return;
+    }
+
+    isTooltipSuppressed = true;
+    isLocationContentOpen = false;
+    retractCallout(true);
+  };
+  const handleLocationMarkerReset = () => {
+    isTooltipSuppressed = false;
     isLocationContentOpen = false;
     retractCallout(true);
   };
@@ -1077,11 +1237,21 @@ function createLocationMarkerElement(data: object) {
     clickHint.addEventListener('click', handleMarkerSelect);
   }
   hitArea.addEventListener('click', handleMarkerSelect);
-  hitArea.addEventListener('pointerenter', showTooltip);
+  hitArea.addEventListener('pointerenter', handleHitAreaPointerEnter);
+  hitArea.addEventListener('wheel', handleMarkerWheel, { passive: false });
+  element.addEventListener('wheel', handleMarkerWheel, { passive: false });
   pulseSquare.addEventListener('animationiteration', handlePulseIteration);
   window.addEventListener(
     LOCATION_CONTENT_CLOSE_EVENT,
     handleLocationContentClose
+  );
+  window.addEventListener(
+    LOCATION_MARKER_SELECTED_EVENT,
+    handleLocationMarkerSelected
+  );
+  window.addEventListener(
+    LOCATION_MARKER_RESET_EVENT,
+    handleLocationMarkerReset
   );
   window.addEventListener('pointermove', handleWindowPointerMove, {
     passive: true
@@ -1423,6 +1593,7 @@ export default function V2Globe({
             }
           })
         );
+        resetLocationMarkerState();
 
         locationContentTimeoutRef.current = window.setTimeout(() => {
           setSelectedLocation(null);
@@ -1598,6 +1769,7 @@ export default function V2Globe({
       setSelectedLocationAnchor(null);
       isLocationContentClosingRef.current = false;
       previousLocationPovRef.current = null;
+      resetLocationMarkerState();
       return;
     }
 
@@ -1849,6 +2021,43 @@ export default function V2Globe({
   useEffect(() => {
     updateLocationMarkerScale(currentPov.altitude);
   }, [currentPov.altitude, visibleLocationMarkers.length]);
+
+  useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
+    const handleLocationMarkerWheel = (event: Event) => {
+      const { deltaY } = (event as LocationMarkerWheelEvent).detail;
+      const currentZoom = getDisplayZoomFromAltitude(
+        currentPovRef.current.altitude
+      );
+      const nextZoom = Math.max(
+        MIN_DISPLAY_ZOOM,
+        Math.min(MAX_DISPLAY_ZOOM, currentZoom - deltaY * 0.08)
+      );
+
+      updatePointOfView(
+        {
+          ...currentPovRef.current,
+          altitude: getAltitudeFromDisplayZoom(nextZoom)
+        },
+        0
+      );
+    };
+
+    window.addEventListener(
+      LOCATION_MARKER_WHEEL_EVENT,
+      handleLocationMarkerWheel
+    );
+
+    return () => {
+      window.removeEventListener(
+        LOCATION_MARKER_WHEEL_EVENT,
+        handleLocationMarkerWheel
+      );
+    };
+  }, [isActive, updatePointOfView]);
 
   useEffect(() => {
     if (!isGlobeReady || !isActive || fps === 0) {

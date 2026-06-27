@@ -4,7 +4,10 @@
 - Add an onboarding hint that tells users: move the cursor around for interactive mode, or keep scrolling for story mode.
 - At the V2 start, offer two choices: “Story mode” with supporting copy “I want to see this as a story”, and “Interactive mode” with supporting copy “I want to explore myself”. If the user clicks, treat that as interactive mode, tell them their choice, and move ahead. If the user scrolls, treat that as story mode, tell them their choice, and move forward.
 - In V2 story mode, continuous scrolling should progress through the full story from the user’s current point. If the user wants to interact at any time, mouse movement, hover, and clicks should switch into interactive behavior without resetting story progress; scrolling should resume from where they left off.
+- In V2 interactive mode, reveal location markers one by one as a journey path so users know which location to click next.
+- Add a V2 “Ride mode” that turns on only the places I have ridden to. Include Kolar in this mode, but reveal it only when the user zooms in deeply.
 - Show childhood photo from Jorhat with eyes redacted for family privacy, animated with a shimmer effect.
+- Future V2 journey locations: Cuttack, Odisha, India as “the OG home - the teenage”; Kanpur, Uttar Pradesh, India as “childhood”; Munnar, Kerala, India as “The first long ride”; BR Hills, Karnataka, India as “The first solo”; Udupi, Karnataka, India as “Road trip”.
 - V2 globe story stages: first stage is the loading text; second stage is the globe appearing, rotating, and zooming into India; third stage is India changing colors.
 - Show ride routes on the globe/map as path lines following the actual roads taken. Hovering or clicking a route should reveal trip context such as the road taken and which trip it belonged to.
 - Explore a public photo-gallery flow where Google Photos is only the private curation/source layer, not the public viewer. Selected images should sync into public storage such as S3, Cloudflare R2, Supabase Storage, or Vercel Blob, then render through a custom gallery page.

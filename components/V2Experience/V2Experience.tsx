@@ -14,18 +14,30 @@ const FLOW_STEPS: Array<{ id: FlowStep; label: string }> = [
 
 export default function V2Experience() {
   const [activeStep, setActiveStep] = useState<FlowStep>('loading');
+  const [isLoaderVisible, setIsLoaderVisible] = useState(true);
+  const [hasEnteredGlobe, setHasEnteredGlobe] = useState(false);
   const [loaderRunId, setLoaderRunId] = useState(0);
 
   const handleStepChange = (step: FlowStep) => {
+    if (step === 'loading' && hasEnteredGlobe) {
+      return;
+    }
+
     if (step === 'loading') {
       setLoaderRunId((currentRunId) => currentRunId + 1);
+      setIsLoaderVisible(true);
     }
 
     setActiveStep(step);
   };
 
   const handleLoaderComplete = useCallback(() => {
+    setHasEnteredGlobe(true);
     setActiveStep('globe');
+  }, []);
+
+  const handleLoaderExitComplete = useCallback(() => {
+    setIsLoaderVisible(false);
   }, []);
 
   return (
@@ -37,11 +49,12 @@ export default function V2Experience() {
         onStepChange={handleStepChange}
       />
 
-      {activeStep === 'loading' && (
+      {isLoaderVisible && (
         <PortfolioLoader
           key={loaderRunId}
           isLockedOnTextStage
           onComplete={handleLoaderComplete}
+          onExitComplete={handleLoaderExitComplete}
         />
       )}
     </main>

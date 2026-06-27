@@ -804,13 +804,6 @@ export default function V2Globe({
       controls.autoRotate = false;
     }
 
-    if (IS_DEV_PANEL_ENABLED && shouldSkipInitialTransition) {
-      updatePointOfView(getIntroPointOfView(1), 0);
-      applyThemeProgress(1);
-      setIsGlobeVisible(true);
-      return;
-    }
-
     updatePointOfView(
       {
         ...MADRID_VIEW,
@@ -836,7 +829,6 @@ export default function V2Globe({
     isGlobeReady,
     applyThemeProgress,
     queueIntroFlight,
-    shouldSkipInitialTransition,
     updatePointOfView
   ]);
 

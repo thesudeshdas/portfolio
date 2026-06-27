@@ -110,31 +110,38 @@ function SmoothDecryptedText({
 
 export default function PortfolioLoader({
   isLockedOnTextStage = false,
-  onComplete
+  onComplete,
+  onExitComplete
 }: {
   isLockedOnTextStage?: boolean;
   onComplete?: () => void;
+  onExitComplete?: () => void;
 }) {
   const [phase, setPhase] = useState<LoaderPhase>('entering');
   const [isMounted, setIsMounted] = useState(true);
   const [isScrollIconVisible, setIsScrollIconVisible] = useState(false);
+  const [isDecryptComplete, setIsDecryptComplete] = useState(false);
   const controls = DEFAULT_CONTROLS;
+  const hasCompletedRef = useRef(false);
 
   useEffect(() => {
     setPhase('entering');
     setIsMounted(true);
     setIsScrollIconVisible(false);
+    setIsDecryptComplete(false);
+    hasCompletedRef.current = false;
 
     const holdTimer = window.setTimeout(() => {
       setPhase('holding');
     }, START_DELAY_MS);
 
     const decryptDurationMs = controls.decryptSpeedMs * INTRO_TEXT.length;
-    const scrollIconStartMs =
-      START_DELAY_MS +
-      TEXT_FADE_IN_MS +
-      decryptDurationMs +
-      controls.scrollIconDelayMs;
+    const decryptCompleteMs =
+      START_DELAY_MS + TEXT_FADE_IN_MS + decryptDurationMs;
+    const decryptCompleteTimer = window.setTimeout(() => {
+      setIsDecryptComplete(true);
+    }, decryptCompleteMs);
+    const scrollIconStartMs = decryptCompleteMs + controls.scrollIconDelayMs;
     const scrollPromptTimer = window.setTimeout(() => {
       setIsScrollIconVisible(true);
     }, scrollIconStartMs);
@@ -142,6 +149,7 @@ export default function PortfolioLoader({
     if (isLockedOnTextStage) {
       return () => {
         window.clearTimeout(holdTimer);
+        window.clearTimeout(decryptCompleteTimer);
         window.clearTimeout(scrollPromptTimer);
       };
     }
@@ -172,6 +180,7 @@ export default function PortfolioLoader({
         window.dispatchEvent(new Event('portfolio-loader-complete'));
         onComplete?.();
         setIsMounted(false);
+        onExitComplete?.();
       },
       START_DELAY_MS +
         TEXT_FADE_IN_MS +
@@ -183,12 +192,81 @@ export default function PortfolioLoader({
 
     return () => {
       window.clearTimeout(holdTimer);
+      window.clearTimeout(decryptCompleteTimer);
       window.clearTimeout(scrollPromptTimer);
       window.clearTimeout(textExitTimer);
       window.clearTimeout(overlayExitTimer);
       window.clearTimeout(unmountTimer);
     };
-  }, [controls, isLockedOnTextStage, onComplete]);
+  }, [controls, isLockedOnTextStage, onComplete, onExitComplete]);
+
+  useEffect(() => {
+    if (!isLockedOnTextStage) {
+      return;
+    }
+
+    let touchStartY = 0;
+
+    const completeTextStage = () => {
+      if (hasCompletedRef.current || !isDecryptComplete) {
+        return;
+      }
+
+      hasCompletedRef.current = true;
+      setPhase('leaving');
+      window.dispatchEvent(new Event('portfolio-loader-complete'));
+      onComplete?.();
+
+      window.setTimeout(() => {
+        setIsMounted(false);
+        onExitComplete?.();
+      }, OVERLAY_EXIT_MS);
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+
+      if (event.deltaY > 0) {
+        completeTextStage();
+      }
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartY = event.touches[0]?.clientY ?? 0;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      event.preventDefault();
+
+      const touchY = event.touches[0]?.clientY ?? touchStartY;
+      if (touchStartY - touchY > 12) {
+        completeTextStage();
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const scrollKeys = new Set(['ArrowDown', 'PageDown', ' ', 'Spacebar']);
+
+      if (!scrollKeys.has(event.key)) {
+        return;
+      }
+
+      event.preventDefault();
+      completeTextStage();
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDecryptComplete, isLockedOnTextStage, onComplete, onExitComplete]);
 
   if (!isMounted) {
     return null;
@@ -216,7 +294,7 @@ export default function PortfolioLoader({
         style={textStyle}
         className={cn(
           'relative inline-block px-6 text-left text-4xl leading-none font-medium whitespace-nowrap text-zinc-100 opacity-0 transition-opacity duration-[1200ms] ease-in-out',
-          phase === 'holding' && 'opacity-100'
+          (phase === 'holding' || phase === 'leaving') && 'opacity-100'
         )}
       >
         <span className='invisible whitespace-pre'>{INTRO_TEXT}</span>

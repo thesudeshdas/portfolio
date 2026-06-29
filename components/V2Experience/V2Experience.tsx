@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 
 import PortfolioLoader from '@/components/PortfolioLoader/PortfolioLoader';
+import V2Cursor from '@/components/V2Cursor/V2Cursor';
 import V2Globe from '@/components/V2Globe/V2Globe';
 
 type FlowStep = 'loading' | 'globe';
@@ -57,6 +58,8 @@ export default function V2Experience() {
           onExitComplete={handleLoaderExitComplete}
         />
       )}
+
+      {!isLoaderVisible && <V2Cursor />}
     </main>
   );
 }

@@ -247,7 +247,8 @@ export function createLocationMarkerElement(data: object) {
   pulseSquare.style.pointerEvents = 'none';
   pulseSquare.style.transform = 'translate(-50%, -50%)';
   pulseSquare.style.animation = `${LOCATION_MARKER_PULSE_KEYFRAMES} ${LOCATION_MARKER_PULSE_DURATION_MS}ms ease-in-out infinite`;
-  pulseSquare.style.transition = 'transform 260ms ease, background 260ms ease';
+  pulseSquare.style.transition =
+    'opacity 260ms ease, transform 260ms ease, background 260ms ease';
 
   clickHint.style.position = 'absolute';
   clickHint.style.left = '-210px';
@@ -304,7 +305,8 @@ export function createLocationMarkerElement(data: object) {
   square.style.background = LOCATION_MARKER_COLOR;
   square.style.border = '1px solid rgba(216, 199, 170, 0.85)';
   square.style.pointerEvents = 'none';
-  square.style.transition = 'background 260ms ease';
+  square.style.transition =
+    'background 260ms ease, width 260ms ease, height 260ms ease';
 
   callout.style.position = 'absolute';
   callout.style.left = '2px';
@@ -423,6 +425,7 @@ export function createLocationMarkerElement(data: object) {
   element.append(style, marker);
 
   let isTooltipVisible = false;
+  let isTooltipPinned = false;
   let isTooltipSuppressed = false;
   let isLocationContentOpen = false;
   let isCalloutRetracting = false;
@@ -430,6 +433,16 @@ export function createLocationMarkerElement(data: object) {
   let pulseCount = 0;
   let isClickHintDismissed = !isClickHintEnabled;
 
+  const stopPulse = () => {
+    pulseSquare.style.animation = 'none';
+    pulseSquare.style.opacity = '0';
+  };
+  const markContentSeen = () => {
+    element.dataset.v2LocationSeen = 'true';
+    stopPulse();
+    square.style.width = '6px';
+    square.style.height = '6px';
+  };
   const showClickHint = () => {
     if (!isClickHintEnabled || isClickHintDismissed) {
       return;
@@ -525,6 +538,10 @@ export function createLocationMarkerElement(data: object) {
     );
   };
   const hideTooltip = () => {
+    if (isTooltipPinned) {
+      return;
+    }
+
     if (!isTooltipVisible) {
       return;
     }
@@ -606,8 +623,10 @@ export function createLocationMarkerElement(data: object) {
 
     isCalloutRetracting = false;
     isClickHintDismissed = true;
+    isTooltipPinned = false;
     isTooltipSuppressed = true;
     isLocationContentOpen = true;
+    stopPulse();
     setActiveLocationMarkerId(pin.id);
     hideClickHint();
     isTooltipVisible = true;
@@ -703,7 +722,9 @@ export function createLocationMarkerElement(data: object) {
     }
 
     isTooltipSuppressed = true;
+    isTooltipPinned = false;
     isLocationContentOpen = false;
+    markContentSeen();
     retractCallout(true);
   };
   const handleLocationMarkerSelected = (event: Event) => {
@@ -714,15 +735,18 @@ export function createLocationMarkerElement(data: object) {
     }
 
     isTooltipSuppressed = true;
+    isTooltipPinned = false;
     isLocationContentOpen = false;
     retractCallout(true);
   };
   const handleLocationMarkerReset = () => {
+    isTooltipPinned = false;
     isTooltipSuppressed = false;
     isLocationContentOpen = false;
     retractCallout(true);
   };
   const handleLocationMarkerCallout = () => {
+    isTooltipPinned = true;
     isTooltipSuppressed = false;
     showTooltip();
   };

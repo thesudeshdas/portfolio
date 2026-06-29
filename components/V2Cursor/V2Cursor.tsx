@@ -2,132 +2,72 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-const COFFEE_CURSOR = '#2f1d13';
 const CURSOR_SIZE_PX = 16;
-const MOVING_CURSOR_SCALE = 0.5;
-const WHITE_CURSOR = '#ffffff';
-
-function getLuminance(color: string) {
-  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-
-  if (!match) {
-    return 0;
-  }
-
-  const [, red, green, blue] = match.map(Number);
-
-  return (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
-}
-
-function getCursorColor(target: Element | null) {
-  let element = target;
-
-  while (element instanceof HTMLElement) {
-    if (element instanceof HTMLCanvasElement) {
-      const canvasCursorColor = window
-        .getComputedStyle(document.body)
-        .getPropertyValue('--v2-cursor-canvas-color')
-        .trim();
-
-      if (canvasCursorColor) {
-        return canvasCursorColor;
-      }
-    }
-
-    const backgroundColor = window.getComputedStyle(element).backgroundColor;
-
-    if (
-      backgroundColor &&
-      backgroundColor !== 'transparent' &&
-      !backgroundColor.endsWith(', 0)')
-    ) {
-      return getLuminance(backgroundColor) > 0.45
-        ? COFFEE_CURSOR
-        : WHITE_CURSOR;
-    }
-
-    element = element.parentElement;
-  }
-
-  return WHITE_CURSOR;
-}
+const CURSOR_IDLE_HIDE_MS = 1000;
 
 export default function V2Cursor() {
+  const idleTimeoutRef = useRef<number | null>(null);
   const [cursor, setCursor] = useState({
-    color: WHITE_CURSOR,
-    isMoving: false,
     isVisible: false,
     x: 0,
     y: 0
   });
-  const moveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const handlePointerMove = (event: PointerEvent) => {
-      const target = document.elementFromPoint(event.clientX, event.clientY);
-
-      if (moveTimeoutRef.current !== null) {
-        window.clearTimeout(moveTimeoutRef.current);
+    const clearIdleTimeout = () => {
+      if (idleTimeoutRef.current === null) {
+        return;
       }
 
+      window.clearTimeout(idleTimeoutRef.current);
+      idleTimeoutRef.current = null;
+    };
+
+    const hideCursor = () => {
+      setCursor((currentCursor) => ({
+        ...currentCursor,
+        isVisible: false
+      }));
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      clearIdleTimeout();
+
+      const isOverNativeCursorArea =
+        event.target instanceof HTMLElement &&
+        event.target.closest('[data-v2-content-cursor="true"]');
+
       setCursor({
-        color: getCursorColor(target),
-        isMoving: true,
-        isVisible: true,
+        isVisible: !isOverNativeCursorArea,
         x: event.clientX,
         y: event.clientY
       });
 
-      moveTimeoutRef.current = window.setTimeout(() => {
-        setCursor((currentCursor) => ({
-          ...currentCursor,
-          isMoving: false
-        }));
-      }, 120);
-    };
-
-    const handlePointerLeave = () => {
-      setCursor((currentCursor) => ({
-        ...currentCursor,
-        isVisible: false
-      }));
-    };
-    const handleWheel = () => {
-      setCursor((currentCursor) => ({
-        ...currentCursor,
-        isVisible: false
-      }));
+      idleTimeoutRef.current = window.setTimeout(() => {
+        hideCursor();
+      }, CURSOR_IDLE_HIDE_MS);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('wheel', handleWheel, {
-      capture: true,
-      passive: true
-    });
-    document.addEventListener('mouseleave', handlePointerLeave);
+    document.addEventListener('mouseleave', hideCursor);
 
     return () => {
-      if (moveTimeoutRef.current !== null) {
-        window.clearTimeout(moveTimeoutRef.current);
-      }
-
+      clearIdleTimeout();
       window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('wheel', handleWheel, { capture: true });
-      document.removeEventListener('mouseleave', handlePointerLeave);
+      document.removeEventListener('mouseleave', hideCursor);
     };
   }, []);
 
   return (
     <span
       aria-hidden='true'
-      className='pointer-events-none fixed z-[13000] rounded-full border transition-[opacity,border-color,transform] duration-150 ease-out'
+      className='pointer-events-none fixed z-[13000] rounded-full border transition-opacity duration-300 ease-out'
       style={{
-        borderColor: cursor.color,
+        borderColor: 'var(--v2-cursor-canvas-color, #ffffff)',
         height: `${CURSOR_SIZE_PX}px`,
+        left: `${cursor.x - CURSOR_SIZE_PX / 2}px`,
         opacity: cursor.isVisible ? 1 : 0,
-        transform: `translate3d(${cursor.x - CURSOR_SIZE_PX / 2}px, ${
-          cursor.y - CURSOR_SIZE_PX / 2
-        }px, 0) scale(${cursor.isMoving ? MOVING_CURSOR_SCALE : 1})`,
+        top: `${cursor.y - CURSOR_SIZE_PX / 2}px`,
         width: `${CURSOR_SIZE_PX}px`
       }}
     />

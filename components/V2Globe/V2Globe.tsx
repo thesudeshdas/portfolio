@@ -98,6 +98,12 @@ const Globe = dynamic<
   GlobeProps & { ref?: MutableRefObject<GlobeMethods | undefined> }
 >(() => import('react-globe.gl'), { ssr: false });
 
+const INDIA_RECENTER_THRESHOLD = {
+  altitude: 0.08,
+  lat: 4,
+  lng: 6
+};
+
 function getLocationContentLayout(
   size: { width: number; height: number },
   anchor: ScreenPoint | null
@@ -144,6 +150,15 @@ function getLocationContentLayout(
   };
 }
 
+function isNearPointOfView(pov: GlobePointOfView, targetPov: GlobePointOfView) {
+  return (
+    Math.abs(pov.lat - targetPov.lat) <= INDIA_RECENTER_THRESHOLD.lat &&
+    Math.abs(pov.lng - targetPov.lng) <= INDIA_RECENTER_THRESHOLD.lng &&
+    Math.abs(pov.altitude - targetPov.altitude) <=
+      INDIA_RECENTER_THRESHOLD.altitude
+  );
+}
+
 export default function V2Globe({
   activeStep,
   flowSteps = [],
@@ -171,6 +186,8 @@ export default function V2Globe({
   const isLocationContentClosingRef = useRef(false);
   const isScrollFlowLockedRef = useRef(false);
   const scrollFlowUnlockTimeoutRef = useRef<number | null>(null);
+  const scrollPromptTimeoutRef = useRef<number | null>(null);
+  const revealCalloutTimeoutRef = useRef<number | null>(null);
   const previousLocationPovRef = useRef<GlobePointOfView | null>(null);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
@@ -210,6 +227,9 @@ export default function V2Globe({
     () => new Set()
   );
   const [scrollFlowStep, setScrollFlowStep] = useState(0);
+  const [hasScrollPromptAppeared, setHasScrollPromptAppeared] = useState(false);
+  const [isScrollPromptVisible, setIsScrollPromptVisible] = useState(false);
+  const [isScrollPromptDismissed, setIsScrollPromptDismissed] = useState(false);
 
   const globeMaterial = useMemo(
     () =>
@@ -259,6 +279,34 @@ export default function V2Globe({
   const locationContentLayout = useMemo(
     () => getLocationContentLayout(size, selectedLocationAnchor),
     [selectedLocationAnchor, size]
+  );
+  const shouldShowScrollPrompt = isScrollPromptVisible && !selectedLocation;
+  const revealLocationMarker = useCallback(
+    (locationId: string, shouldShowCallout = false, calloutDelayMs = 80) => {
+      setRevealedLocationIds((currentIds) => {
+        if (currentIds.has(locationId)) {
+          return currentIds;
+        }
+
+        const nextIds = new Set(currentIds);
+        nextIds.add(locationId);
+        return nextIds;
+      });
+
+      if (!shouldShowCallout) {
+        return;
+      }
+
+      if (revealCalloutTimeoutRef.current !== null) {
+        window.clearTimeout(revealCalloutTimeoutRef.current);
+      }
+
+      revealCalloutTimeoutRef.current = window.setTimeout(() => {
+        showLocationMarkerCallout(locationId);
+        revealCalloutTimeoutRef.current = null;
+      }, calloutDelayMs);
+    },
+    []
   );
   const applyThemeProgress = useCallback(
     (progress: number) => {
@@ -535,6 +583,41 @@ export default function V2Globe({
       scrollFlowUnlockTimeoutRef.current = null;
     }, delayMs);
   }, []);
+  const closeLocationContentAndContinue = useCallback(() => {
+    if (!selectedLocation || isLocationContentClosingRef.current) {
+      return;
+    }
+
+    const locationIndex = scrollFlowLocations.findIndex(
+      (location) => location.id === selectedLocation.id
+    );
+    const nextLocation =
+      locationIndex >= 0 ? scrollFlowLocations[locationIndex + 1] : undefined;
+
+    isScrollFlowLockedRef.current = true;
+    closeLocationContent();
+
+    if (nextLocation) {
+      revealLocationMarker(
+        nextLocation.id,
+        true,
+        LOCATION_CONTENT_TRANSITION_MS + LOCATION_CALLOUT_CLOSE_MS + 120
+      );
+      setScrollFlowStep((currentStep) => currentStep + 3);
+    } else {
+      setScrollFlowStep((currentStep) => currentStep + 1);
+    }
+
+    scheduleScrollFlowUnlock(
+      LOCATION_FOCUS_TRANSITION_MS + LOCATION_CALLOUT_CLOSE_MS + 220
+    );
+  }, [
+    closeLocationContent,
+    revealLocationMarker,
+    scheduleScrollFlowUnlock,
+    scrollFlowLocations,
+    selectedLocation
+  ]);
   const advanceScrollFlow = useCallback(() => {
     if (isScrollFlowLockedRef.current || !isIntroFlightComplete) {
       return;
@@ -543,6 +626,7 @@ export default function V2Globe({
     const locationIndex = Math.floor(scrollFlowStep / 4);
     const locationPhase = scrollFlowStep % 4;
     const location = scrollFlowLocations[locationIndex];
+    const indiaOverviewPov = getIntroPointOfView(1);
 
     if (!location) {
       return;
@@ -550,14 +634,20 @@ export default function V2Globe({
 
     isScrollFlowLockedRef.current = true;
 
+    if (
+      locationPhase !== 0 &&
+      !selectedLocation &&
+      !isNearPointOfView(currentPovRef.current, indiaOverviewPov)
+    ) {
+      updatePointOfView(indiaOverviewPov, LOCATION_FOCUS_TRANSITION_MS);
+      scheduleScrollFlowUnlock(LOCATION_FOCUS_TRANSITION_MS + 120);
+      return;
+    }
+
     if (locationPhase === 0) {
-      setRevealedLocationIds((currentIds) => {
-        const nextIds = new Set(currentIds);
-        nextIds.add(location.id);
-        return nextIds;
-      });
-      setScrollFlowStep((currentStep) => currentStep + 1);
-      scheduleScrollFlowUnlock(520);
+      revealLocationMarker(location.id, true);
+      setScrollFlowStep((currentStep) => currentStep + 2);
+      scheduleScrollFlowUnlock(720);
       return;
     }
 
@@ -577,17 +667,16 @@ export default function V2Globe({
       return;
     }
 
-    closeLocationContent();
-    setScrollFlowStep((currentStep) => currentStep + 1);
-    scheduleScrollFlowUnlock(
-      LOCATION_FOCUS_TRANSITION_MS + LOCATION_CALLOUT_CLOSE_MS + 220
-    );
+    closeLocationContentAndContinue();
   }, [
-    closeLocationContent,
+    closeLocationContentAndContinue,
     isIntroFlightComplete,
+    revealLocationMarker,
     scheduleScrollFlowUnlock,
     scrollFlowLocations,
-    scrollFlowStep
+    scrollFlowStep,
+    selectedLocation,
+    updatePointOfView
   ]);
   const handleDevPanelDragStart = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
@@ -744,6 +833,9 @@ export default function V2Globe({
       setIsIntroFlightComplete(false);
       setRevealedLocationIds(new Set());
       setScrollFlowStep(0);
+      setHasScrollPromptAppeared(false);
+      setIsScrollPromptVisible(false);
+      setIsScrollPromptDismissed(false);
       isLocationContentClosingRef.current = false;
       previousLocationPovRef.current = null;
       resetLocationMarkerState();
@@ -771,6 +863,61 @@ export default function V2Globe({
   }, [isActive, openLocationContent]);
 
   useEffect(() => {
+    const firstLocation = scrollFlowLocations[0];
+
+    if (
+      !isActive ||
+      !isIntroFlightComplete ||
+      !firstLocation ||
+      scrollFlowStep !== 0
+    ) {
+      return;
+    }
+
+    revealLocationMarker(firstLocation.id, true);
+    setScrollFlowStep(2);
+  }, [
+    isActive,
+    isIntroFlightComplete,
+    revealLocationMarker,
+    scrollFlowLocations,
+    scrollFlowStep
+  ]);
+
+  useEffect(() => {
+    if (
+      !isActive ||
+      !isIntroFlightComplete ||
+      isScrollPromptDismissed ||
+      scrollFlowStep !== 2
+    ) {
+      return;
+    }
+
+    if (scrollPromptTimeoutRef.current !== null) {
+      window.clearTimeout(scrollPromptTimeoutRef.current);
+    }
+
+    scrollPromptTimeoutRef.current = window.setTimeout(() => {
+      setHasScrollPromptAppeared(true);
+      setIsScrollPromptVisible(true);
+      scrollPromptTimeoutRef.current = null;
+    }, 800);
+
+    return () => {
+      if (scrollPromptTimeoutRef.current !== null) {
+        window.clearTimeout(scrollPromptTimeoutRef.current);
+        scrollPromptTimeoutRef.current = null;
+      }
+    };
+  }, [
+    isActive,
+    isIntroFlightComplete,
+    isScrollPromptDismissed,
+    scrollFlowStep
+  ]);
+
+  useEffect(() => {
     if (!isActive) {
       return;
     }
@@ -782,6 +929,15 @@ export default function V2Globe({
 
       if (event.deltaY <= 0) {
         return;
+      }
+
+      if (scrollFlowStep === 2 && !hasScrollPromptAppeared) {
+        return;
+      }
+
+      if (isScrollPromptVisible) {
+        setIsScrollPromptVisible(false);
+        setIsScrollPromptDismissed(true);
       }
 
       advanceScrollFlow();
@@ -799,7 +955,13 @@ export default function V2Globe({
       window.removeEventListener('wheel', handleWheel, { capture: true });
       document.removeEventListener('wheel', handleWheel, { capture: true });
     };
-  }, [advanceScrollFlow, isActive]);
+  }, [
+    advanceScrollFlow,
+    hasScrollPromptAppeared,
+    isActive,
+    isScrollPromptVisible,
+    scrollFlowStep
+  ]);
 
   useEffect(() => {
     return () => {
@@ -817,6 +979,14 @@ export default function V2Globe({
 
       if (scrollFlowUnlockTimeoutRef.current !== null) {
         window.clearTimeout(scrollFlowUnlockTimeoutRef.current);
+      }
+
+      if (scrollPromptTimeoutRef.current !== null) {
+        window.clearTimeout(scrollPromptTimeoutRef.current);
+      }
+
+      if (revealCalloutTimeoutRef.current !== null) {
+        window.clearTimeout(revealCalloutTimeoutRef.current);
       }
     };
   }, []);
@@ -940,6 +1110,9 @@ export default function V2Globe({
     setIsIntroFlightComplete(false);
     setRevealedLocationIds(new Set());
     setScrollFlowStep(0);
+    setHasScrollPromptAppeared(false);
+    setIsScrollPromptVisible(false);
+    setIsScrollPromptDismissed(false);
     isScrollFlowLockedRef.current = false;
     if (controls) {
       controls.autoRotate = false;
@@ -1154,9 +1327,24 @@ export default function V2Globe({
         </div>
       )}
 
+      <div
+        aria-hidden='true'
+        className={cn(
+          'pointer-events-none absolute top-1/2 left-1/2 z-[10000] flex -translate-x-1/2 translate-y-4 items-center gap-3 text-[#2f1d13] opacity-0 transition-[opacity,transform] duration-[1400ms] ease-out',
+          shouldShowScrollPrompt && 'translate-y-0 opacity-70'
+        )}
+      >
+        <span className='relative flex h-8 w-5 justify-center rounded-full border border-current/70'>
+          <span className='v2-scroll-dot mt-2 h-1.5 w-1.5 rounded-full bg-current' />
+        </span>
+        <span className='text-[10px] font-semibold tracking-[0.2em] uppercase'>
+          Keep scrolling
+        </span>
+      </div>
+
       {selectedLocation && (
         <V2LocationContentPanel
-          closeLocationContent={closeLocationContent}
+          closeLocationContent={closeLocationContentAndContinue}
           isLocationContentVisible={isLocationContentVisible}
           locationContentLayout={locationContentLayout}
           locationContentProgress={locationContentProgress}

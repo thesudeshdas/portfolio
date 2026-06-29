@@ -16,6 +16,8 @@ const TARGET_DECRYPT_FPS = 120;
 const DECRYPT_CHARACTERS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?.,';
 const INTRO_TEXT = 'hey, who is Dash?';
+const LOADER_CURSOR_SIZE_PX = 16;
+const CURSOR_IDLE_HIDE_MS = 1000;
 
 type TextStageControls = {
   decryptSpeedMs: number;
@@ -121,8 +123,14 @@ export default function PortfolioLoader({
   const [isMounted, setIsMounted] = useState(true);
   const [isScrollIconVisible, setIsScrollIconVisible] = useState(false);
   const [isDecryptComplete, setIsDecryptComplete] = useState(false);
+  const [cursor, setCursor] = useState({
+    isVisible: false,
+    x: 0,
+    y: 0
+  });
   const controls = DEFAULT_CONTROLS;
   const hasCompletedRef = useRef(false);
+  const cursorIdleTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     setPhase('entering');
@@ -199,6 +207,49 @@ export default function PortfolioLoader({
       window.clearTimeout(unmountTimer);
     };
   }, [controls, isLockedOnTextStage, onComplete, onExitComplete]);
+
+  useEffect(() => {
+    const clearCursorIdleTimeout = () => {
+      if (cursorIdleTimeoutRef.current === null) {
+        return;
+      }
+
+      window.clearTimeout(cursorIdleTimeoutRef.current);
+      cursorIdleTimeoutRef.current = null;
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      clearCursorIdleTimeout();
+      setCursor({
+        isVisible: true,
+        x: event.clientX,
+        y: event.clientY
+      });
+
+      cursorIdleTimeoutRef.current = window.setTimeout(() => {
+        setCursor((currentCursor) => ({
+          ...currentCursor,
+          isVisible: false
+        }));
+      }, CURSOR_IDLE_HIDE_MS);
+    };
+
+    const handlePointerLeave = () => {
+      setCursor((currentCursor) => ({
+        ...currentCursor,
+        isVisible: false
+      }));
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('mouseleave', handlePointerLeave);
+
+    return () => {
+      clearCursorIdleTimeout();
+      window.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('mouseleave', handlePointerLeave);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isLockedOnTextStage) {
@@ -332,6 +383,18 @@ export default function PortfolioLoader({
           </div>
         </div>
       )}
+
+      <span
+        aria-hidden='true'
+        className='pointer-events-none fixed z-[10000] rounded-full border border-zinc-100 transition-opacity duration-[800ms] ease-in-out'
+        style={{
+          height: `${LOADER_CURSOR_SIZE_PX}px`,
+          left: `${cursor.x - LOADER_CURSOR_SIZE_PX / 2}px`,
+          opacity: cursor.isVisible && phase !== 'leaving' ? 1 : 0,
+          top: `${cursor.y - LOADER_CURSOR_SIZE_PX / 2}px`,
+          width: `${LOADER_CURSOR_SIZE_PX}px`
+        }}
+      />
     </div>
   );
 }

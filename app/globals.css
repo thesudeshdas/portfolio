@@ -202,6 +202,15 @@ body.v2-route * {
   cursor: none !important;
 }
 
+body.v2-route [data-v2-content-cursor='true'],
+body.v2-route [data-v2-content-cursor='true'] * {
+  cursor: auto !important;
+}
+
+body.v2-route [data-v2-content-cursor='true'] button {
+  cursor: pointer !important;
+}
+
 body.v2-route .app-shell {
   margin: 0;
   max-width: none;

@@ -34,6 +34,7 @@ export default function V2LocationContentPanel({
         }}
       />
       <article
+        data-v2-content-cursor='true'
         className='pointer-events-auto absolute overflow-hidden border border-[#2f1d13]/30 bg-[#d8c7aa]/50 p-8 text-[#2f1d13] shadow-2xl backdrop-blur-sm'
         style={{
           clipPath: `inset(${(1 - locationContentProgress) * 50}% 0 ${

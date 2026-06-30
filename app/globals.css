@@ -189,13 +189,45 @@ body.v2-route .app-nav {
   display: none;
 }
 
+body.v3-route .app-nav {
+  display: none;
+}
+
+body:has(.v3-page) .app-nav {
+  display: none;
+}
+
 body.v2-route .app-footer {
+  display: none;
+}
+
+body.v3-route .app-footer {
+  display: none;
+}
+
+body:has(.v3-page) .app-footer {
   display: none;
 }
 
 body.v2-route {
   background: #000;
   cursor: none;
+}
+
+body.v3-route {
+  background: #f5ebe0;
+}
+
+body:has(.v3-page) {
+  background: #f5ebe0;
+}
+
+.dark body.v3-route {
+  background: #1a1210;
+}
+
+.dark body:has(.v3-page) {
+  background: #1a1210;
 }
 
 body.v2-route * {
@@ -216,7 +248,25 @@ body.v2-route .app-shell {
   max-width: none;
 }
 
+body.v3-route .app-shell {
+  margin: 0;
+  max-width: none;
+}
+
+body:has(.v3-page) .app-shell {
+  margin: 0;
+  max-width: none;
+}
+
 body.v2-route .app-content {
+  padding-inline: 0;
+}
+
+body.v3-route .app-content {
+  padding-inline: 0;
+}
+
+body:has(.v3-page) .app-content {
   padding-inline: 0;
 }
 
@@ -288,7 +338,7 @@ body.v2-route .app-content {
   -webkit-line-clamp: 3;
 }
 
-p {
+p:not(.v3-page *) {
   font-weight: 400;
   font-size: 14px;
   color: color-mix(

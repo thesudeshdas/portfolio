@@ -348,6 +348,28 @@ p:not(.v3-page *) {
   );
 }
 
+.v3-reveal-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+  transition-delay: var(--v3-reveal-delay, 0ms);
+}
+
+.v3-reveal-group[data-visible='true'] .v3-reveal-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-reveal-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* View Transitions: circle-with-blur theme toggle */
 ::view-transition-old(root),
 ::view-transition-new(root) {

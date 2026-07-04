@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import V3BodyClass from '@/components/V3BodyClass/V3BodyClass';
 
 export const metadata: Metadata = {
-  title: 'Dash | Under Renovation',
+  title: 'Dash',
   description:
     'A temporary portfolio page for Sudesh Das while the new site is being rebuilt.'
 };

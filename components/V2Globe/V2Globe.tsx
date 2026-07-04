@@ -281,6 +281,16 @@ export default function V2Globe({
     [selectedLocationAnchor, size]
   );
   const shouldShowScrollPrompt = isScrollPromptVisible && !selectedLocation;
+  const dismissScrollPrompt = useCallback(() => {
+    if (scrollPromptTimeoutRef.current !== null) {
+      window.clearTimeout(scrollPromptTimeoutRef.current);
+      scrollPromptTimeoutRef.current = null;
+    }
+
+    setIsScrollPromptVisible(false);
+    setIsScrollPromptDismissed(true);
+    setHasScrollPromptAppeared(true);
+  }, []);
   const revealLocationMarker = useCallback(
     (locationId: string, shouldShowCallout = false, calloutDelayMs = 80) => {
       setRevealedLocationIds((currentIds) => {
@@ -843,6 +853,8 @@ export default function V2Globe({
     }
 
     const handleLocationSelect = (event: Event) => {
+      dismissScrollPrompt();
+
       const { anchor, id: locationId } = (event as LocationSelectEvent).detail;
       const location = V2_GLOBE_LOCATIONS.find(
         (candidateLocation) => candidateLocation.id === locationId
@@ -860,7 +872,7 @@ export default function V2Globe({
     return () => {
       window.removeEventListener(LOCATION_SELECT_EVENT, handleLocationSelect);
     };
-  }, [isActive, openLocationContent]);
+  }, [dismissScrollPrompt, isActive, openLocationContent]);
 
   useEffect(() => {
     const firstLocation = scrollFlowLocations[0];
@@ -935,10 +947,7 @@ export default function V2Globe({
         return;
       }
 
-      if (isScrollPromptVisible) {
-        setIsScrollPromptVisible(false);
-        setIsScrollPromptDismissed(true);
-      }
+      dismissScrollPrompt();
 
       advanceScrollFlow();
     };
@@ -957,9 +966,9 @@ export default function V2Globe({
     };
   }, [
     advanceScrollFlow,
+    dismissScrollPrompt,
     hasScrollPromptAppeared,
     isActive,
-    isScrollPromptVisible,
     scrollFlowStep
   ]);
 
@@ -1286,6 +1295,16 @@ export default function V2Globe({
     <section
       ref={containerRef}
       className='relative min-h-screen overflow-hidden bg-black'
+      onPointerDownCapture={(event) => {
+        if (
+          event.target instanceof HTMLElement &&
+          event.target.closest('[data-v2-dev-control="true"]')
+        ) {
+          return;
+        }
+
+        dismissScrollPrompt();
+      }}
     >
       <div
         className={cn(

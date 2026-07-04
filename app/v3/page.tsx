@@ -13,46 +13,40 @@ export default function V3Page() {
     <main
       className={`${serif.className} v3-page min-h-[100dvh] bg-[#f5ebe0] text-[#2a1a0e] dark:bg-[#1a1210] dark:text-[#eddcc8]`}
     >
-      <div className='fixed top-5 right-5 z-10'>
+      <div className='fixed top-5 right-5 z-10 sm:right-auto sm:left-[calc(50%+356px)]'>
         <ModeToggle />
       </div>
 
       <article className='mx-auto max-w-[680px] px-6 py-16 sm:px-8 sm:py-24'>
         <header className='mb-16 sm:mb-20'>
           <V3FadeIn delay={0}>
-            <p className='mb-8 text-[15px] font-semibold tracking-[0.15em] text-[#7a5a3e] dark:text-[#b89a78]'>
-              june 2026
+            <p className='mb-8 text-[15px] leading-[1.75] font-semibold tracking-[0.15em] text-[#7a5a3e] dark:text-[#b89a78]'>
+              portfolio site under construction
+              <br />
+              until then, here&apos;s something about me
             </p>
           </V3FadeIn>
 
-          <V3FadeIn delay={200}>
+          <V3FadeIn delay={120}>
             <h1 className='mb-6 text-5xl leading-[1.1] font-semibold sm:text-7xl sm:leading-[1.08]'>
               hi, i am dash
             </h1>
           </V3FadeIn>
-
-          <V3FadeIn delay={400}>
-            <p className='text-lg leading-[1.75] font-medium'>
-              the portfolio you were looking for is currently being rebuilt. in
-              the meantime, here is a short letter about who i am and how to
-              reach me
-            </p>
-          </V3FadeIn>
         </header>
 
-        <V3FadeIn delay={600}>
+        <V3FadeIn delay={240}>
           <div className='mb-14 h-px bg-[#c9b49a]/40 dark:bg-[#5a4535]/60' />
         </V3FadeIn>
 
         <section className='mb-14'>
-          <V3FadeIn delay={700}>
+          <V3FadeIn delay={360}>
             <p className='mb-6 text-lg leading-[1.75] font-medium'>
-              i am sudesh das, also known as dash. i am a product engineer who
+              i am Sudesh Das, i also go by Dash. i am a product engineer who
               takes ideas from rough shape to working software
             </p>
           </V3FadeIn>
 
-          <V3FadeIn delay={800}>
+          <V3FadeIn delay={480}>
             <p className='text-lg leading-[1.75] font-medium'>
               my work spans web and mobile applications, backend systems, AI
               workflows, career and talent products, community platforms, and
@@ -61,24 +55,31 @@ export default function V3Page() {
           </V3FadeIn>
         </section>
 
-        <V3FadeIn>
+        <V3FadeIn delay={600}>
           <div className='mb-14 h-px bg-[#c9b49a]/40 dark:bg-[#5a4535]/60' />
         </V3FadeIn>
 
         <section className='mb-14'>
-          <V3FadeIn>
+          <V3FadeIn delay={720}>
             <p className='mb-8 text-[15px] font-semibold tracking-[0.15em] text-[#7a5a3e] dark:text-[#b89a78]'>
-              where i have been
+              where i have been/i am
             </p>
           </V3FadeIn>
 
           <div className='flex flex-col gap-10'>
-            <V3FadeIn>
+            <V3FadeIn delay={840}>
               <div>
-                <p className='text-lg leading-[1.75] font-medium'>
-                  <span className='font-bold'>SDE-2 at GrowthX</span>
-                  <span className='mx-2 text-[#7a5a3e] dark:text-[#b89a78]'>
-                    &middot;
+                <p className='flex flex-col gap-1 text-lg leading-[1.75] font-medium sm:flex-row sm:items-baseline sm:justify-between'>
+                  <span className='font-bold'>
+                    Software Engineer at{' '}
+                    <a
+                      href='https://growthx.club/'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='underline decoration-[#c9b49a]/50 underline-offset-4 transition-colors hover:text-[#7a5a3e] hover:decoration-[#7a5a3e] dark:decoration-[#5a4535] dark:hover:text-[#eddcc8] dark:hover:decoration-[#b89a78]'
+                    >
+                      GrowthX
+                    </a>
                   </span>
                   <span className='text-[#7a5a3e] dark:text-[#b89a78]'>
                     may 2024 &ndash; present
@@ -92,14 +93,19 @@ export default function V3Page() {
               </div>
             </V3FadeIn>
 
-            <V3FadeIn>
+            <V3FadeIn delay={120}>
               <div>
-                <p className='text-lg leading-[1.75] font-medium'>
+                <p className='flex flex-col gap-1 text-lg leading-[1.75] font-medium sm:flex-row sm:items-baseline sm:justify-between'>
                   <span className='font-bold'>
-                    Frontend Developer at TalentPlace.ai
-                  </span>
-                  <span className='mx-2 text-[#7a5a3e] dark:text-[#b89a78]'>
-                    &middot;
+                    Frontend Developer at{' '}
+                    <a
+                      href='https://talentplace.ai/'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='underline decoration-[#c9b49a]/50 underline-offset-4 transition-colors hover:text-[#7a5a3e] hover:decoration-[#7a5a3e] dark:decoration-[#5a4535] dark:hover:text-[#eddcc8] dark:hover:decoration-[#b89a78]'
+                    >
+                      TalentPlace.ai
+                    </a>
                   </span>
                   <span className='text-[#7a5a3e] dark:text-[#b89a78]'>
                     feb 2023 &ndash; may 2024
@@ -112,12 +118,19 @@ export default function V3Page() {
               </div>
             </V3FadeIn>
 
-            <V3FadeIn>
+            <V3FadeIn delay={120}>
               <div>
-                <p className='text-lg leading-[1.75] font-medium'>
-                  <span className='font-bold'>Teaching Assistant at NeoG</span>
-                  <span className='mx-2 text-[#7a5a3e] dark:text-[#b89a78]'>
-                    &middot;
+                <p className='flex flex-col gap-1 text-lg leading-[1.75] font-medium sm:flex-row sm:items-baseline sm:justify-between'>
+                  <span className='font-bold'>
+                    Teaching Assistant at{' '}
+                    <a
+                      href='https://neog.camp/'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='underline decoration-[#c9b49a]/50 underline-offset-4 transition-colors hover:text-[#7a5a3e] hover:decoration-[#7a5a3e] dark:decoration-[#5a4535] dark:hover:text-[#eddcc8] dark:hover:decoration-[#b89a78]'
+                    >
+                      NeoG
+                    </a>
                   </span>
                   <span className='text-[#7a5a3e] dark:text-[#b89a78]'>
                     jan 2022 &ndash; jul 2022
@@ -147,8 +160,8 @@ export default function V3Page() {
 
         <footer>
           <V3FadeIn>
-            <p className='mb-10 text-lg leading-[1.75] font-medium italic'>
-              warmly,
+            <p className='mb-10 text-lg leading-[1.75] font-medium'>
+              peace,
               <br />
               dash
             </p>

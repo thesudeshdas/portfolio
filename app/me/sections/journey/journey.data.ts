@@ -56,7 +56,7 @@ import {
 export const journey: IJourneyListItem[] = [
   {
     id: 'x5424b2c-d2v8-4w88-vz9x-4a81y5z73w70',
-    designation: 'SDE-2 (promoted from SDE)',
+    designation: 'Software Engineer',
     endDate: 'Present',
     startDate: 'May 2024',
     organisation: 'GrowthX',

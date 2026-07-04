@@ -27,7 +27,10 @@ export default function V3FadeIn({
           observer.unobserve(el);
         }
       },
-      { threshold: 0.1 }
+      {
+        rootMargin: '0px 0px -12% 0px',
+        threshold: 0.1
+      }
     );
 
     observer.observe(el);

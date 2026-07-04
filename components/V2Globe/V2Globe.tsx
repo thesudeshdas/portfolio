@@ -90,6 +90,7 @@ import type {
   MapLinesGeoJson,
   RotationDirection,
   ScreenPoint,
+  V2ExperienceMode,
   V2FlowControl,
   V2FlowStep
 } from './v2-globe.types';
@@ -161,11 +162,13 @@ function isNearPointOfView(pov: GlobePointOfView, targetPov: GlobePointOfView) {
 
 export default function V2Globe({
   activeStep,
+  experienceMode = 'story',
   flowSteps = [],
   isActive,
   onStepChange
 }: {
   activeStep?: V2FlowStep;
+  experienceMode?: V2ExperienceMode;
   flowSteps?: V2FlowControl[];
   isActive: boolean;
   onStepChange?: (step: V2FlowStep) => void;
@@ -267,6 +270,8 @@ export default function V2Globe({
       ),
     []
   );
+  const isStoryMode = experienceMode === 'story';
+  const isInteractiveMode = experienceMode === 'interactive';
   const visibleLocationMarkers = useMemo(
     () =>
       isSecondStage
@@ -878,6 +883,7 @@ export default function V2Globe({
     const firstLocation = scrollFlowLocations[0];
 
     if (
+      !isStoryMode ||
       !isActive ||
       !isIntroFlightComplete ||
       !firstLocation ||
@@ -891,6 +897,7 @@ export default function V2Globe({
   }, [
     isActive,
     isIntroFlightComplete,
+    isStoryMode,
     revealLocationMarker,
     scrollFlowLocations,
     scrollFlowStep
@@ -898,6 +905,7 @@ export default function V2Globe({
 
   useEffect(() => {
     if (
+      !isStoryMode ||
       !isActive ||
       !isIntroFlightComplete ||
       isScrollPromptDismissed ||
@@ -926,11 +934,22 @@ export default function V2Globe({
     isActive,
     isIntroFlightComplete,
     isScrollPromptDismissed,
+    isStoryMode,
     scrollFlowStep
   ]);
 
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive || !isIntroFlightComplete || !isInteractiveMode) {
+      return;
+    }
+
+    setRevealedLocationIds(
+      new Set(V2_GLOBE_LOCATIONS.map((location) => location.id))
+    );
+  }, [isActive, isInteractiveMode, isIntroFlightComplete]);
+
+  useEffect(() => {
+    if (!isActive || !isStoryMode) {
       return;
     }
 
@@ -969,6 +988,7 @@ export default function V2Globe({
     dismissScrollPrompt,
     hasScrollPromptAppeared,
     isActive,
+    isStoryMode,
     scrollFlowStep
   ]);
 
@@ -1182,7 +1202,7 @@ export default function V2Globe({
   ]);
 
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive || !isStoryMode) {
       return;
     }
 
@@ -1245,7 +1265,7 @@ export default function V2Globe({
         handleLocationMarkerWheel
       );
     };
-  }, [advanceScrollFlow, isActive]);
+  }, [advanceScrollFlow, isActive, isStoryMode]);
 
   useEffect(() => {
     if (!isGlobeReady || !isActive || fps === 0) {
@@ -1363,7 +1383,9 @@ export default function V2Globe({
 
       {selectedLocation && (
         <V2LocationContentPanel
-          closeLocationContent={closeLocationContentAndContinue}
+          closeLocationContent={
+            isStoryMode ? closeLocationContentAndContinue : closeLocationContent
+          }
           isLocationContentVisible={isLocationContentVisible}
           locationContentLayout={locationContentLayout}
           locationContentProgress={locationContentProgress}

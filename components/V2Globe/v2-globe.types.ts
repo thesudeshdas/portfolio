@@ -2,6 +2,7 @@ import type * as THREE from 'three';
 
 export type GlobeDirection = 'up' | 'down' | 'left' | 'right';
 export type RotationDirection = 'east' | 'west';
+export type V2ExperienceMode = 'story' | 'interactive';
 export type V2FlowStep = 'loading' | 'globe';
 
 export type V2FlowControl = {

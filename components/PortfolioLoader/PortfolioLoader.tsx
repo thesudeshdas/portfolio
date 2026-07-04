@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
+import type { V2ExperienceMode } from '@/components/V2Globe/v2-globe.types';
 import { cn } from '@/lib/utils';
 
 type LoaderPhase = 'entering' | 'holding' | 'textLeaving' | 'leaving';
@@ -116,7 +117,7 @@ export default function PortfolioLoader({
   onExitComplete
 }: {
   isLockedOnTextStage?: boolean;
-  onComplete?: () => void;
+  onComplete?: (mode: V2ExperienceMode) => void;
   onExitComplete?: () => void;
 }) {
   const [phase, setPhase] = useState<LoaderPhase>('entering');
@@ -186,7 +187,7 @@ export default function PortfolioLoader({
     const unmountTimer = window.setTimeout(
       () => {
         window.dispatchEvent(new Event('portfolio-loader-complete'));
-        onComplete?.();
+        onComplete?.('story');
         setIsMounted(false);
         onExitComplete?.();
       },
@@ -258,7 +259,7 @@ export default function PortfolioLoader({
 
     let touchStartY = 0;
 
-    const completeTextStage = () => {
+    const completeTextStage = (mode: V2ExperienceMode) => {
       if (hasCompletedRef.current || !isDecryptComplete) {
         return;
       }
@@ -266,7 +267,7 @@ export default function PortfolioLoader({
       hasCompletedRef.current = true;
       setPhase('leaving');
       window.dispatchEvent(new Event('portfolio-loader-complete'));
-      onComplete?.();
+      onComplete?.(mode);
 
       window.setTimeout(() => {
         setIsMounted(false);
@@ -278,7 +279,7 @@ export default function PortfolioLoader({
       event.preventDefault();
 
       if (event.deltaY > 0) {
-        completeTextStage();
+        completeTextStage('story');
       }
     };
 
@@ -291,30 +292,42 @@ export default function PortfolioLoader({
 
       const touchY = event.touches[0]?.clientY ?? touchStartY;
       if (touchStartY - touchY > 12) {
-        completeTextStage();
+        completeTextStage('story');
       }
+    };
+
+    const handleClick = () => {
+      completeTextStage('interactive');
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const scrollKeys = new Set(['ArrowDown', 'PageDown', ' ', 'Spacebar']);
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        completeTextStage('interactive');
+        return;
+      }
 
       if (!scrollKeys.has(event.key)) {
         return;
       }
 
       event.preventDefault();
-      completeTextStage();
+      completeTextStage('story');
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('click', handleClick);
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('click', handleClick);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isDecryptComplete, isLockedOnTextStage, onComplete, onExitComplete]);
@@ -361,25 +374,27 @@ export default function PortfolioLoader({
 
       {isLockedOnTextStage && (
         <div
-          aria-hidden='true'
-          className='mt-8 flex flex-col items-center gap-3 text-zinc-500'
+          className='mt-8 flex flex-col items-center gap-5 text-zinc-500'
           style={scrollIconStyle}
         >
           <div
             className={cn(
-              'flex translate-y-4 flex-col items-center gap-3 opacity-0 transition-[opacity,transform] duration-700 ease-out',
+              'flex translate-y-4 flex-col items-center gap-5 opacity-0 transition-[opacity,transform] duration-700 ease-out',
               isScrollIconVisible && 'translate-y-0 opacity-100'
             )}
           >
-            <span className='relative flex h-10 w-6 justify-center rounded-full border border-zinc-500/80'>
-              <span className='v2-scroll-dot mt-2 h-1.5 w-1.5 rounded-full bg-zinc-400' />
-            </span>
+            <div className='flex flex-wrap items-center justify-center gap-6 px-6 text-center font-mono text-xs tracking-[0.22em] text-zinc-500 uppercase'>
+              <span className='flex items-center gap-3'>
+                <span className='relative flex h-10 w-6 justify-center rounded-full border border-zinc-500/80'>
+                  <span className='v2-scroll-dot mt-2 h-1.5 w-1.5 rounded-full bg-zinc-400' />
+                </span>
+                <span>Scroll for story mode</span>
+              </span>
 
-            <span className='hidden flex-col items-center gap-0.5'>
-              <span className='v2-scroll-arrow h-2 w-2 border-r border-b border-zinc-500' />
-              <span className='v2-scroll-arrow v2-scroll-arrow-delay-1 h-2 w-2 border-r border-b border-zinc-500' />
-              <span className='v2-scroll-arrow v2-scroll-arrow-delay-2 h-2 w-2 border-r border-b border-zinc-500' />
-            </span>
+              <span className='h-px w-8 bg-zinc-700' />
+
+              <span>Click anywhere for interactive mode</span>
+            </div>
           </div>
         </div>
       )}

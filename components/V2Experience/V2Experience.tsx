@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import PortfolioLoader from '@/components/PortfolioLoader/PortfolioLoader';
 import V2Cursor from '@/components/V2Cursor/V2Cursor';
 import V2Globe from '@/components/V2Globe/V2Globe';
+import type { V2ExperienceMode } from '@/components/V2Globe/v2-globe.types';
 
 type FlowStep = 'loading' | 'globe';
 
@@ -15,6 +16,8 @@ const FLOW_STEPS: Array<{ id: FlowStep; label: string }> = [
 
 export default function V2Experience() {
   const [activeStep, setActiveStep] = useState<FlowStep>('loading');
+  const [experienceMode, setExperienceMode] =
+    useState<V2ExperienceMode>('story');
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const [hasEnteredGlobe, setHasEnteredGlobe] = useState(false);
   const [loaderRunId, setLoaderRunId] = useState(0);
@@ -32,7 +35,8 @@ export default function V2Experience() {
     setActiveStep(step);
   };
 
-  const handleLoaderComplete = useCallback(() => {
+  const handleLoaderComplete = useCallback((mode: V2ExperienceMode) => {
+    setExperienceMode(mode);
     setHasEnteredGlobe(true);
     setActiveStep('globe');
   }, []);
@@ -45,6 +49,7 @@ export default function V2Experience() {
     <main className='relative py-0'>
       <V2Globe
         activeStep={activeStep}
+        experienceMode={experienceMode}
         flowSteps={FLOW_STEPS}
         isActive={activeStep === 'globe'}
         onStepChange={handleStepChange}

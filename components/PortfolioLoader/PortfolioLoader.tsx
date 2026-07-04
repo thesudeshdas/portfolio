@@ -17,18 +17,11 @@ const TARGET_DECRYPT_FPS = 120;
 const DECRYPT_CHARACTERS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?.,';
 const INTRO_TEXT = 'hey, who is Dash?';
+const CURSOR_MOVEMENT_SETTLE_MS = 140;
 const LOADER_CURSOR_SIZE_PX = 16;
-const CURSOR_IDLE_HIDE_MS = 1000;
-const CURSOR_TRAIL_LIFETIME_MS = 700;
-const CURSOR_TRAIL_MIN_DISTANCE_PX = 8;
-const CURSOR_TRAIL_MAX_POINTS = 18;
-
-type CursorTrailPoint = {
-  id: number;
-  size: number;
-  x: number;
-  y: number;
-};
+const CURSOR_BLOB_SIZES = [56, 112, 76];
+const CURSOR_BLOB_LERP = [0.78, 0.1, 0.24];
+const CURSOR_BLOB_OPACITY = [1, 1, 1];
 
 type TextStageControls = {
   decryptSpeedMs: number;
@@ -134,18 +127,24 @@ export default function PortfolioLoader({
   const [isMounted, setIsMounted] = useState(true);
   const [isScrollIconVisible, setIsScrollIconVisible] = useState(false);
   const [isDecryptComplete, setIsDecryptComplete] = useState(false);
-  const [cursor, setCursor] = useState({
-    isVisible: false,
-    x: 0,
-    y: 0
-  });
-  const [cursorTrail, setCursorTrail] = useState<CursorTrailPoint[]>([]);
   const controls = DEFAULT_CONTROLS;
   const hasCompletedRef = useRef(false);
-  const cursorIdleTimeoutRef = useRef<number | null>(null);
-  const cursorTrailIdRef = useRef(0);
-  const cursorTrailLastPointRef = useRef<{ x: number; y: number } | null>(null);
-  const cursorTrailTimeoutsRef = useRef<number[]>([]);
+  const cursorBlobLayerRef = useRef<HTMLDivElement>(null);
+  const cursorBlobRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const cursorOutlineRef = useRef<HTMLSpanElement>(null);
+  const cursorMovementTimeoutRef = useRef<number | null>(null);
+  const cursorAnimationFrameRef = useRef<number | null>(null);
+  const cursorPositionRef = useRef({
+    blobs: CURSOR_BLOB_SIZES.map(() => ({
+      x: 0,
+      y: 0
+    })),
+    isInitialized: false,
+    isMoving: false,
+    isVisible: false,
+    targetX: 0,
+    targetY: 0
+  });
 
   useEffect(() => {
     setPhase('entering');
@@ -224,87 +223,119 @@ export default function PortfolioLoader({
   }, [controls, isLockedOnTextStage, onComplete, onExitComplete]);
 
   useEffect(() => {
-    const clearCursorIdleTimeout = () => {
-      if (cursorIdleTimeoutRef.current === null) {
+    if (phase !== 'leaving') {
+      return;
+    }
+
+    cursorPositionRef.current.isVisible = false;
+    cursorPositionRef.current.isMoving = false;
+    cursorBlobLayerRef.current?.style.setProperty('opacity', '0');
+  }, [phase]);
+
+  useEffect(() => {
+    const clearCursorMovementTimeout = () => {
+      if (cursorMovementTimeoutRef.current === null) {
         return;
       }
 
-      window.clearTimeout(cursorIdleTimeoutRef.current);
-      cursorIdleTimeoutRef.current = null;
+      window.clearTimeout(cursorMovementTimeoutRef.current);
+      cursorMovementTimeoutRef.current = null;
     };
 
-    const handlePointerMove = (event: PointerEvent) => {
+    const renderCursorBlob = () => {
+      const layer = cursorBlobLayerRef.current;
+      const outline = cursorOutlineRef.current;
+      const cursorPosition = cursorPositionRef.current;
+
+      if (!layer) {
+        cursorAnimationFrameRef.current =
+          window.requestAnimationFrame(renderCursorBlob);
+        return;
+      }
+
+      if (!cursorPosition.isInitialized) {
+        cursorAnimationFrameRef.current =
+          window.requestAnimationFrame(renderCursorBlob);
+        return;
+      }
+
+      layer.style.opacity = cursorPosition.isVisible ? '1' : '0';
+      if (outline) {
+        outline.style.opacity =
+          cursorPosition.isVisible && !cursorPosition.isMoving ? '1' : '0';
+        outline.style.transform = `translate3d(${
+          cursorPosition.targetX - LOADER_CURSOR_SIZE_PX / 2
+        }px, ${cursorPosition.targetY - LOADER_CURSOR_SIZE_PX / 2}px, 0)`;
+      }
+
+      cursorPosition.blobs.forEach((blobPosition, index) => {
+        const blob = cursorBlobRefs.current[index];
+
+        if (!blob) {
+          return;
+        }
+
+        const lerp = CURSOR_BLOB_LERP[index] ?? 0.24;
+        blobPosition.x += (cursorPosition.targetX - blobPosition.x) * lerp;
+        blobPosition.y += (cursorPosition.targetY - blobPosition.y) * lerp;
+        blob.style.opacity =
+          cursorPosition.isVisible && cursorPosition.isMoving
+            ? `${CURSOR_BLOB_OPACITY[index] ?? 0.72}`
+            : '0';
+        blob.style.transform = `translate3d(${blobPosition.x}px, ${blobPosition.y}px, 0) translate3d(-50%, -50%, 0)`;
+      });
+
+      cursorAnimationFrameRef.current =
+        window.requestAnimationFrame(renderCursorBlob);
+    };
+
+    const handlePointerMove = (event: MouseEvent | PointerEvent) => {
       const nextPoint = {
         x: event.clientX,
         y: event.clientY
       };
 
-      clearCursorIdleTimeout();
-      setCursor({
-        isVisible: true,
-        x: nextPoint.x,
-        y: nextPoint.y
-      });
+      clearCursorMovementTimeout();
 
-      const lastPoint = cursorTrailLastPointRef.current;
-      const distanceFromLastPoint = lastPoint
-        ? Math.hypot(nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y)
-        : Number.POSITIVE_INFINITY;
+      const cursorPosition = cursorPositionRef.current;
+      cursorPosition.targetX = nextPoint.x;
+      cursorPosition.targetY = nextPoint.y;
+      cursorPosition.isMoving = true;
+      cursorPosition.isVisible = true;
 
-      if (distanceFromLastPoint >= CURSOR_TRAIL_MIN_DISTANCE_PX) {
-        const id = cursorTrailIdRef.current + 1;
-        const trailPoint = {
-          id,
-          size: 28 + (id % 4) * 3,
-          x: nextPoint.x,
-          y: nextPoint.y
-        };
-
-        cursorTrailIdRef.current = id;
-        cursorTrailLastPointRef.current = nextPoint;
-        setCursorTrail((currentTrail) =>
-          [...currentTrail, trailPoint].slice(-CURSOR_TRAIL_MAX_POINTS)
-        );
-
-        const timeoutId = window.setTimeout(() => {
-          setCursorTrail((currentTrail) =>
-            currentTrail.filter((point) => point.id !== id)
-          );
-          cursorTrailTimeoutsRef.current =
-            cursorTrailTimeoutsRef.current.filter(
-              (currentTimeoutId) => currentTimeoutId !== timeoutId
-            );
-        }, CURSOR_TRAIL_LIFETIME_MS);
-
-        cursorTrailTimeoutsRef.current.push(timeoutId);
+      if (!cursorPosition.isInitialized) {
+        cursorPosition.blobs.forEach((blobPosition) => {
+          blobPosition.x = nextPoint.x;
+          blobPosition.y = nextPoint.y;
+        });
+        cursorPosition.isInitialized = true;
       }
 
-      cursorIdleTimeoutRef.current = window.setTimeout(() => {
-        setCursor((currentCursor) => ({
-          ...currentCursor,
-          isVisible: false
-        }));
-      }, CURSOR_IDLE_HIDE_MS);
+      cursorMovementTimeoutRef.current = window.setTimeout(() => {
+        cursorPositionRef.current.isMoving = false;
+      }, CURSOR_MOVEMENT_SETTLE_MS);
     };
 
     const handlePointerLeave = () => {
-      setCursor((currentCursor) => ({
-        ...currentCursor,
-        isVisible: false
-      }));
-      cursorTrailLastPointRef.current = null;
+      clearCursorMovementTimeout();
+      cursorPositionRef.current.isMoving = false;
+      cursorPositionRef.current.isVisible = false;
     };
 
+    cursorAnimationFrameRef.current =
+      window.requestAnimationFrame(renderCursorBlob);
     window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('mousemove', handlePointerMove);
     document.addEventListener('mouseleave', handlePointerLeave);
 
     return () => {
-      clearCursorIdleTimeout();
-      cursorTrailTimeoutsRef.current.forEach((timeoutId) => {
-        window.clearTimeout(timeoutId);
-      });
-      cursorTrailTimeoutsRef.current = [];
+      clearCursorMovementTimeout();
+      if (cursorAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(cursorAnimationFrameRef.current);
+        cursorAnimationFrameRef.current = null;
+      }
       window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('mousemove', handlePointerMove);
       document.removeEventListener('mouseleave', handlePointerLeave);
     };
   }, []);
@@ -456,31 +487,53 @@ export default function PortfolioLoader({
         </div>
       )}
 
-      {cursorTrail.map((point) => (
+      <div
+        ref={cursorBlobLayerRef}
+        aria-hidden='true'
+        className={cn(
+          'v2-loader-cursor-layer pointer-events-none fixed inset-0 z-[10000]',
+          phase === 'leaving' && 'opacity-0'
+        )}
+      >
+        <svg className='absolute h-0 w-0'>
+          <filter id='v2-loader-blob-filter'>
+            <feGaussianBlur
+              in='SourceGraphic'
+              result='blur'
+              stdDeviation='18'
+            />
+            <feColorMatrix
+              in='blur'
+              values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 34 -12'
+            />
+          </filter>
+        </svg>
+
         <span
-          key={point.id}
-          aria-hidden='true'
-          className='v2-loader-cursor-blob pointer-events-none fixed z-[10000] rounded-full bg-white'
+          ref={cursorOutlineRef}
+          className='v2-loader-cursor-outline'
           style={{
-            height: `${point.size}px`,
-            left: `${point.x - point.size / 2}px`,
-            top: `${point.y - point.size / 2}px`,
-            width: `${point.size}px`
+            height: `${LOADER_CURSOR_SIZE_PX}px`,
+            width: `${LOADER_CURSOR_SIZE_PX}px`
           }}
         />
-      ))}
 
-      <span
-        aria-hidden='true'
-        className='pointer-events-none fixed z-[10000] rounded-full border border-zinc-100 transition-opacity duration-[800ms] ease-in-out'
-        style={{
-          height: `${LOADER_CURSOR_SIZE_PX}px`,
-          left: `${cursor.x - LOADER_CURSOR_SIZE_PX / 2}px`,
-          opacity: cursor.isVisible && phase !== 'leaving' ? 1 : 0,
-          top: `${cursor.y - LOADER_CURSOR_SIZE_PX / 2}px`,
-          width: `${LOADER_CURSOR_SIZE_PX}px`
-        }}
-      />
+        <div className='v2-loader-cursor-blob'>
+          {CURSOR_BLOB_SIZES.map((size, index) => (
+            <span
+              key={size}
+              ref={(node) => {
+                cursorBlobRefs.current[index] = node;
+              }}
+              className='v2-loader-cursor-blob-item'
+              style={{
+                height: `${size}px`,
+                width: `${size}px`
+              }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

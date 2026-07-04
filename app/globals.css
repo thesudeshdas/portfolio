@@ -288,24 +288,43 @@ body:has(.v3-page) .app-content {
   animation-delay: var(--v2-scroll-arrow-delay-2, 0.64s);
 }
 
-.v2-loader-cursor-blob {
-  animation: v2-loader-cursor-blob 700ms ease-out forwards;
-  filter: blur(1px);
+.v2-loader-cursor-layer {
+  contain: layout paint style;
   mix-blend-mode: difference;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  will-change: opacity;
 }
 
-@keyframes v2-scroll-dot {
-  0% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  35% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(16px);
-  }
+.v2-loader-cursor-blob {
+  background: transparent;
+  cursor: default;
+  filter: url('#v2-loader-blob-filter');
+  inset: 0;
+  position: absolute;
+  user-select: none;
+}
+
+.v2-loader-cursor-outline {
+  border: 1px solid #f4f4f5;
+  border-radius: 50%;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  transition: opacity 140ms ease;
+  will-change: transform, opacity;
+}
+
+.v2-loader-cursor-blob-item {
+  background: #fff;
+  border-radius: 50%;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  transition: opacity 120ms ease;
+  will-change: transform, opacity;
 }
 
 @keyframes v2-scroll-arrow {
@@ -322,14 +341,17 @@ body:has(.v3-page) .app-content {
   }
 }
 
-@keyframes v2-loader-cursor-blob {
+@keyframes v2-scroll-dot {
   0% {
-    opacity: 0.95;
-    transform: scale(0.6);
+    opacity: 0;
+    transform: translateY(0);
+  }
+  35% {
+    opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: scale(1.85);
+    transform: translateY(16px);
   }
 }
 

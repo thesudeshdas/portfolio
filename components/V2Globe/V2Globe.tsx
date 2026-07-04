@@ -99,6 +99,11 @@ const Globe = dynamic<
   GlobeProps & { ref?: MutableRefObject<GlobeMethods | undefined> }
 >(() => import('react-globe.gl'), { ssr: false });
 
+const INTERACTIVE_ZOOM_WHEEL_SCALE = 0.09;
+const INTERACTIVE_ZOOM_LERP = 0.045;
+const INTERACTIVE_ZOOM_SNAP_THRESHOLD = 0.001;
+const INTERACTIVE_ZOOM_STATE_SYNC_MS = 48;
+
 const INDIA_RECENTER_THRESHOLD = {
   altitude: 0.08,
   lat: 4,
@@ -191,6 +196,9 @@ export default function V2Globe({
   const scrollFlowUnlockTimeoutRef = useRef<number | null>(null);
   const scrollPromptTimeoutRef = useRef<number | null>(null);
   const revealCalloutTimeoutRef = useRef<number | null>(null);
+  const interactiveZoomAnimationFrameRef = useRef<number | null>(null);
+  const interactiveZoomTargetRef = useRef<number | null>(null);
+  const interactiveZoomLastStateSyncRef = useRef(0);
   const previousLocationPovRef = useRef<GlobePointOfView | null>(null);
   const currentPovRef = useRef<GlobePointOfView>({
     ...MADRID_VIEW,
@@ -446,6 +454,48 @@ export default function V2Globe({
       0
     );
   };
+  const renderInteractiveZoom = useCallback((currentTime: number) => {
+    const targetZoom = interactiveZoomTargetRef.current;
+
+    if (targetZoom === null) {
+      interactiveZoomAnimationFrameRef.current = null;
+      return;
+    }
+
+    const targetAltitude = getAltitudeFromDisplayZoom(targetZoom);
+    const altitudeDelta = targetAltitude - currentPovRef.current.altitude;
+    const isSettled =
+      Math.abs(altitudeDelta) <= INTERACTIVE_ZOOM_SNAP_THRESHOLD;
+    const nextAltitude = isSettled
+      ? targetAltitude
+      : currentPovRef.current.altitude + altitudeDelta * INTERACTIVE_ZOOM_LERP;
+    const nextPov = {
+      ...currentPovRef.current,
+      altitude: nextAltitude
+    };
+
+    currentPovRef.current = nextPov;
+    updateLocationMarkerScale(nextPov.altitude);
+    globeRef.current?.pointOfView(nextPov, 0);
+
+    if (
+      isSettled ||
+      currentTime - interactiveZoomLastStateSyncRef.current >=
+        INTERACTIVE_ZOOM_STATE_SYNC_MS
+    ) {
+      setCurrentPov(nextPov);
+      interactiveZoomLastStateSyncRef.current = currentTime;
+    }
+
+    if (isSettled) {
+      interactiveZoomAnimationFrameRef.current = null;
+      return;
+    }
+
+    interactiveZoomAnimationFrameRef.current = window.requestAnimationFrame(
+      renderInteractiveZoom
+    );
+  }, []);
   const animateLocationContentProgress = useCallback(
     (from: number, to: number, durationMs: number, onComplete?: () => void) => {
       if (locationContentAnimationFrameRef.current !== null) {
@@ -1017,6 +1067,11 @@ export default function V2Globe({
       if (revealCalloutTimeoutRef.current !== null) {
         window.clearTimeout(revealCalloutTimeoutRef.current);
       }
+
+      if (interactiveZoomAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(interactiveZoomAnimationFrameRef.current);
+        interactiveZoomAnimationFrameRef.current = null;
+      }
     };
   }, []);
 
@@ -1202,6 +1257,86 @@ export default function V2Globe({
   ]);
 
   useEffect(() => {
+    if (!isGlobeReady) {
+      return;
+    }
+
+    const controls = globeRef.current?.controls();
+
+    if (!controls) {
+      return;
+    }
+
+    controls.enableZoom = false;
+  }, [isActive, isGlobeReady, isInteractiveMode, isIntroFlightComplete]);
+
+  useEffect(() => {
+    if (!isActive || !isInteractiveMode || !isIntroFlightComplete) {
+      return;
+    }
+
+    const handleWheel = (event: WheelEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest('[data-v2-dev-control="true"]')
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      const currentTargetZoom =
+        interactiveZoomTargetRef.current ??
+        getDisplayZoomFromAltitude(currentPovRef.current.altitude);
+      const nextTargetZoom = Math.max(
+        MIN_DISPLAY_ZOOM,
+        Math.min(
+          MAX_DISPLAY_ZOOM,
+          currentTargetZoom - event.deltaY * INTERACTIVE_ZOOM_WHEEL_SCALE
+        )
+      );
+
+      interactiveZoomTargetRef.current = nextTargetZoom;
+
+      if (interactiveZoomAnimationFrameRef.current !== null) {
+        return;
+      }
+
+      interactiveZoomLastStateSyncRef.current = performance.now();
+      interactiveZoomAnimationFrameRef.current = window.requestAnimationFrame(
+        renderInteractiveZoom
+      );
+    };
+
+    const wheelListenerOptions = {
+      capture: true,
+      passive: false
+    } satisfies AddEventListenerOptions;
+
+    window.addEventListener('wheel', handleWheel, wheelListenerOptions);
+    document.addEventListener('wheel', handleWheel, wheelListenerOptions);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel, { capture: true });
+      document.removeEventListener('wheel', handleWheel, { capture: true });
+
+      if (interactiveZoomAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(interactiveZoomAnimationFrameRef.current);
+        interactiveZoomAnimationFrameRef.current = null;
+      }
+
+      interactiveZoomTargetRef.current = null;
+    };
+  }, [
+    isActive,
+    isInteractiveMode,
+    isIntroFlightComplete,
+    renderInteractiveZoom
+  ]);
+
+  useEffect(() => {
     if (!isActive || !isStoryMode) {
       return;
     }
@@ -1240,7 +1375,7 @@ export default function V2Globe({
   }, [currentPov.altitude, visibleLocationMarkers.length]);
 
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive || !isStoryMode) {
       return;
     }
 

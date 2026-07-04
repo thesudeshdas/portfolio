@@ -288,6 +288,12 @@ body:has(.v3-page) .app-content {
   animation-delay: var(--v2-scroll-arrow-delay-2, 0.64s);
 }
 
+.v2-loader-cursor-blob {
+  animation: v2-loader-cursor-blob 700ms ease-out forwards;
+  filter: blur(1px);
+  mix-blend-mode: difference;
+}
+
 @keyframes v2-scroll-dot {
   0% {
     opacity: 0;
@@ -313,6 +319,17 @@ body:has(.v3-page) .app-content {
   100% {
     opacity: 0;
     transform: translateY(8px) rotate(45deg);
+  }
+}
+
+@keyframes v2-loader-cursor-blob {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.85);
   }
 }
 

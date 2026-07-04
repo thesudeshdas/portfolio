@@ -19,6 +19,16 @@ const DECRYPT_CHARACTERS =
 const INTRO_TEXT = 'hey, who is Dash?';
 const LOADER_CURSOR_SIZE_PX = 16;
 const CURSOR_IDLE_HIDE_MS = 1000;
+const CURSOR_TRAIL_LIFETIME_MS = 700;
+const CURSOR_TRAIL_MIN_DISTANCE_PX = 8;
+const CURSOR_TRAIL_MAX_POINTS = 18;
+
+type CursorTrailPoint = {
+  id: number;
+  size: number;
+  x: number;
+  y: number;
+};
 
 type TextStageControls = {
   decryptSpeedMs: number;
@@ -129,9 +139,13 @@ export default function PortfolioLoader({
     x: 0,
     y: 0
   });
+  const [cursorTrail, setCursorTrail] = useState<CursorTrailPoint[]>([]);
   const controls = DEFAULT_CONTROLS;
   const hasCompletedRef = useRef(false);
   const cursorIdleTimeoutRef = useRef<number | null>(null);
+  const cursorTrailIdRef = useRef(0);
+  const cursorTrailLastPointRef = useRef<{ x: number; y: number } | null>(null);
+  const cursorTrailTimeoutsRef = useRef<number[]>([]);
 
   useEffect(() => {
     setPhase('entering');
@@ -220,12 +234,50 @@ export default function PortfolioLoader({
     };
 
     const handlePointerMove = (event: PointerEvent) => {
+      const nextPoint = {
+        x: event.clientX,
+        y: event.clientY
+      };
+
       clearCursorIdleTimeout();
       setCursor({
         isVisible: true,
-        x: event.clientX,
-        y: event.clientY
+        x: nextPoint.x,
+        y: nextPoint.y
       });
+
+      const lastPoint = cursorTrailLastPointRef.current;
+      const distanceFromLastPoint = lastPoint
+        ? Math.hypot(nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y)
+        : Number.POSITIVE_INFINITY;
+
+      if (distanceFromLastPoint >= CURSOR_TRAIL_MIN_DISTANCE_PX) {
+        const id = cursorTrailIdRef.current + 1;
+        const trailPoint = {
+          id,
+          size: 28 + (id % 4) * 3,
+          x: nextPoint.x,
+          y: nextPoint.y
+        };
+
+        cursorTrailIdRef.current = id;
+        cursorTrailLastPointRef.current = nextPoint;
+        setCursorTrail((currentTrail) =>
+          [...currentTrail, trailPoint].slice(-CURSOR_TRAIL_MAX_POINTS)
+        );
+
+        const timeoutId = window.setTimeout(() => {
+          setCursorTrail((currentTrail) =>
+            currentTrail.filter((point) => point.id !== id)
+          );
+          cursorTrailTimeoutsRef.current =
+            cursorTrailTimeoutsRef.current.filter(
+              (currentTimeoutId) => currentTimeoutId !== timeoutId
+            );
+        }, CURSOR_TRAIL_LIFETIME_MS);
+
+        cursorTrailTimeoutsRef.current.push(timeoutId);
+      }
 
       cursorIdleTimeoutRef.current = window.setTimeout(() => {
         setCursor((currentCursor) => ({
@@ -240,6 +292,7 @@ export default function PortfolioLoader({
         ...currentCursor,
         isVisible: false
       }));
+      cursorTrailLastPointRef.current = null;
     };
 
     window.addEventListener('pointermove', handlePointerMove);
@@ -247,6 +300,10 @@ export default function PortfolioLoader({
 
     return () => {
       clearCursorIdleTimeout();
+      cursorTrailTimeoutsRef.current.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+      cursorTrailTimeoutsRef.current = [];
       window.removeEventListener('pointermove', handlePointerMove);
       document.removeEventListener('mouseleave', handlePointerLeave);
     };
@@ -398,6 +455,20 @@ export default function PortfolioLoader({
           </div>
         </div>
       )}
+
+      {cursorTrail.map((point) => (
+        <span
+          key={point.id}
+          aria-hidden='true'
+          className='v2-loader-cursor-blob pointer-events-none fixed z-[10000] rounded-full bg-white'
+          style={{
+            height: `${point.size}px`,
+            left: `${point.x - point.size / 2}px`,
+            top: `${point.y - point.size / 2}px`,
+            width: `${point.size}px`
+          }}
+        />
+      ))}
 
       <span
         aria-hidden='true'

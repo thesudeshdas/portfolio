@@ -189,6 +189,10 @@ body.v2-route .app-nav {
   display: none;
 }
 
+body:has(.v2-page) .app-nav {
+  display: none;
+}
+
 body.v3-route .app-nav {
   display: none;
 }
@@ -198,6 +202,10 @@ body:has(.v3-page) .app-nav {
 }
 
 body.v2-route .app-footer {
+  display: none;
+}
+
+body:has(.v2-page) .app-footer {
   display: none;
 }
 
@@ -211,7 +219,10 @@ body:has(.v3-page) .app-footer {
 
 body.v2-route {
   background: #000;
-  cursor: none;
+}
+
+body:has(.v2-page) {
+  background: #000;
 }
 
 body.v3-route {
@@ -243,7 +254,16 @@ body.v2-route [data-v2-content-cursor='true'] button {
   cursor: pointer !important;
 }
 
+body.v2-route [data-v2-content-cursor='true'] a {
+  cursor: pointer !important;
+}
+
 body.v2-route .app-shell {
+  margin: 0;
+  max-width: none;
+}
+
+body:has(.v2-page) .app-shell {
   margin: 0;
   max-width: none;
 }
@@ -259,6 +279,10 @@ body:has(.v3-page) .app-shell {
 }
 
 body.v2-route .app-content {
+  padding-inline: 0;
+}
+
+body:has(.v2-page) .app-content {
   padding-inline: 0;
 }
 

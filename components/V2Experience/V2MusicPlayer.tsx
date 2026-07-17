@@ -112,7 +112,10 @@ export default function V2MusicPlayer({
             return;
           }
 
-          const progress = Math.min((now - fadeStartedAt) / VOLUME_FADE_MS, 1);
+          const progress = Math.max(
+            0,
+            Math.min((now - fadeStartedAt) / VOLUME_FADE_MS, 1)
+          );
           currentAudio.volume = DEFAULT_VOLUME * progress;
 
           if (progress < 1 && !currentAudio.paused) {

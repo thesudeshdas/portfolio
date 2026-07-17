@@ -16,6 +16,7 @@
 - Keep comments and likes inside the custom app instead of relying on Google Photos shared-album reactions. Public viewers can see comments and aggregate counts, but should not see who else liked or commented. Support anonymous or pseudonymous comments, moderation, and optional rate limits.
 - Fetch gallery images lazily instead of loading the full album at once. Use paginated API calls such as `limit=24&cursor=...`, lazy image loading, responsive thumbnails, and full-resolution image fetch only when a visitor opens a photo.
 - Avoid treating Google Photos URLs as permanent public image URLs. Google Photos media URLs are temporary, and API access is constrained, so long-lived public albums need an app-owned storage/cache layer.
+- Create a voice-based portfolio where visitors can have a natural spoken conversation with an AI avatar of me. The avatar should respond in my voice and personality, answer questions about me and my work, and engage with whatever topic the visitor brings up instead of behaving like a fixed portfolio navigation bot.
 
 ## V2 animation ledger
 

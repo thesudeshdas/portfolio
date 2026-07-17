@@ -258,11 +258,6 @@ body.v2-route [data-v2-content-cursor='true'] a {
   cursor: pointer !important;
 }
 
-body.v2-route .v2-spotify-hit-target,
-body.v2-route .v2-spotify-hit-target iframe {
-  cursor: pointer !important;
-}
-
 body.v2-route .app-shell {
   margin: 0;
   max-width: none;

@@ -8,7 +8,7 @@ import {
 import { Outfit } from 'next/font/google';
 
 import V2AttributionPopover from './V2AttributionPopover';
-import V2SpotifyPlayer from './V2SpotifyPlayer';
+import V2MusicPlayer from './V2MusicPlayer';
 
 const outfit = Outfit({ subsets: ['latin'], weight: '200' });
 
@@ -40,7 +40,7 @@ export default function V2Experience() {
           </h1>
         </div>
 
-        <V2SpotifyPlayer />
+        <V2MusicPlayer />
 
         <div className='absolute right-2.5 bottom-2.5 flex flex-col items-end gap-3 sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6'>
           <div

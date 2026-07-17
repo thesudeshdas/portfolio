@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'img.notionusercontent.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co'
       }
     ]
   },

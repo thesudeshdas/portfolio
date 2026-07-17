@@ -13,8 +13,10 @@ import {
 } from './v2-music.settings';
 
 const ALBUM_SIZE = 64;
+const AUTOPLAY_DELAY_MS = 1500;
 const DEFAULT_VOLUME = 1;
 const PLAYER_BUTTON_WIDTH = 104;
+const VOLUME_FADE_MS = 1500;
 
 function getVinylTranslateX(revealPercent: number) {
   const fullyExtendedReveal = PLAYER_BUTTON_WIDTH - ALBUM_SIZE;
@@ -29,6 +31,7 @@ export default function V2MusicPlayer({
   fontClassName: string;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const cancelAutoplayRef = useRef<() => void>(() => undefined);
   const continuePlaybackRef = useRef(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [hasPlaybackError, setHasPlaybackError] = useState(false);
@@ -55,30 +58,84 @@ export default function V2MusicPlayer({
   const isAlbumBorderVisible =
     settings.albumBorderVisibility === 'always' || isPlaying;
 
-  const playCurrentTrack = useCallback(async (showPlaybackError = true) => {
+  const playCurrentTrack = useCallback(
+    async (showPlaybackError = true, initialVolume = DEFAULT_VOLUME) => {
+      const audio = audioRef.current;
+
+      if (!audio) {
+        return false;
+      }
+
+      audio.volume = initialVolume;
+
+      try {
+        await audio.play();
+        setHasPlaybackError(false);
+        return true;
+      } catch {
+        continuePlaybackRef.current = false;
+        if (showPlaybackError) {
+          setHasPlaybackError(true);
+        }
+        setIsPlaying(false);
+        return false;
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
     const audio = audioRef.current;
+    let fadeFrame: number | undefined;
+    let isCancelled = false;
 
     if (!audio) {
       return;
     }
 
-    audio.volume = DEFAULT_VOLUME;
+    audio.volume = 0;
 
-    try {
-      await audio.play();
-      setHasPlaybackError(false);
-    } catch {
-      continuePlaybackRef.current = false;
-      if (showPlaybackError) {
-        setHasPlaybackError(true);
+    const autoplayTimer = window.setTimeout(() => {
+      continuePlaybackRef.current = true;
+
+      void playCurrentTrack(false, 0).then((didStart) => {
+        if (!didStart || isCancelled) {
+          return;
+        }
+
+        const fadeStartedAt = window.performance.now();
+
+        const fadeVolume = (now: number) => {
+          const currentAudio = audioRef.current;
+
+          if (!currentAudio || isCancelled) {
+            return;
+          }
+
+          const progress = Math.min((now - fadeStartedAt) / VOLUME_FADE_MS, 1);
+          currentAudio.volume = DEFAULT_VOLUME * progress;
+
+          if (progress < 1 && !currentAudio.paused) {
+            fadeFrame = window.requestAnimationFrame(fadeVolume);
+          }
+        };
+
+        fadeFrame = window.requestAnimationFrame(fadeVolume);
+      });
+    }, AUTOPLAY_DELAY_MS);
+
+    const cancelAutoplay = () => {
+      isCancelled = true;
+      window.clearTimeout(autoplayTimer);
+
+      if (fadeFrame !== undefined) {
+        window.cancelAnimationFrame(fadeFrame);
       }
-      setIsPlaying(false);
-    }
-  }, []);
+    };
 
-  useEffect(() => {
-    continuePlaybackRef.current = true;
-    void playCurrentTrack(false);
+    cancelAutoplayRef.current = cancelAutoplay;
+
+    return cancelAutoplay;
   }, [playCurrentTrack]);
 
   const updateSetting = useCallback(
@@ -107,6 +164,8 @@ export default function V2MusicPlayer({
 
   function toggleAudio() {
     const audio = audioRef.current;
+
+    cancelAutoplayRef.current();
 
     if (!audio) {
       return;
@@ -158,7 +217,6 @@ export default function V2MusicPlayer({
         onMouseLeave={() => setIsHovered(false)}
       >
         <audio
-          autoPlay
           ref={audioRef}
           preload='metadata'
           src={currentTrack.audioSrc}

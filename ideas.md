@@ -17,6 +17,7 @@
 - Fetch gallery images lazily instead of loading the full album at once. Use paginated API calls such as `limit=24&cursor=...`, lazy image loading, responsive thumbnails, and full-resolution image fetch only when a visitor opens a photo.
 - Avoid treating Google Photos URLs as permanent public image URLs. Google Photos media URLs are temporary, and API access is constrained, so long-lived public albums need an app-owned storage/cache layer.
 - Add an optional developer-facing “context layer” for the entire portfolio. Curious developers can toggle it on to see how each animation works while the normal experience continues underneath. Visually expose the active scene and step, the event that triggered it, animation progress, duration and easing, state transitions, relevant viewport or camera values, and the component responsible. Keep it off by default and make the overlay observational only so it does not alter the visitor journey.
+- Create a voice-based portfolio where visitors can have a natural spoken conversation with an AI avatar of me. The avatar should respond in my voice and personality, answer questions about me and my work, and engage with whatever topic the visitor brings up instead of behaving like a fixed portfolio navigation bot.
 
 ## V2 animation ledger
 

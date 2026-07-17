@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <link
+      rel="icon"
+      href="data:,"
+    />
+    <title>Intro animation mock</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #090909;
+        color: #f4f4f5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        background: #090909;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        min-height: 100vh;
+        place-items: center;
+        isolation: isolate;
+      }
+
+      .sentence {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        color: #f4f4f5;
+        font-size: clamp(2rem, 4vw, 3.75rem);
+        font-weight: 500;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .word-target,
+      .question-target {
+        opacity: 0;
+      }
+
+      .hand-shell,
+      .question-shell {
+        position: fixed;
+        z-index: 2;
+        pointer-events: none;
+        will-change: top, left, width, height, opacity;
+      }
+
+      .hand-shell img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        transform-origin: 52% 82%;
+        user-select: none;
+      }
+
+      .question-shell svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .question-curve {
+        fill: none;
+        stroke: #f4f4f5;
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 12;
+      }
+
+      .question-dot {
+        fill: #f4f4f5;
+        transform: scale(0);
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+
+      .panel {
+        position: fixed;
+        z-index: 10;
+        bottom: 12px;
+        left: 12px;
+        width: min(380px, calc(100vw - 24px));
+        max-height: calc(100vh - 24px);
+        overflow: auto;
+        border: 1px solid #343438;
+        border-radius: 10px;
+        background: rgb(18 18 20 / 94%);
+        color: #e4e4e7;
+        font-size: 12px;
+        box-shadow: 0 16px 60px rgb(0 0 0 / 45%);
+        backdrop-filter: blur(16px);
+      }
+
+      .panel summary {
+        display: flex;
+        cursor: pointer;
+        list-style: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px;
+        user-select: none;
+      }
+
+      .panel summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .panel-title {
+        font-weight: 600;
+      }
+
+      .phase {
+        overflow: hidden;
+        max-width: 190px;
+        color: #a1a1aa;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .panel-body {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        padding: 0 12px 12px;
+      }
+
+      .control {
+        display: grid;
+        gap: 5px;
+      }
+
+      .control label {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: #b4b4bc;
+      }
+
+      .control output {
+        color: #fafafa;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .control input,
+      .control select {
+        width: 100%;
+      }
+
+      .control select {
+        min-height: 30px;
+        border: 1px solid #3f3f46;
+        border-radius: 6px;
+        background: #18181b;
+        color: #fafafa;
+      }
+
+      input[type='range'] {
+        accent-color: #f4f4f5;
+      }
+
+      .panel-actions {
+        display: flex;
+        grid-column: 1 / -1;
+        gap: 8px;
+        padding-top: 2px;
+      }
+
+      .panel-actions button {
+        min-height: 34px;
+        flex: 1;
+        cursor: pointer;
+        border: 1px solid #3f3f46;
+        border-radius: 7px;
+        background: #27272a;
+        color: #fafafa;
+      }
+
+      .panel-actions button:first-child {
+        border-color: #e4e4e7;
+        background: #f4f4f5;
+        color: #09090b;
+      }
+
+      .hint {
+        grid-column: 1 / -1;
+        margin: 0;
+        color: #71717a;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 560px) {
+        .panel-body {
+          grid-template-columns: 1fr;
+        }
+
+        .sentence {
+          font-size: clamp(1.75rem, 8vw, 2.5rem);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main
+      class="stage"
+      aria-label="Intro animation prototype"
+    >
+      <h1
+        class="sentence"
+        aria-label="hey, who is Dash?"
+      >
+        <span id="heyTarget">hey, </span
+        ><span
+          id="wordTarget"
+          class="word-target"
+          ><span id="letterTarget">w</span>ho is Dash</span
+        ><span
+          id="questionTarget"
+          class="question-target"
+          >?</span
+        >
+      </h1>
+
+      <div
+        id="handShell"
+        class="hand-shell"
+        aria-hidden="true"
+      >
+        <img
+          id="handImage"
+          src="/noto-waving-hand.svg"
+          alt=""
+          draggable="false"
+        />
+      </div>
+
+      <div
+        id="questionShell"
+        class="question-shell"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 100 150">
+          <path
+            id="questionCurve"
+            class="question-curve"
+            pathLength="1"
+            d="M 24 31 C 26 10, 49 4, 68 12 C 88 21, 89 47, 72 60 C 61 69, 51 71, 50 88"
+          />
+          <circle
+            id="questionDot"
+            class="question-dot"
+            cx="50"
+            cy="124"
+            r="8"
+          />
+        </svg>
+      </div>
+    </main>
+
+    <details
+      class="panel"
+      open
+    >
+      <summary>
+        <span class="panel-title">Dev controls</span>
+        <output
+          id="phase"
+          class="phase"
+          >ready</output
+        >
+      </summary>
+      <div class="panel-body">
+        <div class="control">
+          <label for="handSize">
+            Hand height
+            <output data-for="handSize"></output>
+          </label>
+          <input
+            id="handSize"
+            type="range"
+            min="25"
+            max="70"
+            value="50"
+            step="1"
+            data-unit="vh"
+          />
+        </div>
+        <div class="control">
+          <label for="waveHold">
+            Wave hold
+            <output data-for="waveHold"></output>
+          </label>
+          <input
+            id="waveHold"
+            type="range"
+            min="0"
+            max="3000"
+            value="1400"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="waveCycle">
+            Wave cycle
+            <output data-for="waveCycle"></output>
+          </label>
+          <input
+            id="waveCycle"
+            type="range"
+            min="200"
+            max="1200"
+            value="520"
+            step="20"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="waveAngle">
+            Wave angle
+            <output data-for="waveAngle"></output>
+          </label>
+          <input
+            id="waveAngle"
+            type="range"
+            min="3"
+            max="28"
+            value="13"
+            step="1"
+            data-unit="°"
+          />
+        </div>
+        <div class="control">
+          <label for="shrinkDuration">
+            Shrink to “hey”
+            <output data-for="shrinkDuration"></output>
+          </label>
+          <input
+            id="shrinkDuration"
+            type="range"
+            min="100"
+            max="2000"
+            value="700"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="slideDuration">
+            Slide to “who”
+            <output data-for="slideDuration"></output>
+          </label>
+          <input
+            id="slideDuration"
+            type="range"
+            min="100"
+            max="1600"
+            value="500"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="wordDelay">
+            Word delay
+            <output data-for="wordDelay"></output>
+          </label>
+          <input
+            id="wordDelay"
+            type="range"
+            min="0"
+            max="1800"
+            value="600"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="fadeDuration">
+            Word crossfade
+            <output data-for="fadeDuration"></output>
+          </label>
+          <input
+            id="fadeDuration"
+            type="range"
+            min="100"
+            max="1400"
+            value="400"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="questionDelay">
+            Question delay
+            <output data-for="questionDelay"></output>
+          </label>
+          <input
+            id="questionDelay"
+            type="range"
+            min="0"
+            max="1800"
+            value="300"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="questionSize">
+            Question height
+            <output data-for="questionSize"></output>
+          </label>
+          <input
+            id="questionSize"
+            type="range"
+            min="10"
+            max="45"
+            value="25"
+            step="1"
+            data-unit="vh"
+          />
+        </div>
+        <div class="control">
+          <label for="questionX">
+            Question X
+            <output data-for="questionX"></output>
+          </label>
+          <input
+            id="questionX"
+            type="range"
+            min="35"
+            max="85"
+            value="64"
+            step="1"
+            data-unit="%"
+          />
+        </div>
+        <div class="control">
+          <label for="drawDuration">
+            Question draw
+            <output data-for="drawDuration"></output>
+          </label>
+          <input
+            id="drawDuration"
+            type="range"
+            min="200"
+            max="2600"
+            value="1200"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="settleDuration">
+            Question settle
+            <output data-for="settleDuration"></output>
+          </label>
+          <input
+            id="settleDuration"
+            type="range"
+            min="100"
+            max="1800"
+            value="700"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="easing">Travel easing</label>
+          <select id="easing">
+            <option value="cubic-bezier(.22, 1, .36, 1)">
+              Smooth overshoot
+            </option>
+            <option value="cubic-bezier(.16, 1, .3, 1)">Fast settle</option>
+            <option value="cubic-bezier(.65, 0, .35, 1)">Sine-like</option>
+            <option value="ease-in-out">Standard</option>
+          </select>
+        </div>
+        <div class="panel-actions">
+          <button
+            id="replay"
+            type="button"
+          >
+            Replay
+          </button>
+          <button
+            id="reset"
+            type="button"
+          >
+            Reset defaults
+          </button>
+        </div>
+        <p class="hint">
+          Values apply on replay. Final text keeps its geometry throughout.
+        </p>
+      </div>
+    </details>
+
+    <script>
+      const defaults = {
+        handSize: 50,
+        waveHold: 1400,
+        waveCycle: 520,
+        waveAngle: 13,
+        shrinkDuration: 700,
+        slideDuration: 500,
+        wordDelay: 600,
+        fadeDuration: 400,
+        questionDelay: 300,
+        questionSize: 25,
+        questionX: 64,
+        drawDuration: 1200,
+        settleDuration: 700,
+        easing: 'cubic-bezier(.22, 1, .36, 1)'
+      };
+
+      const nodes = {
+        handImage: document.querySelector('#handImage'),
+        handShell: document.querySelector('#handShell'),
+        heyTarget: document.querySelector('#heyTarget'),
+        letterTarget: document.querySelector('#letterTarget'),
+        phase: document.querySelector('#phase'),
+        questionCurve: document.querySelector('#questionCurve'),
+        questionDot: document.querySelector('#questionDot'),
+        questionShell: document.querySelector('#questionShell'),
+        questionTarget: document.querySelector('#questionTarget'),
+        replay: document.querySelector('#replay'),
+        reset: document.querySelector('#reset'),
+        wordTarget: document.querySelector('#wordTarget')
+      };
+
+      const controlIds = Object.keys(defaults);
+      const activeAnimations = new Set();
+      let runId = 0;
+
+      function setPhase(label) {
+        nodes.phase.textContent = label;
+      }
+
+      function readSettings() {
+        return controlIds.reduce((settings, id) => {
+          const input = document.querySelector(`#${id}`);
+          settings[id] =
+            input.type === 'range' ? Number(input.value) : input.value;
+          return settings;
+        }, {});
+      }
+
+      function syncControlOutputs() {
+        document.querySelectorAll('input[type="range"]').forEach((input) => {
+          const output = document.querySelector(`[data-for="${input.id}"]`);
+          output.textContent = `${input.value}${input.dataset.unit || ''}`;
+        });
+      }
+
+      function cancelAnimations() {
+        activeAnimations.forEach((animation) => animation.cancel());
+        activeAnimations.clear();
+        document.getAnimations().forEach((animation) => animation.cancel());
+      }
+
+      function sleep(duration, id) {
+        return new Promise((resolve) => {
+          window.setTimeout(() => resolve(id === runId), duration);
+        });
+      }
+
+      async function animate(element, keyframes, options, id) {
+        const animation = element.animate(keyframes, options);
+        activeAnimations.add(animation);
+
+        try {
+          await animation.finished;
+
+          if (id !== runId) {
+            return false;
+          }
+
+          animation.commitStyles();
+          animation.cancel();
+          return true;
+        } catch {
+          return false;
+        } finally {
+          activeAnimations.delete(animation);
+        }
+      }
+
+      function place(element, box) {
+        Object.assign(element.style, {
+          height: `${box.height}px`,
+          left: `${box.left}px`,
+          top: `${box.top}px`,
+          width: `${box.width}px`
+        });
+      }
+
+      function currentBox(element) {
+        const rect = element.getBoundingClientRect();
+        return {
+          height: rect.height,
+          left: rect.left,
+          top: rect.top,
+          width: rect.width
+        };
+      }
+
+      function keyframesBetween(from, to) {
+        return [
+          {
+            height: `${from.height}px`,
+            left: `${from.left}px`,
+            top: `${from.top}px`,
+            width: `${from.width}px`
+          },
+          {
+            height: `${to.height}px`,
+            left: `${to.left}px`,
+            top: `${to.top}px`,
+            width: `${to.width}px`
+          }
+        ];
+      }
+
+      function initialHandBox(settings) {
+        const size = window.innerHeight * (settings.handSize / 100);
+        return {
+          height: size,
+          left: (window.innerWidth - size) / 2,
+          top: (window.innerHeight - size) / 2,
+          width: size
+        };
+      }
+
+      function handAtHeyBox() {
+        const hey = nodes.heyTarget.getBoundingClientRect();
+        const size = hey.height * 1.08;
+        return {
+          height: size,
+          left: hey.right - size * 0.1,
+          top: hey.top + (hey.height - size) / 2,
+          width: size
+        };
+      }
+
+      function handAtWordBox() {
+        const letter = nodes.letterTarget.getBoundingClientRect();
+        const size = letter.height * 1.02;
+        return {
+          height: size,
+          left: letter.left + (letter.width - size) / 2,
+          top: letter.top + (letter.height - size) / 2,
+          width: size
+        };
+      }
+
+      function initialQuestionBox(settings) {
+        const height = window.innerHeight * (settings.questionSize / 100);
+        const width = height * (2 / 3);
+        return {
+          height,
+          left: window.innerWidth * (settings.questionX / 100) - width / 2,
+          top: (window.innerHeight - height) / 2,
+          width
+        };
+      }
+
+      function finalQuestionBox() {
+        const target = nodes.questionTarget.getBoundingClientRect();
+        const height = target.height * 1.08;
+        const width = height * (2 / 3);
+        return {
+          height,
+          left: target.left + (target.width - width) / 2,
+          top: target.top + (target.height - height) / 2,
+          width
+        };
+      }
+
+      function resetStage(settings) {
+        cancelAnimations();
+        nodes.heyTarget.style.opacity = '0';
+        nodes.wordTarget.style.opacity = '0';
+        nodes.questionTarget.style.opacity = '0';
+        nodes.handShell.style.opacity = '1';
+        nodes.questionShell.style.opacity = '0';
+        nodes.questionCurve.style.strokeDashoffset = '1';
+        nodes.questionDot.style.transform = 'scale(0)';
+        nodes.handImage.style.transform = 'rotate(0deg)';
+        place(nodes.handShell, initialHandBox(settings));
+        place(nodes.questionShell, initialQuestionBox(settings));
+      }
+
+      async function play() {
+        const id = ++runId;
+        const settings = readSettings();
+        resetStage(settings);
+        setPhase('1 · waving');
+
+        const wave = nodes.handImage.animate(
+          [
+            { transform: `rotate(-${settings.waveAngle}deg)` },
+            { transform: `rotate(${settings.waveAngle}deg)` },
+            { transform: `rotate(-${settings.waveAngle}deg)` }
+          ],
+          {
+            duration: settings.waveCycle,
+            easing: 'ease-in-out',
+            iterations: Infinity
+          }
+        );
+        activeAnimations.add(wave);
+
+        if (!(await sleep(settings.waveHold, id))) return;
+
+        setPhase('2 · shrinking to “hey”');
+        if (
+          !(await animate(
+            nodes.handShell,
+            keyframesBetween(currentBox(nodes.handShell), handAtHeyBox()),
+            {
+              duration: settings.shrinkDuration,
+              easing: settings.easing,
+              fill: 'forwards'
+            },
+            id
+          ))
+        )
+          return;
+
+        nodes.heyTarget.style.opacity = '1';
+        setPhase('3 · sliding into “who”');
+        if (
+          !(await animate(
+            nodes.handShell,
+            keyframesBetween(currentBox(nodes.handShell), handAtWordBox()),
+            {
+              duration: settings.slideDuration,
+              easing: settings.easing,
+              fill: 'forwards'
+            },
+            id
+          ))
+        )
+          return;
+
+        wave.cancel();
+        activeAnimations.delete(wave);
+        nodes.handImage.style.transform = 'rotate(0deg)';
+
+        setPhase(`4 · word delay (${settings.wordDelay}ms)`);
+        if (!(await sleep(settings.wordDelay, id))) return;
+
+        setPhase('5 · hand → words');
+        const [handFaded, wordShown] = await Promise.all([
+          animate(
+            nodes.handShell,
+            [{ opacity: 1 }, { opacity: 0 }],
+            {
+              duration: settings.fadeDuration,
+              easing: 'ease-out',
+              fill: 'forwards'
+            },
+            id
+          ),
+          animate(
+            nodes.wordTarget,
+            [{ opacity: 0 }, { opacity: 1 }],
+            {
+              duration: settings.fadeDuration,
+              easing: 'ease-in',
+              fill: 'forwards'
+            },
+            id
+          )
+        ]);
+        if (!handFaded || !wordShown) return;
+
+        setPhase(`6 · question delay (${settings.questionDelay}ms)`);
+        if (!(await sleep(settings.questionDelay, id))) return;
+
+        setPhase('7 · drawing question mark');
+        nodes.questionShell.style.opacity = '1';
+        const curveDuration = settings.drawDuration * 0.8;
+        const dotDuration = settings.drawDuration * 0.2;
+
+        if (
+          !(await animate(
+            nodes.questionCurve,
+            [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
+            {
+              duration: curveDuration,
+              easing: 'ease-in-out',
+              fill: 'forwards'
+            },
+            id
+          ))
+        )
+          return;
+
+        if (
+          !(await animate(
+            nodes.questionDot,
+            [{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
+            {
+              duration: dotDuration,
+              easing: 'cubic-bezier(.22, 1, .36, 1)',
+              fill: 'forwards'
+            },
+            id
+          ))
+        )
+          return;
+
+        setPhase('8 · question settling');
+        if (
+          !(await animate(
+            nodes.questionShell,
+            keyframesBetween(
+              currentBox(nodes.questionShell),
+              finalQuestionBox()
+            ),
+            {
+              duration: settings.settleDuration,
+              easing: settings.easing,
+              fill: 'forwards'
+            },
+            id
+          ))
+        )
+          return;
+
+        nodes.questionTarget.style.opacity = '1';
+        nodes.questionShell.style.opacity = '0';
+        setPhase('complete · hey, who is Dash?');
+      }
+
+      document.querySelectorAll('input[type="range"]').forEach((input) => {
+        input.addEventListener('input', syncControlOutputs);
+      });
+
+      nodes.replay.addEventListener('click', play);
+      nodes.reset.addEventListener('click', () => {
+        controlIds.forEach((id) => {
+          document.querySelector(`#${id}`).value = defaults[id];
+        });
+        syncControlOutputs();
+        play();
+      });
+
+      window.addEventListener('resize', () => {
+        if (nodes.phase.textContent.startsWith('complete')) return;
+        play();
+      });
+
+      syncControlOutputs();
+      window.requestAnimationFrame(play);
+    </script>
+  </body>
+</html>

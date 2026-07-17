@@ -65,7 +65,7 @@ export default function V2MusicPlayer() {
   }
 
   return (
-    <div className='group absolute bottom-2.5 left-2.5 flex items-center sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6'>
+    <div className='group absolute bottom-2.5 left-2.5 flex cursor-pointer items-center sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6'>
       <audio
         ref={audioRef}
         preload='metadata'
@@ -91,8 +91,10 @@ export default function V2MusicPlayer() {
       >
         <span
           aria-hidden='true'
-          className={`absolute top-1/2 right-0 size-16 -translate-y-1/2 rounded-full motion-reduce:animate-none ${
-            isPlaying ? 'animate-[spin_6s_linear_infinite]' : ''
+          className={`absolute top-1/2 right-0 size-16 -translate-y-1/2 rounded-full transition-transform duration-700 ease-out motion-reduce:animate-none motion-reduce:transition-none ${
+            isPlaying
+              ? 'translate-x-0 animate-[spin_6s_linear_infinite]'
+              : '-translate-x-10 group-hover:translate-x-0'
           }`}
           style={{
             background:
@@ -113,22 +115,28 @@ export default function V2MusicPlayer() {
         </span>
       </button>
 
-      <div className='ml-3 max-w-[min(18rem,calc(100vw-9rem))] min-w-0 translate-x-2 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within:translate-x-0 group-focus-within:opacity-100 group-hover:translate-x-0 group-hover:opacity-100 sm:ml-4'>
+      <div
+        className={`ml-3 max-w-[min(18rem,calc(100vw-9rem))] min-w-0 origin-left transition-[opacity,transform] duration-700 ease-out group-hover:translate-x-0 group-hover:scale-100 group-hover:opacity-100 focus-within:translate-x-0 focus-within:scale-100 focus-within:opacity-100 motion-reduce:transition-none sm:ml-4 ${
+          isPlaying
+            ? 'pointer-events-auto translate-x-0 scale-[0.8] opacity-[0.55]'
+            : 'pointer-events-none -translate-x-8 scale-[0.8] opacity-0 group-hover:pointer-events-auto'
+        }`}
+      >
         <a
-          className='block truncate text-base leading-tight font-semibold text-zinc-100 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none sm:text-lg'
+          className='block cursor-pointer truncate rounded-sm text-base leading-tight font-semibold text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 sm:text-lg'
           href={currentTrack.sourceUrl}
           rel='noopener noreferrer'
           target='_blank'
-          title={`Open ${currentTrack.title} on Free Music Archive`}
+          title={`Open ${currentTrack.title} on YouTube`}
         >
           {currentTrack.title}
         </a>
         <a
-          className='mt-1 block truncate text-[11px] leading-tight font-light text-zinc-300 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none sm:text-xs'
+          className='mt-1 block cursor-pointer truncate rounded-sm text-[11px] leading-tight font-light text-zinc-300 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 sm:text-xs'
           href={currentTrack.artistUrl}
           rel='noopener noreferrer'
           target='_blank'
-          title={`Open ${currentTrack.artist} on Free Music Archive`}
+          title={`Open ${currentTrack.artist} on YouTube`}
         >
           {currentTrack.artist}
         </a>

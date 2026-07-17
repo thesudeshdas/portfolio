@@ -19,6 +19,10 @@
 - Add an optional developer-facing “context layer” for the entire portfolio. Curious developers can toggle it on to see how each animation works while the normal experience continues underneath. Visually expose the active scene and step, the event that triggered it, animation progress, duration and easing, state transitions, relevant viewport or camera values, and the component responsible. Keep it off by default and make the overlay observational only so it does not alter the visitor journey.
 - Create a voice-based portfolio where visitors can have a natural spoken conversation with an AI avatar of me. The avatar should respond in my voice and personality, answer questions about me and my work, and engage with whatever topic the visitor brings up instead of behaving like a fixed portfolio navigation bot.
 - Add a Cal.com integration so visitors can view availability and book a conversation directly from the portfolio without leaving the site.
+- Connect keybr.com and/or Monkeytype to display my typing skills, including metrics such as speed, accuracy, consistency, and recent activity.
+- Connect Strava and/or Mi Fitness to show my fitness activity, progress, and selected health or workout highlights.
+- Write a blog post breaking down how this portfolio site was conceived, designed, built, and evolved, including its technical and creative decisions.
+- Create an AI workflow section showing how I use AI, the files and systems behind my workflows, and the roles played by assistants such as Delilah and Cortana.
 
 ## V2 animation ledger
 

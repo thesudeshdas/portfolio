@@ -17,6 +17,10 @@
 - Fetch gallery images lazily instead of loading the full album at once. Use paginated API calls such as `limit=24&cursor=...`, lazy image loading, responsive thumbnails, and full-resolution image fetch only when a visitor opens a photo.
 - Avoid treating Google Photos URLs as permanent public image URLs. Google Photos media URLs are temporary, and API access is constrained, so long-lived public albums need an app-owned storage/cache layer.
 - Create a voice-based portfolio where visitors can have a natural spoken conversation with an AI avatar of me. The avatar should respond in my voice and personality, answer questions about me and my work, and engage with whatever topic the visitor brings up instead of behaving like a fixed portfolio navigation bot.
+- Connect keybr.com and/or Monkeytype to display my typing skills, including metrics such as speed, accuracy, consistency, and recent activity.
+- Connect Strava and/or Mi Fitness to show my fitness activity, progress, and selected health or workout highlights.
+- Write a blog post breaking down how this portfolio site was conceived, designed, built, and evolved, including its technical and creative decisions.
+- Create an AI workflow section showing how I use AI, the files and systems behind my workflows, and the roles played by assistants such as Delilah and Cortana.
 
 ## V2 animation ledger
 

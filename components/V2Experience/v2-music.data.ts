@@ -1,45 +1,39 @@
 export interface V2MusicTrack {
+  albumArtSrc: string;
   artist: string;
-  artistUrl: string;
   audioSrc: string;
-  sourceUrl: string;
   title: string;
 }
 
 export const v2MusicTracks: V2MusicTrack[] = [
   {
+    albumArtSrc: '/images/music/blue-dream.jpg',
     artist: 'Cheel',
-    artistUrl: 'https://www.youtube.com/channel/UCC9WyMCKVYnc1up0C8ili9A',
     audioSrc: '/audio/lounge/blue-dream.mp3',
-    sourceUrl: 'https://www.youtube.com/watch?v=4WVfjizgRcc',
     title: 'Blue Dream'
   },
   {
+    albumArtSrc: '/images/music/eternal-garden.jpg',
     artist: 'Dan Henig',
-    artistUrl: 'https://www.youtube.com/channel/UCYGkBsrL7uqcqzGz31p_ffQ',
     audioSrc: '/audio/lounge/eternal-garden.mp3',
-    sourceUrl: 'https://www.youtube.com/watch?v=T0jrH8NO4Xo',
     title: 'Eternal Garden'
   },
   {
+    albumArtSrc: '/images/music/book-bag.jpg',
     artist: "E's Jammy Jams",
-    artistUrl: 'https://www.youtube.com/channel/UCqB5WMs4Flb6-1Akyuo49vA',
     audioSrc: '/audio/lounge/book-bag.mp3',
-    sourceUrl: 'https://www.youtube.com/watch?v=TbeUbgO2AJc',
     title: 'Book Bag'
   },
   {
+    albumArtSrc: '/images/music/jazz-mango.jpg',
     artist: 'Joey Pecoraro',
-    artistUrl: 'https://www.youtube.com/channel/UCXUbxtXlyp-urIb2hRlXRpQ',
     audioSrc: '/audio/lounge/jazz-mango.mp3',
-    sourceUrl: 'https://www.youtube.com/watch?v=g6ipZxMRMhc',
     title: 'Jazz Mango'
   },
   {
+    albumArtSrc: '/images/music/natural-light.jpg',
     artist: 'Chris Haugen',
-    artistUrl: 'https://www.youtube.com/channel/UCutTds62MP2kK8Tb-HUgyIw',
     audioSrc: '/audio/lounge/natural-light.mp3',
-    sourceUrl: 'https://www.youtube.com/watch?v=rmEWfFLLUL8',
     title: 'Natural Light'
   }
 ];

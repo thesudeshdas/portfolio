@@ -86,6 +86,32 @@
   }
 }
 
+@keyframes v2-vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.v2-vinyl-slide {
+  transition-property: transform;
+  transition-timing-function: ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-music-player-shell,
+  .v2-music-metadata,
+  .v2-vinyl-slide {
+    transition: none !important;
+  }
+
+  .v2-vinyl-disc {
+    animation: none !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 98%;
@@ -255,6 +281,11 @@ body.v2-route [data-v2-content-cursor='true'] button {
 }
 
 body.v2-route [data-v2-content-cursor='true'] a {
+  cursor: pointer !important;
+}
+
+body.v2-route [data-v2-music-hit-target='true'],
+body.v2-route [data-v2-music-hit-target='true'] * {
   cursor: pointer !important;
 }
 

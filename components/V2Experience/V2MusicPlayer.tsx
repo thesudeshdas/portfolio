@@ -95,41 +95,72 @@ export default function V2MusicPlayer({
 
     audio.volume = 0;
 
-    const autoplayTimer = window.setTimeout(() => {
-      continuePlaybackRef.current = true;
+    const removeInteractionFallback = () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
 
-      void playCurrentTrack(false, 0).then((didStart) => {
-        if (!didStart || isCancelled) {
+    const startPlaybackWithFade = async () => {
+      continuePlaybackRef.current = true;
+      const didStart = await playCurrentTrack(false, 0);
+
+      if (!didStart || isCancelled) {
+        return false;
+      }
+
+      removeInteractionFallback();
+      const fadeStartedAt = window.performance.now();
+
+      const fadeVolume = (now: number) => {
+        const currentAudio = audioRef.current;
+
+        if (!currentAudio || isCancelled) {
           return;
         }
 
-        const fadeStartedAt = window.performance.now();
+        const progress = Math.max(
+          0,
+          Math.min((now - fadeStartedAt) / VOLUME_FADE_MS, 1)
+        );
+        currentAudio.volume = DEFAULT_VOLUME * progress;
 
-        const fadeVolume = (now: number) => {
-          const currentAudio = audioRef.current;
+        if (progress < 1 && !currentAudio.paused) {
+          fadeFrame = window.requestAnimationFrame(fadeVolume);
+        }
+      };
 
-          if (!currentAudio || isCancelled) {
-            return;
-          }
+      fadeFrame = window.requestAnimationFrame(fadeVolume);
+      return true;
+    };
 
-          const progress = Math.max(
-            0,
-            Math.min((now - fadeStartedAt) / VOLUME_FADE_MS, 1)
-          );
-          currentAudio.volume = DEFAULT_VOLUME * progress;
+    function handleFirstInteraction(event: Event) {
+      const target = event.target;
 
-          if (progress < 1 && !currentAudio.paused) {
-            fadeFrame = window.requestAnimationFrame(fadeVolume);
-          }
-        };
+      if (
+        target instanceof Element &&
+        target.closest('[data-v2-music-player]')
+      ) {
+        return;
+      }
 
-        fadeFrame = window.requestAnimationFrame(fadeVolume);
-      });
+      void startPlaybackWithFade();
+    }
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+
+    const autoplayTimer = window.setTimeout(() => {
+      if (!audio.paused) {
+        return;
+      }
+
+      void startPlaybackWithFade();
     }, AUTOPLAY_DELAY_MS);
 
     const cancelAutoplay = () => {
       isCancelled = true;
       window.clearTimeout(autoplayTimer);
+      removeInteractionFallback();
 
       if (fadeFrame !== undefined) {
         window.cancelAnimationFrame(fadeFrame);
@@ -210,6 +241,7 @@ export default function V2MusicPlayer({
       ) : null}
 
       <div
+        data-v2-music-player
         className='v2-music-player-shell absolute bottom-2.5 left-2.5 flex items-center sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6'
         style={{
           transform: `scale(${settings.componentScale})`,

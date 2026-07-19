@@ -1,0 +1,101 @@
+.root {
+  position: relative;
+  text-align: center;
+}
+
+.hey {
+  opacity: 0;
+}
+
+.word {
+  display: inline-block;
+  mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    #000 48%,
+    transparent 52%,
+    transparent 100%
+  );
+  mask-position: 100% 0;
+  mask-repeat: no-repeat;
+  mask-size: 220% 100%;
+  will-change: mask-position;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    #000 48%,
+    transparent 52%,
+    transparent 100%
+  );
+  -webkit-mask-position: 100% 0;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 220% 100%;
+}
+
+.questionTarget {
+  opacity: 0;
+}
+
+.handShell,
+.questionShell {
+  position: fixed;
+  z-index: 2;
+  pointer-events: none;
+  will-change: top, left, width, height, opacity;
+}
+
+.handShell {
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 50vh;
+  height: 50vh;
+  transform: translate(-50%, -50%);
+  container-type: size;
+  place-items: center;
+}
+
+.handGlyph {
+  display: block;
+  color: #f4f4f5;
+  font-size: 100cqh;
+  font-variant-emoji: text;
+  font-weight: 400;
+  line-height: 1;
+  transform-origin: 70% 70%;
+  user-select: none;
+}
+
+.questionShell {
+  top: 50%;
+  left: 64%;
+  width: 30vh;
+  height: 45vh;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+
+.questionShell svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.questionCurve {
+  fill: none;
+  opacity: 0;
+  stroke: #f4f4f5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 12;
+}
+
+.questionDot {
+  fill: #f4f4f5;
+  transform: scale(0);
+  transform-box: fill-box;
+  transform-origin: center;
+}

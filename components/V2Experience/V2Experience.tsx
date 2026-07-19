@@ -5,14 +5,20 @@ import {
   FiMail,
   FiYoutube
 } from 'react-icons/fi';
-import { Outfit } from 'next/font/google';
+import { Noto_Emoji, Outfit } from 'next/font/google';
 
 import V2AttributionPopover from './V2AttributionPopover';
+import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
 
 const outfit = Outfit({
   subsets: ['latin'],
   weight: ['200', '300', '400', '500', '600', '700']
+});
+
+const notoEmoji = Noto_Emoji({
+  subsets: ['emoji'],
+  weight: '400'
 });
 
 const socialLabels = [
@@ -37,11 +43,7 @@ export default function V2Experience() {
           work
         </span>
 
-        <div className='text-center'>
-          <h1 className='text-4xl leading-none font-medium text-zinc-100 sm:text-5xl lg:text-6xl'>
-            hey, who is Dash?
-          </h1>
-        </div>
+        <V2IntroAnimation emojiClassName={notoEmoji.className} />
 
         <V2MusicPlayer fontClassName={outfit.className} />
 

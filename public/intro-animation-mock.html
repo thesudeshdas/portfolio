@@ -133,6 +133,7 @@
 
       .question-curve {
         fill: none;
+        opacity: 0;
         stroke: #f4f4f5;
         stroke-dasharray: 1;
         stroke-dashoffset: 1;
@@ -827,7 +828,9 @@
         nodes.wordTarget.style.webkitMaskPosition = '100% 0';
         nodes.handShell.style.opacity = '1';
         nodes.questionShell.style.opacity = '0';
+        nodes.questionCurve.style.opacity = '0';
         nodes.questionCurve.style.strokeDashoffset = '1';
+        nodes.questionCurve.style.strokeLinecap = 'butt';
         nodes.questionDot.style.transform = 'scale(0)';
         nodes.handGlyph.style.transform = 'rotate(0deg)';
         place(nodes.handShell, initialHandBox(settings));
@@ -902,7 +905,9 @@
 
         if (stage >= 7) {
           nodes.questionShell.style.opacity = '1';
+          nodes.questionCurve.style.opacity = '1';
           nodes.questionCurve.style.strokeDashoffset = '0';
+          nodes.questionCurve.style.strokeLinecap = 'round';
           nodes.questionDot.style.transform = 'scale(1)';
         }
 
@@ -1019,7 +1024,32 @@
         if (
           !(await animate(
             nodes.questionCurve,
-            [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
+            [
+              {
+                offset: 0,
+                opacity: 0,
+                strokeDashoffset: 1,
+                strokeLinecap: 'butt'
+              },
+              {
+                offset: 0.08,
+                opacity: 0,
+                strokeDashoffset: 0.82,
+                strokeLinecap: 'butt'
+              },
+              {
+                offset: 0.081,
+                opacity: 1,
+                strokeDashoffset: 0.818,
+                strokeLinecap: 'round'
+              },
+              {
+                offset: 1,
+                opacity: 1,
+                strokeDashoffset: 0,
+                strokeLinecap: 'round'
+              }
+            ],
             {
               duration: curveDuration,
               easing: 'ease-in-out',

@@ -89,6 +89,10 @@ export default function V2MusicPlayer({
     let fadeFrame: number | undefined;
     let isCancelled = false;
 
+    if (process.env.NODE_ENV === 'development') {
+      return;
+    }
+
     if (!audio) {
       return;
     }

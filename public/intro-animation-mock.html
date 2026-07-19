@@ -10,6 +10,19 @@
       rel="icon"
       href="data:,"
     />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@400&amp;display=swap"
+    />
     <title>Intro animation mock</title>
     <style>
       :root {
@@ -56,9 +69,33 @@
         white-space: nowrap;
       }
 
-      .word-target,
       .question-target {
         opacity: 0;
+      }
+
+      .word-target {
+        display: inline-block;
+        mask-image: linear-gradient(
+          to right,
+          #000 0%,
+          #000 48%,
+          transparent 52%,
+          transparent 100%
+        );
+        mask-position: 100% 0;
+        mask-repeat: no-repeat;
+        mask-size: 220% 100%;
+        will-change: mask-position;
+        -webkit-mask-image: linear-gradient(
+          to right,
+          #000 0%,
+          #000 48%,
+          transparent 52%,
+          transparent 100%
+        );
+        -webkit-mask-position: 100% 0;
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-size: 220% 100%;
       }
 
       .hand-shell,
@@ -69,11 +106,21 @@
         will-change: top, left, width, height, opacity;
       }
 
-      .hand-shell img {
+      .hand-shell {
+        container-type: size;
+        display: grid;
+        place-items: center;
+      }
+
+      .hand-glyph {
         display: block;
-        width: 100%;
-        height: 100%;
-        transform-origin: 52% 82%;
+        color: #f4f4f5;
+        font-family: 'Noto Emoji', sans-serif;
+        font-size: 100cqh;
+        font-variant-emoji: text;
+        font-weight: 400;
+        line-height: 1;
+        transform-origin: 70% 70%;
         user-select: none;
       }
 
@@ -155,6 +202,10 @@
       .control {
         display: grid;
         gap: 5px;
+      }
+
+      .control-wide {
+        grid-column: 1 / -1;
       }
 
       .control label {
@@ -240,7 +291,7 @@
         ><span
           id="wordTarget"
           class="word-target"
-          ><span id="letterTarget">w</span>ho is Dash</span
+          >who is Dash</span
         ><span
           id="questionTarget"
           class="question-target"
@@ -253,12 +304,11 @@
         class="hand-shell"
         aria-hidden="true"
       >
-        <img
-          id="handImage"
-          src="/noto-waving-hand.svg"
-          alt=""
-          draggable="false"
-        />
+        <span
+          id="handGlyph"
+          class="hand-glyph"
+          >&#x1f44b;&#xfe0e;</span
+        >
       </div>
 
       <div
@@ -297,6 +347,20 @@
         >
       </summary>
       <div class="panel-body">
+        <div class="control control-wide">
+          <label for="stageScrubber">
+            Stage preview
+            <output id="stageOutput">0 · start</output>
+          </label>
+          <input
+            id="stageScrubber"
+            type="range"
+            min="0"
+            max="8"
+            value="0"
+            step="1"
+          />
+        </div>
         <div class="control">
           <label for="handSize">
             Hand height
@@ -322,7 +386,7 @@
             type="range"
             min="0"
             max="3000"
-            value="1400"
+            value="2000"
             step="50"
             data-unit="ms"
           />
@@ -336,9 +400,9 @@
             id="waveCycle"
             type="range"
             min="200"
-            max="1200"
-            value="520"
-            step="20"
+            max="4000"
+            value="2500"
+            step="50"
             data-unit="ms"
           />
         </div>
@@ -352,7 +416,7 @@
             type="range"
             min="3"
             max="28"
-            value="13"
+            value="14"
             step="1"
             data-unit="°"
           />
@@ -367,14 +431,29 @@
             type="range"
             min="100"
             max="2000"
-            value="700"
+            value="600"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="heyRevealDuration">
+            “hey” reveal
+            <output data-for="heyRevealDuration"></output>
+          </label>
+          <input
+            id="heyRevealDuration"
+            type="range"
+            min="0"
+            max="2000"
+            value="600"
             step="50"
             data-unit="ms"
           />
         </div>
         <div class="control">
           <label for="slideDuration">
-            Slide to “who”
+            Hand settle
             <output data-for="slideDuration"></output>
           </label>
           <input
@@ -382,7 +461,7 @@
             type="range"
             min="100"
             max="1600"
-            value="500"
+            value="800"
             step="50"
             data-unit="ms"
           />
@@ -397,22 +476,22 @@
             type="range"
             min="0"
             max="1800"
-            value="600"
+            value="0"
             step="50"
             data-unit="ms"
           />
         </div>
         <div class="control">
           <label for="fadeDuration">
-            Word crossfade
+            Text reveal
             <output data-for="fadeDuration"></output>
           </label>
           <input
             id="fadeDuration"
             type="range"
             min="100"
-            max="1400"
-            value="400"
+            max="3000"
+            value="1500"
             step="50"
             data-unit="ms"
           />
@@ -427,7 +506,7 @@
             type="range"
             min="0"
             max="1800"
-            value="300"
+            value="600"
             step="50"
             data-unit="ms"
           />
@@ -442,7 +521,7 @@
             type="range"
             min="10"
             max="45"
-            value="25"
+            value="45"
             step="1"
             data-unit="vh"
           />
@@ -472,7 +551,22 @@
             type="range"
             min="200"
             max="2600"
-            value="1200"
+            value="1800"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="questionDotDelay">
+            Question dot delay
+            <output data-for="questionDotDelay"></output>
+          </label>
+          <input
+            id="questionDotDelay"
+            type="range"
+            min="0"
+            max="1200"
+            value="300"
             step="50"
             data-unit="ms"
           />
@@ -487,7 +581,7 @@
             type="range"
             min="100"
             max="1800"
-            value="700"
+            value="600"
             step="50"
             data-unit="ms"
           />
@@ -499,7 +593,12 @@
               Smooth overshoot
             </option>
             <option value="cubic-bezier(.16, 1, .3, 1)">Fast settle</option>
-            <option value="cubic-bezier(.65, 0, .35, 1)">Sine-like</option>
+            <option
+              value="cubic-bezier(.65, 0, .35, 1)"
+              selected
+            >
+              Sine-like
+            </option>
             <option value="ease-in-out">Standard</option>
           </select>
         </div>
@@ -518,7 +617,7 @@
           </button>
         </div>
         <p class="hint">
-          Values apply on replay. Final text keeps its geometry throughout.
+          Drag stage preview to pause. Replay runs the full sequence.
         </p>
       </div>
     </details>
@@ -526,26 +625,39 @@
     <script>
       const defaults = {
         handSize: 50,
-        waveHold: 1400,
-        waveCycle: 520,
-        waveAngle: 13,
-        shrinkDuration: 700,
-        slideDuration: 500,
-        wordDelay: 600,
-        fadeDuration: 400,
-        questionDelay: 300,
-        questionSize: 25,
+        waveHold: 2000,
+        waveCycle: 2500,
+        waveAngle: 14,
+        shrinkDuration: 600,
+        heyRevealDuration: 600,
+        slideDuration: 800,
+        wordDelay: 0,
+        fadeDuration: 1500,
+        questionDelay: 600,
+        questionSize: 45,
         questionX: 64,
-        drawDuration: 1200,
-        settleDuration: 700,
-        easing: 'cubic-bezier(.22, 1, .36, 1)'
+        drawDuration: 1800,
+        questionDotDelay: 300,
+        settleDuration: 600,
+        easing: 'cubic-bezier(.65, 0, .35, 1)'
       };
 
+      const stageLabels = [
+        '0 · start',
+        '1 · wave',
+        '2 · hand by hey',
+        '3 · hey reveal',
+        '4 · word delay',
+        '5 · text reveal',
+        '6 · question delay',
+        '7 · question drawn',
+        '8 · complete'
+      ];
+
       const nodes = {
-        handImage: document.querySelector('#handImage'),
+        handGlyph: document.querySelector('#handGlyph'),
         handShell: document.querySelector('#handShell'),
         heyTarget: document.querySelector('#heyTarget'),
-        letterTarget: document.querySelector('#letterTarget'),
         phase: document.querySelector('#phase'),
         questionCurve: document.querySelector('#questionCurve'),
         questionDot: document.querySelector('#questionDot'),
@@ -553,15 +665,23 @@
         questionTarget: document.querySelector('#questionTarget'),
         replay: document.querySelector('#replay'),
         reset: document.querySelector('#reset'),
+        stageOutput: document.querySelector('#stageOutput'),
+        stageScrubber: document.querySelector('#stageScrubber'),
         wordTarget: document.querySelector('#wordTarget')
       };
 
       const controlIds = Object.keys(defaults);
       const activeAnimations = new Set();
+      let isStagePreview = false;
       let runId = 0;
 
-      function setPhase(label) {
+      function setPhase(label, stage) {
         nodes.phase.textContent = label;
+
+        if (stage !== undefined) {
+          nodes.stageScrubber.value = stage;
+          nodes.stageOutput.textContent = stageLabels[stage];
+        }
       }
 
       function readSettings() {
@@ -576,6 +696,7 @@
       function syncControlOutputs() {
         document.querySelectorAll('input[type="range"]').forEach((input) => {
           const output = document.querySelector(`[data-for="${input.id}"]`);
+          if (!output) return;
           output.textContent = `${input.value}${input.dataset.unit || ''}`;
         });
       }
@@ -659,26 +780,19 @@
         };
       }
 
-      function handAtHeyBox() {
-        const hey = nodes.heyTarget.getBoundingClientRect();
-        const size = hey.height * 1.08;
+      function handAfterTargetBox(target) {
+        const targetBox = target.getBoundingClientRect();
+        const size = targetBox.height * 1.08;
         return {
           height: size,
-          left: hey.right - size * 0.1,
-          top: hey.top + (hey.height - size) / 2,
+          left: targetBox.right - size * 0.1,
+          top: targetBox.top + (targetBox.height - size) / 2,
           width: size
         };
       }
 
-      function handAtWordBox() {
-        const letter = nodes.letterTarget.getBoundingClientRect();
-        const size = letter.height * 1.02;
-        return {
-          height: size,
-          left: letter.left + (letter.width - size) / 2,
-          top: letter.top + (letter.height - size) / 2,
-          width: size
-        };
+      function handAtHeyBox() {
+        return handAfterTargetBox(nodes.heyTarget);
       }
 
       function initialQuestionBox(settings) {
@@ -707,40 +821,148 @@
       function resetStage(settings) {
         cancelAnimations();
         nodes.heyTarget.style.opacity = '0';
-        nodes.wordTarget.style.opacity = '0';
         nodes.questionTarget.style.opacity = '0';
+        nodes.wordTarget.style.maskPosition = '100% 0';
+        nodes.wordTarget.style.webkitMaskPosition = '100% 0';
         nodes.handShell.style.opacity = '1';
         nodes.questionShell.style.opacity = '0';
         nodes.questionCurve.style.strokeDashoffset = '1';
         nodes.questionDot.style.transform = 'scale(0)';
-        nodes.handImage.style.transform = 'rotate(0deg)';
+        nodes.handGlyph.style.transform = 'rotate(0deg)';
         place(nodes.handShell, initialHandBox(settings));
         place(nodes.questionShell, initialQuestionBox(settings));
       }
 
-      async function play() {
-        const id = ++runId;
+      async function revealText(settings, id) {
+        const handKeyframes = keyframesBetween(
+          currentBox(nodes.handShell),
+          handAfterTargetBox(nodes.wordTarget)
+        ).map((keyframe, index) => ({
+          ...keyframe,
+          opacity: index === 0 ? 1 : 0
+        }));
+        const [handMoved, textShown] = await Promise.all([
+          animate(
+            nodes.handShell,
+            handKeyframes,
+            {
+              duration: settings.fadeDuration,
+              easing: settings.easing,
+              fill: 'forwards'
+            },
+            id
+          ),
+          animate(
+            nodes.wordTarget,
+            [
+              { maskPosition: '100% 0', webkitMaskPosition: '100% 0' },
+              { maskPosition: '0% 0', webkitMaskPosition: '0% 0' }
+            ],
+            {
+              duration: settings.fadeDuration,
+              easing: settings.easing,
+              fill: 'forwards'
+            },
+            id
+          )
+        ]);
+
+        return handMoved && textShown;
+      }
+
+      function previewStage(stage) {
+        ++runId;
+        isStagePreview = true;
         const settings = readSettings();
         resetStage(settings);
-        setPhase('1 · waving');
 
-        const wave = nodes.handImage.animate(
+        nodes.stageScrubber.value = stage;
+        nodes.stageOutput.textContent = stageLabels[stage];
+        setPhase(`paused · ${stageLabels[stage]}`);
+
+        if (stage === 1) {
+          nodes.handGlyph.style.transform = `rotate(${settings.waveAngle}deg)`;
+        }
+
+        if (stage >= 2) {
+          place(nodes.handShell, handAtHeyBox());
+        }
+
+        if (stage >= 3) {
+          nodes.heyTarget.style.opacity = '1';
+        }
+
+        if (stage >= 5) {
+          nodes.wordTarget.style.maskPosition = '0% 0';
+          nodes.wordTarget.style.webkitMaskPosition = '0% 0';
+          nodes.handShell.style.opacity = '0';
+          place(nodes.handShell, handAfterTargetBox(nodes.wordTarget));
+        }
+
+        if (stage >= 7) {
+          nodes.questionShell.style.opacity = '1';
+          nodes.questionCurve.style.strokeDashoffset = '0';
+          nodes.questionDot.style.transform = 'scale(1)';
+        }
+
+        if (stage >= 8) {
+          place(nodes.questionShell, finalQuestionBox());
+        }
+      }
+
+      async function play() {
+        const id = ++runId;
+        isStagePreview = false;
+        const settings = readSettings();
+        resetStage(settings);
+        setPhase('1 · waving', 1);
+
+        const wave = nodes.handGlyph.animate(
           [
-            { transform: `rotate(-${settings.waveAngle}deg)` },
-            { transform: `rotate(${settings.waveAngle}deg)` },
-            { transform: `rotate(-${settings.waveAngle}deg)` }
+            { easing: 'ease', offset: 0, transform: 'rotate(0deg)' },
+            {
+              easing: 'ease',
+              offset: 0.1,
+              transform: `rotate(${settings.waveAngle}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.2,
+              transform: `rotate(-${settings.waveAngle * (4 / 7)}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.3,
+              transform: `rotate(${settings.waveAngle}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.4,
+              transform: `rotate(-${settings.waveAngle * (2 / 7)}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.5,
+              transform: `rotate(${settings.waveAngle * (5 / 7)}deg)`
+            },
+            { easing: 'ease', offset: 0.6, transform: 'rotate(0deg)' },
+            { offset: 1, transform: 'rotate(0deg)' }
           ],
           {
             duration: settings.waveCycle,
-            easing: 'ease-in-out',
-            iterations: Infinity
+            easing: 'linear',
+            iterations: 1
           }
         );
         activeAnimations.add(wave);
 
         if (!(await sleep(settings.waveHold, id))) return;
 
-        setPhase('2 · shrinking to “hey”');
+        wave.cancel();
+        activeAnimations.delete(wave);
+        nodes.handGlyph.style.transform = 'rotate(0deg)';
+
+        setPhase('2 · shrinking to “hey”', 2);
         if (
           !(await animate(
             nodes.handShell,
@@ -755,58 +977,32 @@
         )
           return;
 
-        nodes.heyTarget.style.opacity = '1';
-        setPhase('3 · sliding into “who”');
-        if (
-          !(await animate(
-            nodes.handShell,
-            keyframesBetween(currentBox(nodes.handShell), handAtWordBox()),
-            {
-              duration: settings.slideDuration,
-              easing: settings.easing,
-              fill: 'forwards'
-            },
-            id
-          ))
-        )
-          return;
-
-        wave.cancel();
-        activeAnimations.delete(wave);
-        nodes.handImage.style.transform = 'rotate(0deg)';
-
-        setPhase(`4 · word delay (${settings.wordDelay}ms)`);
-        if (!(await sleep(settings.wordDelay, id))) return;
-
-        setPhase('5 · hand → words');
-        const [handFaded, wordShown] = await Promise.all([
+        setPhase(`3 · “hey” reveal (${settings.heyRevealDuration}ms)`, 3);
+        const [heyShown, handSettled] = await Promise.all([
           animate(
-            nodes.handShell,
-            [{ opacity: 1 }, { opacity: 0 }],
+            nodes.heyTarget,
+            [{ opacity: 0 }, { opacity: 1 }],
             {
-              duration: settings.fadeDuration,
-              easing: 'ease-out',
+              duration: settings.heyRevealDuration,
+              easing: 'ease-in-out',
               fill: 'forwards'
             },
             id
           ),
-          animate(
-            nodes.wordTarget,
-            [{ opacity: 0 }, { opacity: 1 }],
-            {
-              duration: settings.fadeDuration,
-              easing: 'ease-in',
-              fill: 'forwards'
-            },
-            id
-          )
+          sleep(settings.slideDuration, id)
         ]);
-        if (!handFaded || !wordShown) return;
+        if (!heyShown || !handSettled) return;
 
-        setPhase(`6 · question delay (${settings.questionDelay}ms)`);
+        setPhase(`4 · word delay (${settings.wordDelay}ms)`, 4);
+        if (!(await sleep(settings.wordDelay, id))) return;
+
+        setPhase('5 · revealing text', 5);
+        if (!(await revealText(settings, id))) return;
+
+        setPhase(`6 · question delay (${settings.questionDelay}ms)`, 6);
         if (!(await sleep(settings.questionDelay, id))) return;
 
-        setPhase('7 · drawing question mark');
+        setPhase('7 · drawing question mark', 7);
         nodes.questionShell.style.opacity = '1';
         const curveDuration = settings.drawDuration * 0.8;
         const dotDuration = settings.drawDuration * 0.2;
@@ -825,6 +1021,10 @@
         )
           return;
 
+        setPhase(`7 · dot delay (${settings.questionDotDelay}ms)`, 7);
+        if (!(await sleep(settings.questionDotDelay, id))) return;
+
+        setPhase('7 · drawing question dot', 7);
         if (
           !(await animate(
             nodes.questionDot,
@@ -839,7 +1039,7 @@
         )
           return;
 
-        setPhase('8 · question settling');
+        setPhase('8 · question settling', 8);
         if (
           !(await animate(
             nodes.questionShell,
@@ -857,15 +1057,22 @@
         )
           return;
 
-        nodes.questionTarget.style.opacity = '1';
-        nodes.questionShell.style.opacity = '0';
-        setPhase('complete · hey, who is Dash?');
+        setPhase('complete · hey, who is Dash?', 8);
       }
 
       document.querySelectorAll('input[type="range"]').forEach((input) => {
-        input.addEventListener('input', syncControlOutputs);
+        input.addEventListener('input', () => {
+          syncControlOutputs();
+
+          if (isStagePreview && input !== nodes.stageScrubber) {
+            previewStage(Number(nodes.stageScrubber.value));
+          }
+        });
       });
 
+      nodes.stageScrubber.addEventListener('input', () => {
+        previewStage(Number(nodes.stageScrubber.value));
+      });
       nodes.replay.addEventListener('click', play);
       nodes.reset.addEventListener('click', () => {
         controlIds.forEach((id) => {
@@ -876,6 +1083,11 @@
       });
 
       window.addEventListener('resize', () => {
+        if (isStagePreview) {
+          previewStage(Number(nodes.stageScrubber.value));
+          return;
+        }
+
         if (nodes.phase.textContent.startsWith('complete')) return;
         play();
       });

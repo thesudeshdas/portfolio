@@ -671,6 +671,7 @@
       };
 
       const controlIds = Object.keys(defaults);
+      const questionFocusMode = true;
       const activeAnimations = new Set();
       let isStagePreview = false;
       let runId = 0;
@@ -915,89 +916,97 @@
         isStagePreview = false;
         const settings = readSettings();
         resetStage(settings);
-        setPhase('1 · waving', 1);
 
-        const wave = nodes.handGlyph.animate(
-          [
-            { easing: 'ease', offset: 0, transform: 'rotate(0deg)' },
-            {
-              easing: 'ease',
-              offset: 0.1,
-              transform: `rotate(${settings.waveAngle}deg)`
-            },
-            {
-              easing: 'ease',
-              offset: 0.2,
-              transform: `rotate(-${settings.waveAngle * (4 / 7)}deg)`
-            },
-            {
-              easing: 'ease',
-              offset: 0.3,
-              transform: `rotate(${settings.waveAngle}deg)`
-            },
-            {
-              easing: 'ease',
-              offset: 0.4,
-              transform: `rotate(-${settings.waveAngle * (2 / 7)}deg)`
-            },
-            {
-              easing: 'ease',
-              offset: 0.5,
-              transform: `rotate(${settings.waveAngle * (5 / 7)}deg)`
-            },
-            { easing: 'ease', offset: 0.6, transform: 'rotate(0deg)' },
-            { offset: 1, transform: 'rotate(0deg)' }
-          ],
-          {
-            duration: settings.waveCycle,
-            easing: 'linear',
-            iterations: 1
-          }
-        );
-        activeAnimations.add(wave);
+        if (questionFocusMode) {
+          nodes.heyTarget.style.opacity = '1';
+          nodes.wordTarget.style.maskPosition = '0% 0';
+          nodes.wordTarget.style.webkitMaskPosition = '0% 0';
+          nodes.handShell.style.opacity = '0';
+        } else {
+          setPhase('1 · waving', 1);
 
-        if (!(await sleep(settings.waveHold, id))) return;
-
-        wave.cancel();
-        activeAnimations.delete(wave);
-        nodes.handGlyph.style.transform = 'rotate(0deg)';
-
-        setPhase('2 · shrinking to “hey”', 2);
-        if (
-          !(await animate(
-            nodes.handShell,
-            keyframesBetween(currentBox(nodes.handShell), handAtHeyBox()),
+          const wave = nodes.handGlyph.animate(
+            [
+              { easing: 'ease', offset: 0, transform: 'rotate(0deg)' },
+              {
+                easing: 'ease',
+                offset: 0.1,
+                transform: `rotate(${settings.waveAngle}deg)`
+              },
+              {
+                easing: 'ease',
+                offset: 0.2,
+                transform: `rotate(-${settings.waveAngle * (4 / 7)}deg)`
+              },
+              {
+                easing: 'ease',
+                offset: 0.3,
+                transform: `rotate(${settings.waveAngle}deg)`
+              },
+              {
+                easing: 'ease',
+                offset: 0.4,
+                transform: `rotate(-${settings.waveAngle * (2 / 7)}deg)`
+              },
+              {
+                easing: 'ease',
+                offset: 0.5,
+                transform: `rotate(${settings.waveAngle * (5 / 7)}deg)`
+              },
+              { easing: 'ease', offset: 0.6, transform: 'rotate(0deg)' },
+              { offset: 1, transform: 'rotate(0deg)' }
+            ],
             {
-              duration: settings.shrinkDuration,
-              easing: settings.easing,
-              fill: 'forwards'
-            },
-            id
-          ))
-        )
-          return;
+              duration: settings.waveCycle,
+              easing: 'linear',
+              iterations: 1
+            }
+          );
+          activeAnimations.add(wave);
 
-        setPhase(`3 · “hey” reveal (${settings.heyRevealDuration}ms)`, 3);
-        const [heyShown, handSettled] = await Promise.all([
-          animate(
-            nodes.heyTarget,
-            [{ opacity: 0 }, { opacity: 1 }],
-            {
-              duration: settings.heyRevealDuration,
-              easing: 'ease-in-out',
-              fill: 'forwards'
-            },
-            id
-          ),
-          sleep(settings.slideDuration, id)
-        ]);
-        if (!heyShown || !handSettled) return;
+          if (!(await sleep(settings.waveHold, id))) return;
 
-        setPhase(`4 · word delay (${settings.wordDelay}ms)`, 4);
-        if (!(await sleep(settings.wordDelay, id))) return;
+          wave.cancel();
+          activeAnimations.delete(wave);
+          nodes.handGlyph.style.transform = 'rotate(0deg)';
 
-        setPhase('5 · revealing text', 5);
-        if (!(await revealText(settings, id))) return;
+          setPhase('2 · shrinking to “hey”', 2);
+          if (
+            !(await animate(
+              nodes.handShell,
+              keyframesBetween(currentBox(nodes.handShell), handAtHeyBox()),
+              {
+                duration: settings.shrinkDuration,
+                easing: settings.easing,
+                fill: 'forwards'
+              },
+              id
+            ))
+          )
+            return;
+
+          setPhase(`3 · “hey” reveal (${settings.heyRevealDuration}ms)`, 3);
+          const [heyShown, handSettled] = await Promise.all([
+            animate(
+              nodes.heyTarget,
+              [{ opacity: 0 }, { opacity: 1 }],
+              {
+                duration: settings.heyRevealDuration,
+                easing: 'ease-in-out',
+                fill: 'forwards'
+              },
+              id
+            ),
+            sleep(settings.slideDuration, id)
+          ]);
+          if (!heyShown || !handSettled) return;
+
+          setPhase(`4 · word delay (${settings.wordDelay}ms)`, 4);
+          if (!(await sleep(settings.wordDelay, id))) return;
+
+          setPhase('5 · revealing text', 5);
+          if (!(await revealText(settings, id))) return;
+        }
 
         setPhase(`6 · question delay (${settings.questionDelay}ms)`, 6);
         if (!(await sleep(settings.questionDelay, id))) return;

@@ -399,8 +399,14 @@ export default function V2IntroAnimation({
             },
             {
               offset: 0.081,
-              opacity: 1,
+              opacity: 0,
               strokeDashoffset: 0.818,
+              strokeLinecap: 'round'
+            },
+            {
+              offset: 0.18,
+              opacity: 1,
+              strokeDashoffset: 0.73,
               strokeLinecap: 'round'
             },
             {

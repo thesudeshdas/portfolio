@@ -606,6 +606,21 @@
           />
         </div>
         <div class="control">
+          <label for="questionSettleDelay">
+            Question settle delay
+            <output data-for="questionSettleDelay"></output>
+          </label>
+          <input
+            id="questionSettleDelay"
+            type="range"
+            min="0"
+            max="1500"
+            value="300"
+            step="50"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
           <label for="tracerSize">
             Tracker size
             <output data-for="tracerSize"></output>
@@ -686,6 +701,7 @@
         questionX: 64,
         drawDuration: 1800,
         questionDotDelay: 300,
+        questionSettleDelay: 300,
         tracerFadeDuration: 150,
         tracerSize: 6,
         settleDuration: 600,
@@ -1194,6 +1210,9 @@
           ))
         )
           return;
+
+        setPhase(`7 · settle delay (${settings.questionSettleDelay}ms)`, 7);
+        if (!(await sleep(settings.questionSettleDelay, id))) return;
 
         setPhase('8 · question settling', 8);
         if (

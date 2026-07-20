@@ -8,6 +8,7 @@ type QuestionSettingKey =
   | 'drawDuration'
   | 'questionDelay'
   | 'questionDotDelay'
+  | 'questionSettleDelay'
   | 'questionSize'
   | 'questionX'
   | 'settleDuration'
@@ -80,6 +81,14 @@ const controls: QuestionControl[] = [
   {
     key: 'questionDotDelay',
     label: 'Dot delay',
+    min: 0,
+    max: 1500,
+    step: 50,
+    format: milliseconds
+  },
+  {
+    key: 'questionSettleDelay',
+    label: 'Settle delay',
     min: 0,
     max: 1500,
     step: 50,

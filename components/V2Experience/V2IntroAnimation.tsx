@@ -537,6 +537,10 @@ export default function V2IntroAnimation({
         return;
       }
 
+      if (!(await sleep(settings.questionSettleDelay, signal))) {
+        return;
+      }
+
       if (
         !(await animate(
           questionShell,

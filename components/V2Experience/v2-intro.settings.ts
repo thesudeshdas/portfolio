@@ -5,6 +5,7 @@ export interface V2IntroSettings {
   heyRevealDuration: number;
   questionDelay: number;
   questionDotDelay: number;
+  questionSettleDelay: number;
   questionSize: number;
   questionX: number;
   settleDuration: number;
@@ -26,6 +27,7 @@ export const DEFAULT_V2_INTRO_SETTINGS: V2IntroSettings = {
   heyRevealDuration: 600,
   questionDelay: 600,
   questionDotDelay: 300,
+  questionSettleDelay: 300,
   questionSize: 45,
   questionX: 64,
   settleDuration: 600,

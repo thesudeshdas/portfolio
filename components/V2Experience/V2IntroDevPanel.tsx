@@ -32,7 +32,7 @@ const viewportHeight = (value: number) => `${value}vh`;
 const controls: QuestionControl[] = [
   {
     key: 'questionDelay',
-    label: 'Question delay',
+    label: 'After sentence',
     min: 0,
     max: 2000,
     step: 50,
@@ -56,7 +56,7 @@ const controls: QuestionControl[] = [
   },
   {
     key: 'drawDuration',
-    label: 'Hook draw',
+    label: 'Hook + dot motion',
     min: 500,
     max: 4000,
     step: 50,
@@ -64,7 +64,7 @@ const controls: QuestionControl[] = [
   },
   {
     key: 'tracerFadeDuration',
-    label: 'Tracker fade',
+    label: 'Tracker fade (each)',
     min: 50,
     max: 500,
     step: 25,
@@ -80,7 +80,7 @@ const controls: QuestionControl[] = [
   },
   {
     key: 'questionDotDelay',
-    label: 'Dot delay',
+    label: 'After hook',
     min: 0,
     max: 1500,
     step: 50,
@@ -88,7 +88,7 @@ const controls: QuestionControl[] = [
   },
   {
     key: 'questionSettleDelay',
-    label: 'Settle delay',
+    label: 'After final dot',
     min: 0,
     max: 1500,
     step: 50,
@@ -96,7 +96,7 @@ const controls: QuestionControl[] = [
   },
   {
     key: 'settleDuration',
-    label: 'Question settle',
+    label: 'Scale down',
     min: 100,
     max: 2000,
     step: 50,
@@ -118,6 +118,11 @@ export default function V2IntroDevPanel({
   settings: V2IntroSettings;
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const hookStartDelay = settings.questionDelay + settings.tracerFadeDuration;
+  const questionDrawDuration =
+    settings.drawDuration +
+    settings.tracerFadeDuration +
+    settings.questionDotDelay;
 
   if (!isOpen) {
     return (
@@ -142,7 +147,7 @@ export default function V2IntroDevPanel({
             Question controls
           </h2>
           <p className='mt-1.5 text-[10px] leading-none text-zinc-500'>
-            Focus mode · full intro paused
+            Full intro · changes replay automatically
           </p>
         </div>
         <button
@@ -154,6 +159,21 @@ export default function V2IntroDevPanel({
           Close
         </button>
       </div>
+
+      <dl className='mt-4 grid grid-cols-2 gap-2 rounded-sm border border-white/10 bg-black/20 p-2.5 text-[10px]'>
+        <div>
+          <dt className='text-zinc-500'>Hook starts after</dt>
+          <dd className='mt-1 font-mono text-zinc-200'>
+            {milliseconds(hookStartDelay)}
+          </dd>
+        </div>
+        <div>
+          <dt className='text-zinc-500'>Question completes in</dt>
+          <dd className='mt-1 font-mono text-zinc-200'>
+            {milliseconds(questionDrawDuration)}
+          </dd>
+        </div>
+      </dl>
 
       <div className='mt-4 grid grid-cols-1 gap-x-5 gap-y-3 sm:grid-cols-2'>
         {controls.map((control) => {

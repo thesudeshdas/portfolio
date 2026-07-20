@@ -21,13 +21,13 @@ export interface V2IntroSettings {
 }
 
 export const DEFAULT_V2_INTRO_SETTINGS: V2IntroSettings = {
-  drawDuration: 1800,
+  drawDuration: 900,
   easing: 'cubic-bezier(.65, 0, .35, 1)',
   handSize: 50,
   heyRevealDuration: 600,
-  questionDelay: 600,
-  questionDotDelay: 300,
-  questionSettleDelay: 300,
+  questionDelay: 0,
+  questionDotDelay: 100,
+  questionSettleDelay: 100,
   questionSize: 45,
   questionX: 64,
   settleDuration: 600,
@@ -61,6 +61,6 @@ export const V2_INTRO_EASINGS = [
   }
 ];
 
-export const IS_V2_INTRO_DEV_PANEL_ENABLED = false;
+export const IS_V2_INTRO_DEV_PANEL_ENABLED = true;
 
 export const IS_V2_QUESTION_FOCUS_MODE = false;

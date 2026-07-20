@@ -1,27 +1,15 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './V2IntroAnimation.module.css';
-
-const SETTINGS = {
-  drawDuration: 1800,
-  easing: 'cubic-bezier(.65, 0, .35, 1)',
-  handSize: 50,
-  heyRevealDuration: 600,
-  questionDelay: 600,
-  questionDotDelay: 300,
-  questionSize: 45,
-  questionX: 64,
-  settleDuration: 600,
-  shrinkDuration: 600,
-  slideDuration: 800,
-  textRevealDuration: 1500,
-  waveAngle: 14,
-  waveCycle: 2500,
-  waveHold: 2000,
-  wordDelay: 0
-} as const;
+import V2IntroDevPanel from './V2IntroDevPanel';
+import {
+  DEFAULT_V2_INTRO_SETTINGS,
+  IS_V2_INTRO_DEV_PANEL_ENABLED,
+  IS_V2_QUESTION_FOCUS_MODE,
+  type V2IntroSettings
+} from './v2-intro.settings';
 
 type ElementBox = {
   height: number;
@@ -68,19 +56,70 @@ function keyframesBetween(from: ElementBox, to: ElementBox): Keyframe[] {
   ];
 }
 
+function tracerTransform(path: SVGPathElement, progress: number) {
+  const pathLength = path.getTotalLength();
+  const start = path.getPointAtLength(0);
+  const point = path.getPointAtLength(pathLength * progress);
+
+  return `translate(${point.x - start.x}px, ${point.y - start.y}px)`;
+}
+
+function tracerKeyframes(path: SVGPathElement): Keyframe[] {
+  const sampleCount = 60;
+
+  return Array.from({ length: sampleCount + 1 }, (_, index) => {
+    const progress = index / sampleCount;
+
+    return {
+      offset: progress,
+      transform: tracerTransform(path, progress)
+    };
+  });
+}
+
 export default function V2IntroAnimation({
   emojiClassName
 }: {
   emojiClassName: string;
 }) {
+  const [replayToken, setReplayToken] = useState(0);
+  const [settings, setSettings] = useState<V2IntroSettings>(() => ({
+    ...DEFAULT_V2_INTRO_SETTINGS
+  }));
   const handGlyphRef = useRef<HTMLSpanElement>(null);
   const handShellRef = useRef<HTMLDivElement>(null);
   const heyTargetRef = useRef<HTMLSpanElement>(null);
   const questionCurveRef = useRef<SVGPathElement>(null);
-  const questionDotRef = useRef<SVGCircleElement>(null);
+  const questionDotRef = useRef<HTMLSpanElement>(null);
   const questionShellRef = useRef<HTMLDivElement>(null);
   const questionTargetRef = useRef<HTMLSpanElement>(null);
+  const questionTracerRef = useRef<SVGCircleElement>(null);
   const wordTargetRef = useRef<HTMLSpanElement>(null);
+
+  const handleSettingChange = useCallback(
+    (key: Exclude<keyof V2IntroSettings, 'easing'>, value: number) => {
+      setSettings((currentSettings) => ({
+        ...currentSettings,
+        [key]: value
+      }));
+    },
+    []
+  );
+
+  const handleEasingChange = useCallback((easing: string) => {
+    setSettings((currentSettings) => ({
+      ...currentSettings,
+      easing
+    }));
+  }, []);
+
+  const handleReplay = useCallback(() => {
+    setReplayToken((currentToken) => currentToken + 1);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setSettings({ ...DEFAULT_V2_INTRO_SETTINGS });
+  }, []);
 
   useEffect(() => {
     const handGlyph = handGlyphRef.current;
@@ -90,6 +129,7 @@ export default function V2IntroAnimation({
     const questionDot = questionDotRef.current;
     const questionShell = questionShellRef.current;
     const questionTarget = questionTargetRef.current;
+    const questionTracer = questionTracerRef.current;
     const wordTarget = wordTargetRef.current;
 
     if (
@@ -100,17 +140,19 @@ export default function V2IntroAnimation({
       !questionDot ||
       !questionShell ||
       !questionTarget ||
+      !questionTracer ||
       !wordTarget
     ) {
       return;
     }
 
     let activeController: AbortController | null = null;
+    let isDisposed = false;
     let isComplete = false;
     let resizeFrame = 0;
 
     const initialHandBox = (): ElementBox => {
-      const size = window.innerHeight * (SETTINGS.handSize / 100);
+      const size = window.innerHeight * (settings.handSize / 100);
 
       return {
         height: size,
@@ -133,12 +175,12 @@ export default function V2IntroAnimation({
     };
 
     const initialQuestionBox = (): ElementBox => {
-      const height = window.innerHeight * (SETTINGS.questionSize / 100);
+      const height = window.innerHeight * (settings.questionSize / 100);
       const width = height * (2 / 3);
 
       return {
         height,
-        left: window.innerWidth * (SETTINGS.questionX / 100) - width / 2,
+        left: window.innerWidth * (settings.questionX / 100) - width / 2,
         top: (window.innerHeight - height) / 2,
         width
       };
@@ -209,8 +251,12 @@ export default function V2IntroAnimation({
       questionShell.style.opacity = '0';
       questionCurve.style.opacity = '0';
       questionCurve.style.strokeDashoffset = '1';
-      questionCurve.style.strokeLinecap = 'butt';
-      questionDot.style.transform = 'scale(0)';
+      questionCurve.style.strokeLinecap = 'round';
+      questionDot.style.display = 'none';
+      questionDot.style.opacity = '0';
+      questionDot.style.transform = 'translate(-50%, -50%) scale(0)';
+      questionTracer.style.opacity = '0';
+      questionTracer.style.transform = 'translate(0, 0)';
       handGlyph.style.transform = 'rotate(0deg)';
       place(handShell, initialHandBox());
       place(questionShell, initialQuestionBox());
@@ -226,7 +272,10 @@ export default function V2IntroAnimation({
       questionCurve.style.opacity = '1';
       questionCurve.style.strokeDashoffset = '0';
       questionCurve.style.strokeLinecap = 'round';
-      questionDot.style.transform = 'scale(1)';
+      questionDot.style.display = 'block';
+      questionDot.style.opacity = '1';
+      questionDot.style.transform = 'translate(-50%, -50%) scale(1)';
+      questionTracer.style.opacity = '0';
       place(questionShell, finalQuestionBox());
       isComplete = true;
     };
@@ -245,8 +294,8 @@ export default function V2IntroAnimation({
           handShell,
           handKeyframes,
           {
-            duration: SETTINGS.textRevealDuration,
-            easing: SETTINGS.easing,
+            duration: settings.textRevealDuration,
+            easing: settings.easing,
             fill: 'forwards'
           },
           signal
@@ -258,8 +307,8 @@ export default function V2IntroAnimation({
             { maskPosition: '0% 0', webkitMaskPosition: '0% 0' }
           ],
           {
-            duration: SETTINGS.textRevealDuration,
-            easing: SETTINGS.easing,
+            duration: settings.textRevealDuration,
+            easing: settings.easing,
             fill: 'forwards'
           },
           signal
@@ -281,64 +330,120 @@ export default function V2IntroAnimation({
         return;
       }
 
-      const wave = handGlyph.animate(
-        [
-          { easing: 'ease', offset: 0, transform: 'rotate(0deg)' },
+      if (IS_V2_QUESTION_FOCUS_MODE) {
+        heyTarget.style.opacity = '1';
+        wordTarget.style.maskPosition = '0% 0';
+        wordTarget.style.webkitMaskPosition = '0% 0';
+        handShell.style.opacity = '0';
+      } else {
+        const wave = handGlyph.animate(
+          [
+            { easing: 'ease', offset: 0, transform: 'rotate(0deg)' },
+            {
+              easing: 'ease',
+              offset: 0.1,
+              transform: `rotate(${settings.waveAngle}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.2,
+              transform: `rotate(-${settings.waveAngle * (4 / 7)}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.3,
+              transform: `rotate(${settings.waveAngle}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.4,
+              transform: `rotate(-${settings.waveAngle * (2 / 7)}deg)`
+            },
+            {
+              easing: 'ease',
+              offset: 0.5,
+              transform: `rotate(${settings.waveAngle * (5 / 7)}deg)`
+            },
+            { easing: 'ease', offset: 0.6, transform: 'rotate(0deg)' },
+            { offset: 1, transform: 'rotate(0deg)' }
+          ],
           {
-            easing: 'ease',
-            offset: 0.1,
-            transform: `rotate(${SETTINGS.waveAngle}deg)`
-          },
-          {
-            easing: 'ease',
-            offset: 0.2,
-            transform: `rotate(-${SETTINGS.waveAngle * (4 / 7)}deg)`
-          },
-          {
-            easing: 'ease',
-            offset: 0.3,
-            transform: `rotate(${SETTINGS.waveAngle}deg)`
-          },
-          {
-            easing: 'ease',
-            offset: 0.4,
-            transform: `rotate(-${SETTINGS.waveAngle * (2 / 7)}deg)`
-          },
-          {
-            easing: 'ease',
-            offset: 0.5,
-            transform: `rotate(${SETTINGS.waveAngle * (5 / 7)}deg)`
-          },
-          { easing: 'ease', offset: 0.6, transform: 'rotate(0deg)' },
-          { offset: 1, transform: 'rotate(0deg)' }
-        ],
-        {
-          duration: SETTINGS.waveCycle,
-          easing: 'linear',
-          iterations: 1
-        }
-      );
-      const cancelWave = () => wave.cancel();
-      signal.addEventListener('abort', cancelWave, { once: true });
+            duration: settings.waveCycle,
+            easing: 'linear',
+            iterations: 1
+          }
+        );
+        const cancelWave = () => wave.cancel();
+        signal.addEventListener('abort', cancelWave, { once: true });
 
-      if (!(await sleep(SETTINGS.waveHold, signal))) {
+        if (!(await sleep(settings.waveHold, signal))) {
+          return;
+        }
+
+        wave.cancel();
+        signal.removeEventListener('abort', cancelWave);
+        handGlyph.style.transform = 'rotate(0deg)';
+
+        if (
+          !(await animate(
+            handShell,
+            keyframesBetween(
+              currentBox(handShell),
+              handAfterTargetBox(heyTarget)
+            ),
+            {
+              duration: settings.shrinkDuration,
+              easing: settings.easing,
+              fill: 'forwards'
+            },
+            signal
+          ))
+        ) {
+          return;
+        }
+
+        const [heyShown, handSettled] = await Promise.all([
+          animate(
+            heyTarget,
+            [{ opacity: 0 }, { opacity: 1 }],
+            {
+              duration: settings.heyRevealDuration,
+              easing: 'ease-in-out',
+              fill: 'forwards'
+            },
+            signal
+          ),
+          sleep(settings.slideDuration, signal)
+        ]);
+
+        if (!heyShown || !handSettled) {
+          return;
+        }
+
+        if (!(await sleep(settings.wordDelay, signal))) {
+          return;
+        }
+
+        if (!(await revealText(signal))) {
+          return;
+        }
+      }
+
+      if (!(await sleep(settings.questionDelay, signal))) {
         return;
       }
 
-      wave.cancel();
-      signal.removeEventListener('abort', cancelWave);
-      handGlyph.style.transform = 'rotate(0deg)';
+      questionShell.style.opacity = '1';
+      const curveDuration = settings.drawDuration * 0.8;
+      const dotDuration = settings.drawDuration * 0.2;
 
       if (
         !(await animate(
-          handShell,
-          keyframesBetween(
-            currentBox(handShell),
-            handAfterTargetBox(heyTarget)
-          ),
+          questionTracer,
+          [{ opacity: 0 }, { opacity: 1 }],
           {
-            duration: SETTINGS.shrinkDuration,
-            easing: SETTINGS.easing,
+            duration: settings.tracerFadeDuration,
+            easing: 'ease-out',
             fill: 'forwards'
           },
           signal
@@ -347,66 +452,15 @@ export default function V2IntroAnimation({
         return;
       }
 
-      const [heyShown, handSettled] = await Promise.all([
+      questionCurve.style.opacity = '1';
+      const [curveDrawn, tracerMoved] = await Promise.all([
         animate(
-          heyTarget,
-          [{ opacity: 0 }, { opacity: 1 }],
-          {
-            duration: SETTINGS.heyRevealDuration,
-            easing: 'ease-in-out',
-            fill: 'forwards'
-          },
-          signal
-        ),
-        sleep(SETTINGS.slideDuration, signal)
-      ]);
-
-      if (!heyShown || !handSettled) {
-        return;
-      }
-
-      if (!(await sleep(SETTINGS.wordDelay, signal))) {
-        return;
-      }
-
-      if (!(await revealText(signal))) {
-        return;
-      }
-
-      if (!(await sleep(SETTINGS.questionDelay, signal))) {
-        return;
-      }
-
-      questionShell.style.opacity = '1';
-      const curveDuration = SETTINGS.drawDuration * 0.8;
-      const dotDuration = SETTINGS.drawDuration * 0.2;
-
-      if (
-        !(await animate(
           questionCurve,
           [
             {
               offset: 0,
-              opacity: 0,
-              strokeDashoffset: 1,
-              strokeLinecap: 'butt'
-            },
-            {
-              offset: 0.08,
-              opacity: 0,
-              strokeDashoffset: 0.82,
-              strokeLinecap: 'butt'
-            },
-            {
-              offset: 0.081,
-              opacity: 0,
-              strokeDashoffset: 0.818,
-              strokeLinecap: 'round'
-            },
-            {
-              offset: 0.18,
               opacity: 1,
-              strokeDashoffset: 0.73,
+              strokeDashoffset: 1,
               strokeLinecap: 'round'
             },
             {
@@ -422,22 +476,59 @@ export default function V2IntroAnimation({
             fill: 'forwards'
           },
           signal
-        ))
-      ) {
-        return;
-      }
+        ),
+        animate(
+          questionTracer,
+          tracerKeyframes(questionCurve),
+          {
+            duration: curveDuration,
+            easing: 'ease-in-out',
+            fill: 'forwards'
+          },
+          signal
+        )
+      ]);
 
-      if (!(await sleep(SETTINGS.questionDotDelay, signal))) {
+      if (!curveDrawn || !tracerMoved) {
         return;
       }
 
       if (
         !(await animate(
+          questionTracer,
+          [{ opacity: 1 }, { opacity: 0 }],
+          {
+            duration: settings.tracerFadeDuration,
+            easing: 'ease-in',
+            fill: 'forwards'
+          },
+          signal
+        ))
+      ) {
+        return;
+      }
+
+      if (!(await sleep(settings.questionDotDelay, signal))) {
+        return;
+      }
+
+      questionDot.style.display = 'block';
+      if (
+        !(await animate(
           questionDot,
-          [{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
+          [
+            {
+              opacity: 0,
+              transform: 'translate(-50%, -50%) scale(0)'
+            },
+            {
+              opacity: 1,
+              transform: 'translate(-50%, -50%) scale(1)'
+            }
+          ],
           {
             duration: dotDuration,
-            easing: 'cubic-bezier(.22, 1, .36, 1)',
+            easing: settings.easing,
             fill: 'forwards'
           },
           signal
@@ -451,8 +542,8 @@ export default function V2IntroAnimation({
           questionShell,
           keyframesBetween(currentBox(questionShell), finalQuestionBox()),
           {
-            duration: SETTINGS.settleDuration,
-            easing: SETTINGS.easing,
+            duration: settings.settleDuration,
+            easing: settings.easing,
             fill: 'forwards'
           },
           signal
@@ -477,16 +568,19 @@ export default function V2IntroAnimation({
     };
 
     void document.fonts.ready.then(() => {
-      void play();
+      if (!isDisposed) {
+        void play();
+      }
     });
     window.addEventListener('resize', handleResize);
 
     return () => {
+      isDisposed = true;
       activeController?.abort();
       window.cancelAnimationFrame(resizeFrame);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [replayToken, settings]);
 
   return (
     <div className={styles.root}>
@@ -498,6 +592,7 @@ export default function V2IntroAnimation({
           ref={heyTargetRef}
           className={styles.hey}
           aria-hidden='true'
+          style={IS_V2_QUESTION_FOCUS_MODE ? { opacity: 1 } : undefined}
         >
           hey,{' '}
         </span>
@@ -505,6 +600,11 @@ export default function V2IntroAnimation({
           ref={wordTargetRef}
           className={styles.word}
           aria-hidden='true'
+          style={
+            IS_V2_QUESTION_FOCUS_MODE
+              ? { maskPosition: '0% 0', WebkitMaskPosition: '0% 0' }
+              : undefined
+          }
         >
           who is Dash
         </span>
@@ -521,6 +621,7 @@ export default function V2IntroAnimation({
         ref={handShellRef}
         className={styles.handShell}
         aria-hidden='true'
+        style={IS_V2_QUESTION_FOCUS_MODE ? { opacity: 0 } : undefined}
       >
         <span
           ref={handGlyphRef}
@@ -543,14 +644,28 @@ export default function V2IntroAnimation({
             d='M 24 31 C 26 10, 49 4, 68 12 C 88 21, 89 47, 72 60 C 61 69, 51 71, 50 88'
           />
           <circle
-            ref={questionDotRef}
-            className={styles.questionDot}
-            cx='50'
-            cy='124'
-            r='8'
+            ref={questionTracerRef}
+            className={styles.questionTracer}
+            cx='24'
+            cy='31'
+            r={settings.tracerSize}
           />
         </svg>
+        <span
+          ref={questionDotRef}
+          className={styles.questionDot}
+        />
       </div>
+
+      {IS_V2_INTRO_DEV_PANEL_ENABLED ? (
+        <V2IntroDevPanel
+          settings={settings}
+          onChange={handleSettingChange}
+          onEasingChange={handleEasingChange}
+          onReplay={handleReplay}
+          onReset={handleReset}
+        />
+      ) : null}
     </div>
   );
 }

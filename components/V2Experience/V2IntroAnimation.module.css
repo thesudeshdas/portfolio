@@ -86,7 +86,7 @@
   fill: none;
   opacity: 0;
   stroke: #f4f4f5;
-  stroke-dasharray: 1;
+  stroke-dasharray: 1 100;
   stroke-dashoffset: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -94,8 +94,22 @@
 }
 
 .questionDot {
-  fill: #f4f4f5;
-  transform: scale(0);
-  transform-box: fill-box;
+  position: absolute;
+  top: 82.6667%;
+  left: 50%;
+  display: none;
+  width: 16%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: #f4f4f5;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
   transform-origin: center;
+}
+
+.questionTracer {
+  fill: #f4f4f5;
+  opacity: 0;
+  transform-box: view-box;
+  transform-origin: 0 0;
 }

@@ -135,7 +135,7 @@
         fill: none;
         opacity: 0;
         stroke: #f4f4f5;
-        stroke-dasharray: 1;
+        stroke-dasharray: 1 100;
         stroke-dashoffset: 1;
         stroke-linecap: round;
         stroke-linejoin: round;
@@ -143,10 +143,24 @@
       }
 
       .question-dot {
-        fill: #f4f4f5;
-        transform: scale(0);
-        transform-box: fill-box;
+        position: absolute;
+        top: 82.6667%;
+        left: 50%;
+        display: none;
+        width: 16%;
+        aspect-ratio: 1;
+        border-radius: 9999px;
+        background: #f4f4f5;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
         transform-origin: center;
+      }
+
+      .question-tracer {
+        fill: #f4f4f5;
+        opacity: 0;
+        transform-box: view-box;
+        transform-origin: 0 0;
       }
 
       .panel {
@@ -325,13 +339,17 @@
             d="M 24 31 C 26 10, 49 4, 68 12 C 88 21, 89 47, 72 60 C 61 69, 51 71, 50 88"
           />
           <circle
-            id="questionDot"
-            class="question-dot"
-            cx="50"
-            cy="124"
-            r="8"
+            id="questionTracer"
+            class="question-tracer"
+            cx="24"
+            cy="31"
+            r="6"
           />
         </svg>
+        <span
+          id="questionDot"
+          class="question-dot"
+        ></span>
       </div>
     </main>
 
@@ -573,6 +591,35 @@
           />
         </div>
         <div class="control">
+          <label for="tracerFadeDuration">
+            Tracker fade
+            <output data-for="tracerFadeDuration"></output>
+          </label>
+          <input
+            id="tracerFadeDuration"
+            type="range"
+            min="50"
+            max="500"
+            value="150"
+            step="25"
+            data-unit="ms"
+          />
+        </div>
+        <div class="control">
+          <label for="tracerSize">
+            Tracker size
+            <output data-for="tracerSize"></output>
+          </label>
+          <input
+            id="tracerSize"
+            type="range"
+            min="3"
+            max="12"
+            value="6"
+            step="0.5"
+          />
+        </div>
+        <div class="control">
           <label for="settleDuration">
             Question settle
             <output data-for="settleDuration"></output>
@@ -639,6 +686,8 @@
         questionX: 64,
         drawDuration: 1800,
         questionDotDelay: 300,
+        tracerFadeDuration: 150,
+        tracerSize: 6,
         settleDuration: 600,
         easing: 'cubic-bezier(.65, 0, .35, 1)'
       };
@@ -664,6 +713,7 @@
         questionDot: document.querySelector('#questionDot'),
         questionShell: document.querySelector('#questionShell'),
         questionTarget: document.querySelector('#questionTarget'),
+        questionTracer: document.querySelector('#questionTracer'),
         replay: document.querySelector('#replay'),
         reset: document.querySelector('#reset'),
         stageOutput: document.querySelector('#stageOutput'),
@@ -772,6 +822,27 @@
         ];
       }
 
+      function tracerTransform(path, progress) {
+        const pathLength = path.getTotalLength();
+        const start = path.getPointAtLength(0);
+        const point = path.getPointAtLength(pathLength * progress);
+
+        return `translate(${point.x - start.x}px, ${point.y - start.y}px)`;
+      }
+
+      function tracerKeyframes(path) {
+        const sampleCount = 60;
+
+        return Array.from({ length: sampleCount + 1 }, (_, index) => {
+          const progress = index / sampleCount;
+
+          return {
+            offset: progress,
+            transform: tracerTransform(path, progress)
+          };
+        });
+      }
+
       function initialHandBox(settings) {
         const size = window.innerHeight * (settings.handSize / 100);
         return {
@@ -830,8 +901,13 @@
         nodes.questionShell.style.opacity = '0';
         nodes.questionCurve.style.opacity = '0';
         nodes.questionCurve.style.strokeDashoffset = '1';
-        nodes.questionCurve.style.strokeLinecap = 'butt';
-        nodes.questionDot.style.transform = 'scale(0)';
+        nodes.questionCurve.style.strokeLinecap = 'round';
+        nodes.questionDot.style.display = 'none';
+        nodes.questionDot.style.opacity = '0';
+        nodes.questionDot.style.transform = 'translate(-50%, -50%) scale(0)';
+        nodes.questionTracer.setAttribute('r', settings.tracerSize);
+        nodes.questionTracer.style.opacity = '0';
+        nodes.questionTracer.style.transform = 'translate(0, 0)';
         nodes.handGlyph.style.transform = 'rotate(0deg)';
         place(nodes.handShell, initialHandBox(settings));
         place(nodes.questionShell, initialQuestionBox(settings));
@@ -908,7 +984,10 @@
           nodes.questionCurve.style.opacity = '1';
           nodes.questionCurve.style.strokeDashoffset = '0';
           nodes.questionCurve.style.strokeLinecap = 'round';
-          nodes.questionDot.style.transform = 'scale(1)';
+          nodes.questionDot.style.display = 'block';
+          nodes.questionDot.style.opacity = '1';
+          nodes.questionDot.style.transform = 'translate(-50%, -50%) scale(1)';
+          nodes.questionTracer.style.opacity = '0';
         }
 
         if (stage >= 8) {
@@ -1023,30 +1102,27 @@
 
         if (
           !(await animate(
+            nodes.questionTracer,
+            [{ opacity: 0 }, { opacity: 1 }],
+            {
+              duration: settings.tracerFadeDuration,
+              easing: 'ease-out',
+              fill: 'forwards'
+            },
+            id
+          ))
+        )
+          return;
+
+        nodes.questionCurve.style.opacity = '1';
+        const [curveDrawn, tracerMoved] = await Promise.all([
+          animate(
             nodes.questionCurve,
             [
               {
                 offset: 0,
-                opacity: 0,
-                strokeDashoffset: 1,
-                strokeLinecap: 'butt'
-              },
-              {
-                offset: 0.08,
-                opacity: 0,
-                strokeDashoffset: 0.82,
-                strokeLinecap: 'butt'
-              },
-              {
-                offset: 0.081,
-                opacity: 0,
-                strokeDashoffset: 0.818,
-                strokeLinecap: 'round'
-              },
-              {
-                offset: 0.18,
                 opacity: 1,
-                strokeDashoffset: 0.73,
+                strokeDashoffset: 1,
                 strokeLinecap: 'round'
               },
               {
@@ -1062,6 +1138,31 @@
               fill: 'forwards'
             },
             id
+          ),
+          animate(
+            nodes.questionTracer,
+            tracerKeyframes(nodes.questionCurve),
+            {
+              duration: curveDuration,
+              easing: 'ease-in-out',
+              fill: 'forwards'
+            },
+            id
+          )
+        ]);
+        if (!curveDrawn || !tracerMoved) return;
+
+        setPhase('7 · hiding tracker', 7);
+        if (
+          !(await animate(
+            nodes.questionTracer,
+            [{ opacity: 1 }, { opacity: 0 }],
+            {
+              duration: settings.tracerFadeDuration,
+              easing: 'ease-in',
+              fill: 'forwards'
+            },
+            id
           ))
         )
           return;
@@ -1070,13 +1171,23 @@
         if (!(await sleep(settings.questionDotDelay, id))) return;
 
         setPhase('7 · drawing question dot', 7);
+        nodes.questionDot.style.display = 'block';
         if (
           !(await animate(
             nodes.questionDot,
-            [{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
+            [
+              {
+                opacity: 0,
+                transform: 'translate(-50%, -50%) scale(0)'
+              },
+              {
+                opacity: 1,
+                transform: 'translate(-50%, -50%) scale(1)'
+              }
+            ],
             {
               duration: dotDuration,
-              easing: 'cubic-bezier(.22, 1, .36, 1)',
+              easing: settings.easing,
               fill: 'forwards'
             },
             id

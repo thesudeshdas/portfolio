@@ -252,7 +252,7 @@ export default function V2IntroAnimation({
       questionTarget.style.opacity = '0';
       wordTarget.style.maskPosition = '100% 0';
       wordTarget.style.webkitMaskPosition = '100% 0';
-      handShell.style.opacity = '1';
+      handShell.style.opacity = '0';
       questionShell.style.opacity = '0';
       questionCurve.style.opacity = '0';
       questionCurve.style.strokeDashoffset = '1';
@@ -388,7 +388,21 @@ export default function V2IntroAnimation({
         const cancelWave = () => wave.cancel();
         signal.addEventListener('abort', cancelWave, { once: true });
 
-        if (!(await sleep(settings.waveHold, signal))) {
+        const [handShown, handHeld] = await Promise.all([
+          animate(
+            handShell,
+            [{ opacity: 0 }, { opacity: 1 }],
+            {
+              duration: settings.handFadeDuration,
+              easing: 'ease-out',
+              fill: 'forwards'
+            },
+            signal
+          ),
+          sleep(settings.waveHold, signal)
+        ]);
+
+        if (!handShown || !handHeld) {
           return;
         }
 

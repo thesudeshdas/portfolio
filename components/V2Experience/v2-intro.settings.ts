@@ -1,6 +1,7 @@
 export interface V2IntroSettings {
   drawDuration: number;
   easing: string;
+  handFadeDuration: number;
   handSize: number;
   heyRevealDuration: number;
   questionDelay: number;
@@ -23,6 +24,7 @@ export interface V2IntroSettings {
 export const DEFAULT_V2_INTRO_SETTINGS: V2IntroSettings = {
   drawDuration: 900,
   easing: 'cubic-bezier(.65, 0, .35, 1)',
+  handFadeDuration: 600,
   handSize: 50,
   heyRevealDuration: 600,
   questionDelay: 0,

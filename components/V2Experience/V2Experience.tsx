@@ -194,6 +194,9 @@ export default function V2Experience() {
         />
 
         <V2MusicPlayer
+          autoplayDelayMs={
+            getV2CornerDelay(cornerSettings, 2) + cornerSettings.duration
+          }
           fontClassName={outfit.className}
           isRevealed={isIntroComplete}
           revealStyle={musicRevealStyle}

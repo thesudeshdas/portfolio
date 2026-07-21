@@ -19,7 +19,6 @@ import {
 } from './v2-music.settings';
 
 const ALBUM_SIZE = 64;
-const AUTOPLAY_DELAY_MS = 1500;
 const DEFAULT_VOLUME = 1;
 const PLAYER_BUTTON_WIDTH = 104;
 const VOLUME_FADE_MS = 1500;
@@ -32,10 +31,12 @@ function getVinylTranslateX(revealPercent: number) {
 }
 
 export default function V2MusicPlayer({
+  autoplayDelayMs,
   fontClassName,
   isRevealed,
   revealStyle
 }: {
+  autoplayDelayMs: number;
   fontClassName: string;
   isRevealed: boolean;
   revealStyle: CSSProperties;
@@ -99,11 +100,7 @@ export default function V2MusicPlayer({
     let fadeFrame: number | undefined;
     let isCancelled = false;
 
-    if (process.env.NODE_ENV === 'development') {
-      return;
-    }
-
-    if (!audio) {
+    if (!audio || !isRevealed) {
       return;
     }
 
@@ -169,7 +166,7 @@ export default function V2MusicPlayer({
       }
 
       void startPlaybackWithFade();
-    }, AUTOPLAY_DELAY_MS);
+    }, autoplayDelayMs);
 
     const cancelAutoplay = () => {
       isCancelled = true;
@@ -184,7 +181,7 @@ export default function V2MusicPlayer({
     cancelAutoplayRef.current = cancelAutoplay;
 
     return cancelAutoplay;
-  }, [playCurrentTrack]);
+  }, [autoplayDelayMs, isRevealed, playCurrentTrack]);
 
   const updateSetting = useCallback(
     (key: keyof V2MusicPlayerSettings, value: number) => {

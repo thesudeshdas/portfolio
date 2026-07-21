@@ -1,3 +1,12 @@
+'use client';
+
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import {
   FiGithub,
   FiInstagram,
@@ -8,8 +17,17 @@ import {
 import { Noto_Emoji, Outfit } from 'next/font/google';
 
 import V2AttributionPopover from './V2AttributionPopover';
+import V2CornerDevPanel from './V2CornerDevPanel';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
+import {
+  DEFAULT_V2_CORNER_SETTINGS,
+  getV2CornerDelay,
+  IS_V2_CORNER_DEV_PANEL_ENABLED,
+  type V2CornerAnimationMode,
+  type V2CornerNumericSettingKey,
+  type V2CornerSettings
+} from './v2-corner.settings';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -29,7 +47,129 @@ const socialLabels = [
   { icon: FiMail, label: 'Email' }
 ];
 
+function cornerRevealStyle(
+  settings: V2CornerSettings,
+  isRevealed: boolean,
+  itemIndex: number,
+  slideDirection: -1 | 1
+): CSSProperties {
+  const isScaleAnimation = settings.animationMode === 'scale';
+
+  return {
+    opacity: isRevealed ? 1 : 0,
+    scale: isScaleAnimation && !isRevealed ? settings.startScale : 1,
+    translate:
+      !isScaleAnimation && !isRevealed
+        ? `${settings.slideDistance * slideDirection}px 0`
+        : '0 0',
+    transitionDelay: isRevealed
+      ? `${getV2CornerDelay(settings, itemIndex)}ms`
+      : '0ms',
+    transitionDuration: isRevealed ? `${settings.duration}ms` : '0ms',
+    transitionProperty: isScaleAnimation
+      ? 'opacity, scale'
+      : 'opacity, translate',
+    transitionTimingFunction: settings.easing
+  };
+}
+
 export default function V2Experience() {
+  const [cornerSettings, setCornerSettings] = useState<V2CornerSettings>(
+    () => ({
+      ...DEFAULT_V2_CORNER_SETTINGS
+    })
+  );
+  const [isIntroComplete, setIsIntroComplete] = useState(false);
+  const replayFrameRef = useRef<number | null>(null);
+
+  const replayCorners = useCallback(() => {
+    if (replayFrameRef.current !== null) {
+      window.cancelAnimationFrame(replayFrameRef.current);
+    }
+
+    setIsIntroComplete(false);
+    replayFrameRef.current = window.requestAnimationFrame(() => {
+      replayFrameRef.current = window.requestAnimationFrame(() => {
+        replayFrameRef.current = null;
+        setIsIntroComplete(true);
+      });
+    });
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (replayFrameRef.current !== null) {
+        window.cancelAnimationFrame(replayFrameRef.current);
+      }
+    },
+    []
+  );
+
+  const handleIntroStart = useCallback(() => {
+    setIsIntroComplete(false);
+  }, []);
+
+  const handleIntroComplete = useCallback(() => {
+    setIsIntroComplete(true);
+  }, []);
+
+  const handleCornerSettingChange = useCallback(
+    (key: V2CornerNumericSettingKey, value: number) => {
+      setCornerSettings((currentSettings) => ({
+        ...currentSettings,
+        [key]: value
+      }));
+      replayCorners();
+    },
+    [replayCorners]
+  );
+
+  const handleCornerAnimationModeChange = useCallback(
+    (animationMode: V2CornerAnimationMode) => {
+      setCornerSettings((currentSettings) => ({
+        ...currentSettings,
+        animationMode
+      }));
+      replayCorners();
+    },
+    [replayCorners]
+  );
+
+  const handleCornerEasingChange = useCallback(
+    (easing: string) => {
+      setCornerSettings((currentSettings) => ({
+        ...currentSettings,
+        easing
+      }));
+      replayCorners();
+    },
+    [replayCorners]
+  );
+
+  const handleCornerReset = useCallback(() => {
+    setCornerSettings({ ...DEFAULT_V2_CORNER_SETTINGS });
+    replayCorners();
+  }, [replayCorners]);
+
+  const workRevealStyle = cornerRevealStyle(
+    cornerSettings,
+    isIntroComplete,
+    0,
+    1
+  );
+  const socialsRevealStyle = cornerRevealStyle(
+    cornerSettings,
+    isIntroComplete,
+    1,
+    1
+  );
+  const musicRevealStyle = cornerRevealStyle(
+    cornerSettings,
+    isIntroComplete,
+    2,
+    -1
+  );
+
   return (
     <main
       data-v2-content-cursor='true'
@@ -37,17 +177,34 @@ export default function V2Experience() {
     >
       <section className='relative flex min-h-[calc(100dvh-0.75rem)] items-center justify-center sm:min-h-[calc(100dvh-1.25rem)]'>
         <span
-          className={`${outfit.className} absolute top-2.5 right-2.5 text-[24px] font-extralight text-zinc-100 sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6`}
-          style={{ lineHeight: '100%' }}
+          className={`${
+            outfit.className
+          } absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
+            isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
+          }`}
+          style={{ ...workRevealStyle, lineHeight: '100%' }}
         >
           work
         </span>
 
-        <V2IntroAnimation emojiClassName={notoEmoji.className} />
+        <V2IntroAnimation
+          emojiClassName={notoEmoji.className}
+          onComplete={handleIntroComplete}
+          onStart={handleIntroStart}
+        />
 
-        <V2MusicPlayer fontClassName={outfit.className} />
+        <V2MusicPlayer
+          fontClassName={outfit.className}
+          isRevealed={isIntroComplete}
+          revealStyle={musicRevealStyle}
+        />
 
-        <div className='absolute right-2.5 bottom-2.5 flex flex-col items-end gap-3 sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6'>
+        <div
+          className={`absolute right-2.5 bottom-2.5 flex origin-bottom-right flex-col items-end gap-3 sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6 ${
+            isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
+          }`}
+          style={socialsRevealStyle}
+        >
           <div
             aria-label='Social media'
             className='flex items-center gap-3 text-xl leading-none font-medium text-zinc-100 sm:gap-5 sm:text-2xl'
@@ -74,6 +231,17 @@ export default function V2Experience() {
           <V2AttributionPopover fontClassName={outfit.className} />
         </div>
       </section>
+
+      {IS_V2_CORNER_DEV_PANEL_ENABLED ? (
+        <V2CornerDevPanel
+          settings={cornerSettings}
+          onChange={handleCornerSettingChange}
+          onAnimationModeChange={handleCornerAnimationModeChange}
+          onEasingChange={handleCornerEasingChange}
+          onReplay={replayCorners}
+          onReset={handleCornerReset}
+        />
+      ) : null}
     </main>
   );
 }

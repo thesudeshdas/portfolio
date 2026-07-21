@@ -61,6 +61,6 @@ export const V2_INTRO_EASINGS = [
   }
 ];
 
-export const IS_V2_INTRO_DEV_PANEL_ENABLED = true;
+export const IS_V2_INTRO_DEV_PANEL_ENABLED = false;
 
 export const IS_V2_QUESTION_FOCUS_MODE = false;

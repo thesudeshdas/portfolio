@@ -1,7 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 
 import V2MusicDevPanel from './V2MusicDevPanel';
 import { v2MusicTracks } from './v2-music.data';
@@ -26,9 +32,13 @@ function getVinylTranslateX(revealPercent: number) {
 }
 
 export default function V2MusicPlayer({
-  fontClassName
+  fontClassName,
+  isRevealed,
+  revealStyle
 }: {
   fontClassName: string;
+  isRevealed: boolean;
+  revealStyle: CSSProperties;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const cancelAutoplayRef = useRef<() => void>(() => undefined);
@@ -246,119 +256,126 @@ export default function V2MusicPlayer({
 
       <div
         data-v2-music-player
-        className='v2-music-player-shell absolute bottom-2.5 left-2.5 flex items-center sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6'
-        style={{
-          transform: `scale(${settings.componentScale})`,
-          transformOrigin: 'bottom left',
-          transition: `transform ${settings.metadataTransitionMs}ms ease-out`
-        }}
+        className={`v2-music-player-shell absolute bottom-2.5 left-2.5 origin-bottom-left sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6 ${
+          isRevealed ? 'pointer-events-auto' : 'pointer-events-none'
+        }`}
+        style={revealStyle}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <audio
-          ref={audioRef}
-          preload='metadata'
-          src={currentTrack.audioSrc}
-          onCanPlay={resumePlaylist}
-          onEnded={playNextTrack}
-          onError={() => {
-            continuePlaybackRef.current = false;
-            setHasPlaybackError(true);
-            setIsPlaying(false);
+        <div
+          className='flex items-center'
+          style={{
+            transform: `scale(${settings.componentScale})`,
+            transformOrigin: 'bottom left',
+            transition: `transform ${settings.metadataTransitionMs}ms ease-out`
           }}
-          onPause={() => setIsPlaying(false)}
-          onPlay={() => setIsPlaying(true)}
-        />
-
-        <button
-          aria-label={`${isPlaying ? 'Pause' : 'Play'} ${currentTrack.title}`}
-          aria-pressed={isPlaying}
-          className='relative h-16 w-[104px] shrink-0 cursor-pointer focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-400'
-          type='button'
-          onClick={toggleAudio}
         >
-          <span
-            aria-hidden='true'
-            data-v2-music-hit-target='true'
-            className='v2-vinyl-slide absolute top-1/2 right-0 z-10 size-16 cursor-pointer rounded-full'
+          <audio
+            ref={audioRef}
+            preload='metadata'
+            src={currentTrack.audioSrc}
+            onCanPlay={resumePlaylist}
+            onEnded={playNextTrack}
+            onError={() => {
+              continuePlaybackRef.current = false;
+              setHasPlaybackError(true);
+              setIsPlaying(false);
+            }}
+            onPause={() => setIsPlaying(false)}
+            onPlay={() => setIsPlaying(true)}
+          />
+
+          <button
+            aria-label={`${isPlaying ? 'Pause' : 'Play'} ${currentTrack.title}`}
+            aria-pressed={isPlaying}
+            className='relative h-16 w-[104px] shrink-0 cursor-pointer focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-400'
+            type='button'
+            onClick={toggleAudio}
+          >
+            <span
+              aria-hidden='true'
+              data-v2-music-hit-target='true'
+              className='v2-vinyl-slide absolute top-1/2 right-0 z-10 size-16 cursor-pointer rounded-full'
+              style={{
+                transform: `translate(${getVinylTranslateX(
+                  vinylReveal
+                )}px, -50%)`,
+                transitionDelay: isPlaying
+                  ? `${settings.vinylSlideDelayMs}ms`
+                  : '0ms',
+                transitionDuration: `${settings.vinylSlideMs}ms`
+              }}
+            >
+              <span
+                className='v2-vinyl-disc absolute inset-0 cursor-pointer rounded-full'
+                style={{
+                  animation: `v2-vinyl-spin ${settings.rotationSeconds}s linear infinite`,
+                  animationPlayState: isPlaying ? 'running' : 'paused',
+                  background:
+                    'repeating-radial-gradient(circle, transparent 0 3px, rgba(255,255,255,0.08) 3px 4px), conic-gradient(from 20deg, #09090b, #27272a 18%, #09090b 36%, #3f3f46 52%, #09090b 70%, #27272a 88%, #09090b)'
+                }}
+              >
+                <span className='absolute inset-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-500' />
+                <span className='absolute inset-1/2 size-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-950' />
+              </span>
+            </span>
+
+            <span
+              data-v2-music-hit-target='true'
+              className='absolute top-1/2 left-0 z-20 flex size-16 -translate-y-1/2 cursor-pointer items-end overflow-hidden bg-zinc-950 text-left'
+              style={{
+                borderColor: isAlbumBorderVisible
+                  ? 'rgba(255,255,255,0.9)'
+                  : 'transparent',
+                borderRadius: `${settings.albumRadius}px`,
+                borderStyle: 'solid',
+                borderWidth: `${settings.albumBorderWidth}px`,
+                transition: `border-color ${settings.albumBorderTransitionMs}ms ease-out`
+              }}
+            >
+              <Image
+                fill
+                priority={currentTrackIndex === 0}
+                alt=''
+                aria-hidden='true'
+                className='object-cover'
+                sizes='64px'
+                src={currentTrack.albumArtSrc}
+              />
+            </span>
+          </button>
+
+          <div
+            className={`${fontClassName} v2-music-metadata relative z-0 ml-3 max-w-[min(18rem,calc(100vw-9rem))] min-w-0 origin-left sm:ml-4`}
             style={{
-              transform: `translate(${getVinylTranslateX(
-                vinylReveal
-              )}px, -50%)`,
-              transitionDelay: isPlaying
-                ? `${settings.vinylSlideDelayMs}ms`
-                : '0ms',
-              transitionDuration: `${settings.vinylSlideMs}ms`
+              display: 'flex',
+              flexDirection: 'column',
+              gap: `${settings.metadataGap}px`,
+              opacity: metadataOpacity,
+              pointerEvents: 'none',
+              transform: `translateX(${metadataTranslateX}px) scale(${metadataScale})`,
+              transition: `opacity ${settings.metadataTransitionMs}ms ease-out, transform ${settings.metadataTransitionMs}ms ease-out`
             }}
           >
             <span
-              className='v2-vinyl-disc absolute inset-0 cursor-pointer rounded-full'
-              style={{
-                animation: `v2-vinyl-spin ${settings.rotationSeconds}s linear infinite`,
-                animationPlayState: isPlaying ? 'running' : 'paused',
-                background:
-                  'repeating-radial-gradient(circle, transparent 0 3px, rgba(255,255,255,0.08) 3px 4px), conic-gradient(from 20deg, #09090b, #27272a 18%, #09090b 36%, #3f3f46 52%, #09090b 70%, #27272a 88%, #09090b)'
-              }}
+              className='block truncate text-base leading-none text-zinc-100 sm:text-lg'
+              style={{ fontWeight: settings.songWeight }}
             >
-              <span className='absolute inset-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-500' />
-              <span className='absolute inset-1/2 size-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-950' />
+              {currentTrack.title}
             </span>
-          </span>
-
-          <span
-            data-v2-music-hit-target='true'
-            className='absolute top-1/2 left-0 z-20 flex size-16 -translate-y-1/2 cursor-pointer items-end overflow-hidden bg-zinc-950 text-left'
-            style={{
-              borderColor: isAlbumBorderVisible
-                ? 'rgba(255,255,255,0.9)'
-                : 'transparent',
-              borderRadius: `${settings.albumRadius}px`,
-              borderStyle: 'solid',
-              borderWidth: `${settings.albumBorderWidth}px`,
-              transition: `border-color ${settings.albumBorderTransitionMs}ms ease-out`
-            }}
-          >
-            <Image
-              fill
-              priority={currentTrackIndex === 0}
-              alt=''
-              aria-hidden='true'
-              className='object-cover'
-              sizes='64px'
-              src={currentTrack.albumArtSrc}
-            />
-          </span>
-        </button>
-
-        <div
-          className={`${fontClassName} v2-music-metadata relative z-0 ml-3 max-w-[min(18rem,calc(100vw-9rem))] min-w-0 origin-left sm:ml-4`}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: `${settings.metadataGap}px`,
-            opacity: metadataOpacity,
-            pointerEvents: 'none',
-            transform: `translateX(${metadataTranslateX}px) scale(${metadataScale})`,
-            transition: `opacity ${settings.metadataTransitionMs}ms ease-out, transform ${settings.metadataTransitionMs}ms ease-out`
-          }}
-        >
-          <span
-            className='block truncate text-base leading-none text-zinc-100 sm:text-lg'
-            style={{ fontWeight: settings.songWeight }}
-          >
-            {currentTrack.title}
-          </span>
-          <span
-            className='block truncate text-[11px] leading-none text-zinc-300 sm:text-xs'
-            style={{ fontWeight: settings.artistWeight }}
-          >
-            {currentTrack.artist}
-          </span>
-          {hasPlaybackError ? (
-            <span className='block text-[10px] leading-none text-red-300'>
-              Audio unavailable
+            <span
+              className='block truncate text-[11px] leading-none text-zinc-300 sm:text-xs'
+              style={{ fontWeight: settings.artistWeight }}
+            >
+              {currentTrack.artist}
             </span>
-          ) : null}
+            {hasPlaybackError ? (
+              <span className='block text-[10px] leading-none text-red-300'>
+                Audio unavailable
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
     </>

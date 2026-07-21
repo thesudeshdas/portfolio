@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import styles from './V2IntroAnimation.module.css';
+import { IS_V2_CORNER_FOCUS_MODE } from './v2-corner.settings';
 import V2IntroDevPanel from './V2IntroDevPanel';
 import {
   DEFAULT_V2_INTRO_SETTINGS,
@@ -78,9 +79,13 @@ function tracerKeyframes(path: SVGPathElement): Keyframe[] {
 }
 
 export default function V2IntroAnimation({
-  emojiClassName
+  emojiClassName,
+  onComplete,
+  onStart
 }: {
   emojiClassName: string;
+  onComplete?: () => void;
+  onStart?: () => void;
 }) {
   const [replayToken, setReplayToken] = useState(0);
   const [settings, setSettings] = useState<V2IntroSettings>(() => ({
@@ -278,6 +283,7 @@ export default function V2IntroAnimation({
       questionTracer.style.opacity = '0';
       place(questionShell, finalQuestionBox());
       isComplete = true;
+      onComplete?.();
     };
 
     const revealText = async (signal: AbortSignal) => {
@@ -324,6 +330,12 @@ export default function V2IntroAnimation({
       const { signal } = activeController;
       isComplete = false;
       resetStage();
+      onStart?.();
+
+      if (IS_V2_CORNER_FOCUS_MODE) {
+        showFinalStage();
+        return;
+      }
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         showFinalStage();
@@ -557,6 +569,7 @@ export default function V2IntroAnimation({
       }
 
       isComplete = true;
+      onComplete?.();
     };
 
     const handleResize = () => {
@@ -584,7 +597,7 @@ export default function V2IntroAnimation({
       window.cancelAnimationFrame(resizeFrame);
       window.removeEventListener('resize', handleResize);
     };
-  }, [replayToken, settings]);
+  }, [onComplete, onStart, replayToken, settings]);
 
   return (
     <div className={styles.root}>

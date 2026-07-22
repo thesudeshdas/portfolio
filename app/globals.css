@@ -288,9 +288,51 @@ body.v2-route [data-v2-content-cursor='true'] a {
   cursor: pointer !important;
 }
 
+body.v2-route [data-v2-top-right-corner='true'] {
+  cursor: pointer !important;
+  scale: 1;
+  transition-duration: var(--v2-work-hover-duration);
+  transition-property: scale;
+  transition-timing-function: ease-out;
+}
+
+body.v2-route [data-v2-top-right-corner='true']:hover {
+  scale: var(--v2-work-hover-scale);
+}
+
+body.v2-route [data-v2-top-right-corner='true']::after {
+  position: absolute;
+  right: 0;
+  bottom: calc(-1 * var(--v2-work-underline-gap));
+  width: var(--v2-work-underline-width);
+  height: 1px;
+  background: currentColor;
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition:
+    opacity var(--v2-work-underline-duration) ease-out,
+    transform var(--v2-work-underline-duration) ease-out;
+}
+
+body.v2-route [data-v2-top-right-corner='true']:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
+  transition-delay: var(--v2-work-hover-duration);
+}
+
 body.v2-route [data-v2-music-hit-target='true'],
 body.v2-route [data-v2-music-hit-target='true'] * {
   cursor: pointer !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.v2-route [data-v2-top-right-corner='true'],
+  body.v2-route [data-v2-top-right-corner='true']::after {
+    transition-duration: 0ms;
+  }
 }
 
 body.v2-route .app-shell {

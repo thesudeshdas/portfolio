@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import { type CSSProperties, useCallback, useEffect, useState } from 'react';
 import {
   FiGithub,
   FiInstagram,
@@ -17,17 +11,20 @@ import {
 import { Noto_Emoji, Outfit } from 'next/font/google';
 
 import V2AttributionPopover from './V2AttributionPopover';
-import V2CornerDevPanel from './V2CornerDevPanel';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
+import V2WorkHoverDevPanel from './V2WorkHoverDevPanel';
 import {
   DEFAULT_V2_CORNER_SETTINGS,
   getV2CornerDelay,
-  IS_V2_CORNER_DEV_PANEL_ENABLED,
-  type V2CornerAnimationMode,
-  type V2CornerNumericSettingKey,
   type V2CornerSettings
 } from './v2-corner.settings';
+import {
+  DEFAULT_V2_WORK_HOVER_SETTINGS,
+  IS_V2_WORK_HOVER_DEV_PANEL_ENABLED,
+  type V2WorkHoverNumericSettingKey,
+  type V2WorkHoverSettings
+} from './v2-work-hover.settings';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -86,38 +83,13 @@ function cornerRevealStyle(
 }
 
 export default function V2Experience() {
-  const [cornerSettings, setCornerSettings] = useState<V2CornerSettings>(
-    () => ({
-      ...DEFAULT_V2_CORNER_SETTINGS
-    })
-  );
+  const cornerSettings = DEFAULT_V2_CORNER_SETTINGS;
+  const [workHoverSettings, setWorkHoverSettings] =
+    useState<V2WorkHoverSettings>(() => ({
+      ...DEFAULT_V2_WORK_HOVER_SETTINGS
+    }));
   const [areCornersSettled, setAreCornersSettled] = useState(false);
   const [isIntroComplete, setIsIntroComplete] = useState(false);
-  const replayFrameRef = useRef<number | null>(null);
-
-  const replayCorners = useCallback(() => {
-    if (replayFrameRef.current !== null) {
-      window.cancelAnimationFrame(replayFrameRef.current);
-    }
-
-    setAreCornersSettled(false);
-    setIsIntroComplete(false);
-    replayFrameRef.current = window.requestAnimationFrame(() => {
-      replayFrameRef.current = window.requestAnimationFrame(() => {
-        replayFrameRef.current = null;
-        setIsIntroComplete(true);
-      });
-    });
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (replayFrameRef.current !== null) {
-        window.cancelAnimationFrame(replayFrameRef.current);
-      }
-    },
-    []
-  );
 
   const handleIntroStart = useCallback(() => {
     setAreCornersSettled(false);
@@ -145,43 +117,19 @@ export default function V2Experience() {
     return () => window.clearTimeout(settleTimer);
   }, [cornerSettleDelay, isIntroComplete]);
 
-  const handleCornerSettingChange = useCallback(
-    (key: V2CornerNumericSettingKey, value: number) => {
-      setCornerSettings((currentSettings) => ({
+  const handleWorkHoverSettingChange = useCallback(
+    (key: V2WorkHoverNumericSettingKey, value: number) => {
+      setWorkHoverSettings((currentSettings) => ({
         ...currentSettings,
         [key]: value
       }));
-      replayCorners();
     },
-    [replayCorners]
+    []
   );
 
-  const handleCornerAnimationModeChange = useCallback(
-    (animationMode: V2CornerAnimationMode) => {
-      setCornerSettings((currentSettings) => ({
-        ...currentSettings,
-        animationMode
-      }));
-      replayCorners();
-    },
-    [replayCorners]
-  );
-
-  const handleCornerEasingChange = useCallback(
-    (easing: string) => {
-      setCornerSettings((currentSettings) => ({
-        ...currentSettings,
-        easing
-      }));
-      replayCorners();
-    },
-    [replayCorners]
-  );
-
-  const handleCornerReset = useCallback(() => {
-    setCornerSettings({ ...DEFAULT_V2_CORNER_SETTINGS });
-    replayCorners();
-  }, [replayCorners]);
+  const handleWorkHoverReset = useCallback(() => {
+    setWorkHoverSettings({ ...DEFAULT_V2_WORK_HOVER_SETTINGS });
+  }, []);
 
   const workRevealStyle = cornerRevealStyle(
     cornerSettings,
@@ -204,6 +152,13 @@ export default function V2Experience() {
     2,
     -1
   );
+  const workHoverStyle = {
+    '--v2-work-hover-duration': `${workHoverSettings.duration}ms`,
+    '--v2-work-hover-scale': workHoverSettings.scale,
+    '--v2-work-underline-duration': `${workHoverSettings.underlineDuration}ms`,
+    '--v2-work-underline-gap': `${workHoverSettings.underlineGap}px`,
+    '--v2-work-underline-width': `${workHoverSettings.underlineWidth}%`
+  } as CSSProperties;
 
   return (
     <main
@@ -215,11 +170,17 @@ export default function V2Experience() {
           className={`${
             outfit.className
           } v2-corner-item absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
-            isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
+            areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={{ ...workRevealStyle, lineHeight: '100%' }}
         >
-          work
+          <span
+            data-v2-top-right-corner={areCornersSettled ? 'true' : undefined}
+            className='relative inline-block'
+            style={workHoverStyle}
+          >
+            work
+          </span>
         </span>
 
         <V2IntroAnimation
@@ -271,14 +232,11 @@ export default function V2Experience() {
         </div>
       </section>
 
-      {IS_V2_CORNER_DEV_PANEL_ENABLED ? (
-        <V2CornerDevPanel
-          settings={cornerSettings}
-          onChange={handleCornerSettingChange}
-          onAnimationModeChange={handleCornerAnimationModeChange}
-          onEasingChange={handleCornerEasingChange}
-          onReplay={replayCorners}
-          onReset={handleCornerReset}
+      {IS_V2_WORK_HOVER_DEV_PANEL_ENABLED ? (
+        <V2WorkHoverDevPanel
+          settings={workHoverSettings}
+          onChange={handleWorkHoverSettingChange}
+          onReset={handleWorkHoverReset}
         />
       ) : null}
     </main>

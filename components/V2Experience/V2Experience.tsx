@@ -36,12 +36,32 @@ const notoEmoji = Noto_Emoji({
   weight: '400'
 });
 
-const socialLabels = [
-  { icon: FiLinkedin, label: 'LinkedIn' },
-  { icon: FiGithub, label: 'GitHub' },
-  { icon: FiInstagram, label: 'Instagram' },
-  { icon: FiYoutube, label: 'YouTube' },
-  { icon: FiMail, label: 'Email' }
+const socialLinks = [
+  {
+    href: 'https://www.linkedin.com/in/thesudeshdas',
+    icon: FiLinkedin,
+    label: 'LinkedIn'
+  },
+  {
+    href: 'https://github.com/thesudeshdas',
+    icon: FiGithub,
+    label: 'GitHub'
+  },
+  {
+    href: 'https://www.instagram.com/heywhoisdash',
+    icon: FiInstagram,
+    label: 'Instagram'
+  },
+  {
+    href: 'https://www.youtube.com/@heywhoisdash',
+    icon: FiYoutube,
+    label: 'YouTube'
+  },
+  {
+    href: 'mailto:sudeshkumardas7@gmail.com',
+    icon: FiMail,
+    label: 'Email'
+  }
 ];
 
 function cornerRevealStyle(
@@ -209,13 +229,17 @@ export default function V2Experience() {
             aria-label='Social media'
             className='flex items-center gap-3 text-xl leading-none font-medium text-zinc-100 sm:gap-5 sm:text-2xl'
           >
-            {socialLabels.map((social) => {
+            {socialLinks.map((social) => {
               const Icon = social.icon;
 
               return (
-                <span
+                <a
                   key={social.label}
                   aria-label={social.label}
+                  className='inline-flex cursor-pointer transition-transform duration-300 ease-out hover:scale-[1.2] motion-reduce:transition-none'
+                  href={social.href}
+                  rel='noopener noreferrer'
+                  target='_blank'
                   title={social.label}
                 >
                   <Icon
@@ -223,7 +247,7 @@ export default function V2Experience() {
                     className='size-5 sm:size-6'
                     strokeWidth={0.75}
                   />
-                </span>
+                </a>
               );
             })}
           </div>

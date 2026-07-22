@@ -16,5 +16,4 @@ export const DEFAULT_V2_WORK_HOVER_SETTINGS: V2WorkHoverSettings = {
   underlineWidth: 80
 };
 
-export const IS_V2_WORK_HOVER_DEV_PANEL_ENABLED =
-  process.env.NODE_ENV === 'development';
+export const IS_V2_WORK_HOVER_DEV_PANEL_ENABLED = false;

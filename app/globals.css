@@ -370,6 +370,11 @@ body.v2-route [data-v2-music-hit-target='true'] * {
   cursor: pointer !important;
 }
 
+body.v2-route [data-v2-hide-cursor='true'],
+body.v2-route [data-v2-hide-cursor='true'] * {
+  cursor: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.v2-route .v2-social-attribution,
   body.v2-route .v2-social-link,

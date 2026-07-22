@@ -252,6 +252,8 @@ export default function V2MusicPlayer({
       ) : null}
 
       <div
+        data-v2-content-cursor='true'
+        data-v2-hide-cursor='true'
         data-v2-music-player
         className={`v2-corner-item v2-music-player-shell absolute bottom-2.5 left-2.5 origin-bottom-left motion-reduce:transition-none sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6 ${
           isRevealed ? 'pointer-events-auto' : 'pointer-events-none'
@@ -286,12 +288,15 @@ export default function V2MusicPlayer({
           <button
             aria-label={`${isPlaying ? 'Pause' : 'Play'} ${currentTrack.title}`}
             aria-pressed={isPlaying}
+            data-v2-content-cursor='true'
+            data-v2-hide-cursor='true'
             className='relative h-16 w-[104px] shrink-0 cursor-pointer focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-400'
             type='button'
             onClick={toggleAudio}
           >
             <span
               aria-hidden='true'
+              data-v2-hide-cursor='true'
               data-v2-music-hit-target='true'
               className='v2-vinyl-slide absolute top-1/2 right-0 z-10 size-16 cursor-pointer rounded-full'
               style={{
@@ -319,6 +324,7 @@ export default function V2MusicPlayer({
             </span>
 
             <span
+              data-v2-hide-cursor='true'
               data-v2-music-hit-target='true'
               className='absolute top-1/2 left-0 z-20 flex size-16 -translate-y-1/2 cursor-pointer items-end overflow-hidden bg-zinc-950 text-left'
               style={{

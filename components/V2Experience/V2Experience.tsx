@@ -10,6 +10,8 @@ import {
 } from 'react-icons/fi';
 import { Noto_Emoji, Outfit } from 'next/font/google';
 
+import V2Cursor from '@/components/V2Cursor/V2Cursor';
+
 import V2AttributionPopover from './V2AttributionPopover';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
@@ -216,10 +218,9 @@ export default function V2Experience() {
   } as CSSProperties;
 
   return (
-    <main
-      data-v2-content-cursor='true'
-      className='v2-page min-h-[100dvh] bg-black p-1.5 text-zinc-200 sm:p-2.5'
-    >
+    <main className='v2-page min-h-[100dvh] bg-black p-1.5 text-zinc-200 sm:p-2.5'>
+      <V2Cursor />
+
       <section className='relative flex min-h-[calc(100dvh-0.75rem)] items-center justify-center sm:min-h-[calc(100dvh-1.25rem)]'>
         <span
           className={`${
@@ -230,6 +231,8 @@ export default function V2Experience() {
           style={{ ...workRevealStyle, lineHeight: '100%' }}
         >
           <span
+            data-v2-content-cursor='true'
+            data-v2-hide-cursor='true'
             data-v2-top-right-corner={areCornersSettled ? 'true' : undefined}
             className='relative inline-block'
             style={workHoverStyle}
@@ -272,6 +275,8 @@ export default function V2Experience() {
                 <a
                   key={social.label}
                   aria-label={social.label}
+                  data-v2-content-cursor='true'
+                  data-v2-hide-cursor='true'
                   className={`v2-social-link inline-flex cursor-pointer ${
                     areCornersSettled ? 'opacity-20' : 'opacity-100'
                   }`}

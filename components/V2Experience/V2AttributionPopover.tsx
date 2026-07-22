@@ -159,6 +159,7 @@ export default function V2AttributionPopover({
     <motion.button
       ref={buttonRef}
       data-v2-content-cursor='true'
+      data-v2-hide-cursor='true'
       type='button'
       animate={
         isChaseActive && chasePosition

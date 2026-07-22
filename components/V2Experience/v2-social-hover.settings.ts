@@ -14,5 +14,4 @@ export const DEFAULT_V2_SOCIAL_HOVER_SETTINGS: V2SocialHoverSettings = {
   scale: 1.2
 };
 
-export const IS_V2_SOCIAL_HOVER_DEV_PANEL_ENABLED =
-  process.env.NODE_ENV === 'development';
+export const IS_V2_SOCIAL_HOVER_DEV_PANEL_ENABLED = false;

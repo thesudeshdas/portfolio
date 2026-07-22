@@ -55,4 +55,7 @@ export const V2_CORNER_EASINGS = [
 
 export const IS_V2_CORNER_DEV_PANEL_ENABLED = true;
 
-export const IS_V2_CORNER_FOCUS_MODE = false;
+export const IS_V2_SKIP_INITIAL_ANIMATION =
+  process.env.NODE_ENV === 'development';
+
+export const IS_V2_CORNER_FOCUS_MODE = IS_V2_SKIP_INITIAL_ANIMATION;

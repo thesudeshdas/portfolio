@@ -83,11 +83,13 @@ function tracerKeyframes(path: SVGPathElement): Keyframe[] {
 export default function V2IntroAnimation({
   emojiClassName,
   fontClassName,
+  isDimmed = false,
   onComplete,
   onStart
 }: {
   emojiClassName: string;
   fontClassName?: string;
+  isDimmed?: boolean;
   onComplete?: () => void;
   onStart?: () => void;
 }) {
@@ -622,7 +624,13 @@ export default function V2IntroAnimation({
   }, [fontClassName, onComplete, onStart, replayToken, settings]);
 
   return (
-    <div className={styles.root}>
+    <div
+      className={styles.root}
+      style={{
+        opacity: isDimmed ? 0.2 : 1,
+        transition: 'opacity 300ms ease-out'
+      }}
+    >
       <h1
         aria-label='hey, who is Dash?'
         className={`${

@@ -20,6 +20,7 @@ import V2WorkHoverDevPanel from './V2WorkHoverDevPanel';
 import {
   DEFAULT_V2_CORNER_SETTINGS,
   getV2CornerDelay,
+  IS_V2_SKIP_INITIAL_ANIMATION,
   type V2CornerSettings
 } from './v2-corner.settings';
 import {
@@ -121,16 +122,29 @@ export default function V2Experience() {
     useState<V2WorkHoverSettings>(() => ({
       ...DEFAULT_V2_WORK_HOVER_SETTINGS
     }));
-  const [areCornersSettled, setAreCornersSettled] = useState(false);
-  const [isIntroComplete, setIsIntroComplete] = useState(false);
+  const [areCornersSettled, setAreCornersSettled] = useState(
+    IS_V2_SKIP_INITIAL_ANIMATION
+  );
+  const [isIntroComplete, setIsIntroComplete] = useState(
+    IS_V2_SKIP_INITIAL_ANIMATION
+  );
+  const [isHeadlineDimmed, setIsHeadlineDimmed] = useState(false);
 
   const handleIntroStart = useCallback(() => {
+    if (IS_V2_SKIP_INITIAL_ANIMATION) {
+      return;
+    }
+
     setAreCornersSettled(false);
     setIsIntroComplete(false);
   }, []);
 
   const handleIntroComplete = useCallback(() => {
     setIsIntroComplete(true);
+
+    if (IS_V2_SKIP_INITIAL_ANIMATION) {
+      setAreCornersSettled(true);
+    }
   }, []);
 
   const cornerSettleDelay =
@@ -139,7 +153,7 @@ export default function V2Experience() {
     cornerSettings.finalDelay;
 
   useEffect(() => {
-    if (!isIntroComplete) {
+    if (IS_V2_SKIP_INITIAL_ANIMATION || !isIntroComplete) {
       return;
     }
 
@@ -244,6 +258,7 @@ export default function V2Experience() {
         <V2IntroAnimation
           emojiClassName={notoEmoji.className}
           fontClassName={outfit.className}
+          isDimmed={isHeadlineDimmed}
           onComplete={handleIntroComplete}
           onStart={handleIntroStart}
         />
@@ -300,6 +315,7 @@ export default function V2Experience() {
             fontClassName={outfit.className}
             hoverStyle={socialHoverStyle}
             isSettled={areCornersSettled}
+            onHeadlineDimChange={setIsHeadlineDimmed}
           />
         </div>
       </section>

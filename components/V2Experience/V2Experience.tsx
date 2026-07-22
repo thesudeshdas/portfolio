@@ -50,23 +50,35 @@ const socialLabels = [
 function cornerRevealStyle(
   settings: V2CornerSettings,
   isRevealed: boolean,
+  isSettled: boolean,
   itemIndex: number,
   slideDirection: -1 | 1
 ): CSSProperties {
   const isScaleAnimation = settings.animationMode === 'scale';
 
   return {
-    opacity: isRevealed ? 1 : 0,
-    scale: isScaleAnimation && !isRevealed ? settings.startScale : 1,
+    opacity: isRevealed ? (isSettled ? settings.finalOpacity : 1) : 0,
+    scale: !isRevealed
+      ? isScaleAnimation
+        ? settings.startScale
+        : settings.revealScale
+      : isSettled
+      ? settings.finalScale
+      : settings.revealScale,
     translate:
       !isScaleAnimation && !isRevealed
         ? `${settings.slideDistance * slideDirection}px 0`
         : '0 0',
-    transitionDelay: isRevealed
-      ? `${getV2CornerDelay(settings, itemIndex)}ms`
+    transitionDelay:
+      isRevealed && !isSettled
+        ? `${getV2CornerDelay(settings, itemIndex)}ms`
+        : '0ms',
+    transitionDuration: isRevealed
+      ? `${isSettled ? settings.finalTransitionDuration : settings.duration}ms`
       : '0ms',
-    transitionDuration: isRevealed ? `${settings.duration}ms` : '0ms',
-    transitionProperty: isScaleAnimation
+    transitionProperty: isSettled
+      ? 'opacity, scale'
+      : isScaleAnimation
       ? 'opacity, scale'
       : 'opacity, translate',
     transitionTimingFunction: settings.easing
@@ -79,6 +91,7 @@ export default function V2Experience() {
       ...DEFAULT_V2_CORNER_SETTINGS
     })
   );
+  const [areCornersSettled, setAreCornersSettled] = useState(false);
   const [isIntroComplete, setIsIntroComplete] = useState(false);
   const replayFrameRef = useRef<number | null>(null);
 
@@ -87,6 +100,7 @@ export default function V2Experience() {
       window.cancelAnimationFrame(replayFrameRef.current);
     }
 
+    setAreCornersSettled(false);
     setIsIntroComplete(false);
     replayFrameRef.current = window.requestAnimationFrame(() => {
       replayFrameRef.current = window.requestAnimationFrame(() => {
@@ -106,12 +120,30 @@ export default function V2Experience() {
   );
 
   const handleIntroStart = useCallback(() => {
+    setAreCornersSettled(false);
     setIsIntroComplete(false);
   }, []);
 
   const handleIntroComplete = useCallback(() => {
     setIsIntroComplete(true);
   }, []);
+
+  const cornerSettleDelay =
+    getV2CornerDelay(cornerSettings, 2) +
+    cornerSettings.duration +
+    cornerSettings.finalDelay;
+
+  useEffect(() => {
+    if (!isIntroComplete) {
+      return;
+    }
+
+    const settleTimer = window.setTimeout(() => {
+      setAreCornersSettled(true);
+    }, cornerSettleDelay);
+
+    return () => window.clearTimeout(settleTimer);
+  }, [cornerSettleDelay, isIntroComplete]);
 
   const handleCornerSettingChange = useCallback(
     (key: V2CornerNumericSettingKey, value: number) => {
@@ -154,18 +186,21 @@ export default function V2Experience() {
   const workRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
+    areCornersSettled,
     0,
     1
   );
   const socialsRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
+    areCornersSettled,
     1,
     1
   );
   const musicRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
+    areCornersSettled,
     2,
     -1
   );
@@ -179,7 +214,7 @@ export default function V2Experience() {
         <span
           className={`${
             outfit.className
-          } absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
+          } v2-corner-item absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
             isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={{ ...workRevealStyle, lineHeight: '100%' }}
@@ -203,7 +238,7 @@ export default function V2Experience() {
         />
 
         <div
-          className={`absolute right-2.5 bottom-2.5 flex origin-bottom-right flex-col items-end gap-3 sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6 ${
+          className={`v2-corner-item absolute right-2.5 bottom-2.5 flex origin-bottom-right flex-col items-end gap-3 motion-reduce:transition-none sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6 ${
             isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={socialsRevealStyle}

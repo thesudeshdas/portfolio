@@ -253,7 +253,7 @@ export default function V2MusicPlayer({
 
       <div
         data-v2-music-player
-        className={`v2-music-player-shell absolute bottom-2.5 left-2.5 origin-bottom-left sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6 ${
+        className={`v2-corner-item v2-music-player-shell absolute bottom-2.5 left-2.5 origin-bottom-left motion-reduce:transition-none sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6 ${
           isRevealed ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
         style={revealStyle}

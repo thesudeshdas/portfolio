@@ -4,10 +4,15 @@ export interface V2CornerSettings {
   animationMode: V2CornerAnimationMode;
   duration: number;
   easing: string;
+  finalDelay: number;
+  finalOpacity: number;
+  finalScale: number;
+  finalTransitionDuration: number;
   firstDelay: number;
   slideDistance: number;
   staggerDelay: number;
   startScale: number;
+  revealScale: number;
 }
 
 export type V2CornerNumericSettingKey = Exclude<
@@ -19,10 +24,15 @@ export const DEFAULT_V2_CORNER_SETTINGS: V2CornerSettings = {
   animationMode: 'slide',
   duration: 500,
   easing: 'ease-out',
+  finalDelay: 600,
+  finalOpacity: 0.5,
+  finalScale: 1,
+  finalTransitionDuration: 600,
   firstDelay: 100,
   slideDistance: 40,
   staggerDelay: 100,
-  startScale: 2
+  startScale: 2,
+  revealScale: 1.5
 };
 
 export function getV2CornerDelay(

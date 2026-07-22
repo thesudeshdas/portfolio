@@ -100,6 +100,10 @@
   transition-timing-function: ease-out;
 }
 
+.v2-corner-item:hover {
+  opacity: 1 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .v2-music-player-shell,
   .v2-music-metadata,

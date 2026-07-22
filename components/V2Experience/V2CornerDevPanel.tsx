@@ -21,6 +21,7 @@ interface CornerControl {
 
 const milliseconds = (value: number) => `${value}ms`;
 const pixels = (value: number) => `${value}px`;
+const percent = (value: number) => `${Math.round(value * 100)}%`;
 const scale = (value: number) => `${value}×`;
 
 const controls: CornerControl[] = [
@@ -63,6 +64,46 @@ const controls: CornerControl[] = [
     max: 4,
     step: 0.1,
     format: scale
+  },
+  {
+    key: 'revealScale',
+    label: 'Appearing size',
+    min: 0.5,
+    max: 2,
+    step: 0.05,
+    format: scale
+  },
+  {
+    key: 'finalDelay',
+    label: 'Delay before final fade',
+    min: 0,
+    max: 3000,
+    step: 50,
+    format: milliseconds
+  },
+  {
+    key: 'finalOpacity',
+    label: 'Final opacity',
+    min: 0.1,
+    max: 1,
+    step: 0.05,
+    format: percent
+  },
+  {
+    key: 'finalScale',
+    label: 'Final size',
+    min: 0.5,
+    max: 1,
+    step: 0.05,
+    format: percent
+  },
+  {
+    key: 'finalTransitionDuration',
+    label: 'Final transition',
+    min: 0,
+    max: 2000,
+    step: 50,
+    format: milliseconds
   }
 ];
 

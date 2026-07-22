@@ -19,6 +19,8 @@ type ElementBox = {
   width: number;
 };
 
+const QUESTION_VISIBLE_LEFT_RATIO = 0.15;
+
 function place(element: HTMLElement, box: ElementBox) {
   Object.assign(element.style, {
     height: `${box.height}px`,
@@ -184,10 +186,14 @@ export default function V2IntroAnimation({
     const initialQuestionBox = (): ElementBox => {
       const height = window.innerHeight * (settings.questionSize / 100);
       const width = height * (2 / 3);
+      const target = questionTarget.getBoundingClientRect();
 
       return {
         height,
-        left: window.innerWidth * (settings.questionX / 100) - width / 2,
+        left: Math.max(
+          window.innerWidth * (settings.questionX / 100) - width / 2,
+          target.left - width * QUESTION_VISIBLE_LEFT_RATIO
+        ),
         top: (window.innerHeight - height) / 2,
         width
       };

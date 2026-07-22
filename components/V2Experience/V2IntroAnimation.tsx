@@ -80,10 +80,12 @@ function tracerKeyframes(path: SVGPathElement): Keyframe[] {
 
 export default function V2IntroAnimation({
   emojiClassName,
+  fontClassName,
   onComplete,
   onStart
 }: {
   emojiClassName: string;
+  fontClassName?: string;
   onComplete?: () => void;
   onStart?: () => void;
 }) {
@@ -193,7 +195,7 @@ export default function V2IntroAnimation({
 
     const finalQuestionBox = (): ElementBox => {
       const target = questionTarget.getBoundingClientRect();
-      const height = target.height * 1.08;
+      const height = target.height * 1.2;
       const width = height * (2 / 3);
 
       return {
@@ -611,13 +613,15 @@ export default function V2IntroAnimation({
       window.cancelAnimationFrame(resizeFrame);
       window.removeEventListener('resize', handleResize);
     };
-  }, [onComplete, onStart, replayToken, settings]);
+  }, [fontClassName, onComplete, onStart, replayToken, settings]);
 
   return (
     <div className={styles.root}>
       <h1
         aria-label='hey, who is Dash?'
-        className='text-4xl leading-none font-medium text-zinc-100 sm:text-5xl lg:text-6xl'
+        className={`${
+          fontClassName ?? ''
+        } text-[5rem] leading-none font-medium text-zinc-100`}
       >
         <span
           ref={heyTargetRef}

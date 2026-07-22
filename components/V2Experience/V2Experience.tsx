@@ -224,6 +224,7 @@ export default function V2Experience() {
 
         <V2IntroAnimation
           emojiClassName={notoEmoji.className}
+          fontClassName={outfit.className}
           onComplete={handleIntroComplete}
           onStart={handleIntroStart}
         />

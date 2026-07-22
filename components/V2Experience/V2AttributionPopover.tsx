@@ -3,25 +3,32 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import {
+  AnimatePresence,
   motion,
   useAnimationFrame,
   useMotionValue,
   useReducedMotion
 } from 'motion/react';
+import { Comic_Neue } from 'next/font/google';
 import {
   type CSSProperties,
   type MouseEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState
 } from 'react';
 import { createPortal } from 'react-dom';
 
 import V2ChaseBarDevPanel from './V2ChaseBarDevPanel';
+import V2IdeaReturnDevPanel, {
+  type V2IdeaCalloutMode
+} from './V2IdeaReturnDevPanel';
 import {
   DEFAULT_V2_CHASE_BAR_SETTINGS,
   IS_V2_CHASE_BAR_DEV_PANEL_ENABLED,
+  IS_V2_IDEA_RETURN_DEV_PANEL_ENABLED,
   type V2ChaseBarNumericSettingKey,
   type V2ChaseBarSettings
 } from './v2-chase-bar.settings';
@@ -31,12 +38,16 @@ const CHASE_EDGE_PADDING_PX = 24;
 const CHASE_TOP_CLEARANCE_PX = 96;
 const CHASE_MIN_DISTANCE_PX = 160;
 
+const comicNeue = Comic_Neue({
+  subsets: ['latin'],
+  style: 'italic',
+  weight: '700'
+});
+
 interface ChasePosition {
   x: number;
   y: number;
 }
-
-type CalloutMode = 'mock' | 'stolen';
 
 interface V2AttributionPopoverProps {
   fontClassName: string;
@@ -102,6 +113,7 @@ export default function V2AttributionPopover({
   onHeadlineDimChange
 }: V2AttributionPopoverProps) {
   const ideaOriginRef = useRef<HTMLSpanElement | null>(null);
+  const calloutRef = useRef<HTMLDivElement | null>(null);
   const calloutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didStealInCurrentChaseRef = useRef(false);
   const inactivityTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -123,16 +135,78 @@ export default function V2AttributionPopover({
   const [chasePosition, setChasePosition] = useState<ChasePosition | null>(
     null
   );
-  const [calloutMode, setCalloutMode] = useState<CalloutMode | null>(null);
+  const [calloutMode, setCalloutMode] = useState<V2IdeaCalloutMode>(null);
+  const [displayedCalloutMode, setDisplayedCalloutMode] =
+    useState<V2IdeaCalloutMode>(null);
+  const [calloutTailOffset, setCalloutTailOffset] = useState<number | null>(
+    null
+  );
   const [ideasStolen, setIdeasStolen] = useState(0);
   const [isChaseActive, setIsChaseActive] = useState(false);
   const [isClientMounted, setIsClientMounted] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMockExitSettling, setIsMockExitSettling] = useState(false);
   const [isReturning, setIsReturning] = useState(false);
 
   useEffect(() => {
     setIsClientMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (calloutMode) {
+      setDisplayedCalloutMode(calloutMode);
+    }
+  }, [calloutMode]);
+
+  useEffect(() => {
+    if (!isMockExitSettling) {
+      return;
+    }
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      setIsMockExitSettling(false);
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [isMockExitSettling]);
+
+  useLayoutEffect(() => {
+    if (!calloutMode) {
+      return;
+    }
+
+    let animationFrame = 0;
+
+    const positionTail = () => {
+      const callout = calloutRef.current;
+      const idea = ideaOriginRef.current;
+
+      if (!callout || !idea) {
+        return;
+      }
+
+      const calloutRect = callout.getBoundingClientRect();
+      const ideaRect = idea.getBoundingClientRect();
+      const ideaCenter = ideaRect.left + ideaRect.width / 2;
+      const minimumOffset = 18;
+      const maximumOffset = calloutRect.width - minimumOffset;
+
+      setCalloutTailOffset(
+        Math.min(
+          Math.max(ideaCenter - calloutRect.left, minimumOffset),
+          maximumOffset
+        )
+      );
+    };
+
+    animationFrame = window.requestAnimationFrame(positionTail);
+    window.addEventListener('resize', positionTail);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('resize', positionTail);
+    };
+  }, [calloutMode]);
 
   const stopTrembling = useCallback(() => {
     trembleStartedAtRef.current = null;
@@ -208,6 +282,38 @@ export default function V2AttributionPopover({
     setChaseBarSettings({ ...DEFAULT_V2_CHASE_BAR_SETTINGS });
   }, []);
 
+  const handleIdeaReturnDelayChange = useCallback((value: number) => {
+    setChaseBarSettings((currentSettings) => ({
+      ...currentSettings,
+      ideaInactivityDuration: value
+    }));
+  }, []);
+
+  const handleCalloutTransitionChange = useCallback((value: number) => {
+    setChaseBarSettings((currentSettings) => ({
+      ...currentSettings,
+      calloutTransitionDuration: value
+    }));
+  }, []);
+
+  const handleIdeaReturnDelayReset = useCallback(() => {
+    setChaseBarSettings((currentSettings) => ({
+      ...currentSettings,
+      calloutTransitionDuration:
+        DEFAULT_V2_CHASE_BAR_SETTINGS.calloutTransitionDuration,
+      ideaInactivityDuration:
+        DEFAULT_V2_CHASE_BAR_SETTINGS.ideaInactivityDuration
+    }));
+  }, []);
+
+  const handleCalloutPreviewChange = useCallback(
+    (mode: V2IdeaCalloutMode) => {
+      hideCallout();
+      setCalloutMode(mode);
+    },
+    [hideCallout]
+  );
+
   const resetChase = useCallback(() => {
     clearInactivityTimers();
     stopTrembling();
@@ -245,7 +351,8 @@ export default function V2AttributionPopover({
       : chaseBarSettings.ideaReturnDuration;
 
     returnTimeoutRef.current = setTimeout(() => {
-      const shouldMockUser = !didStealInCurrentChaseRef.current;
+      const shouldMockUser =
+        ideasStolen === 0 && !didStealInCurrentChaseRef.current;
 
       resetChase();
 
@@ -257,6 +364,7 @@ export default function V2AttributionPopover({
     chaseBarSettings.ideaReturnDuration,
     chaseOrigin,
     clearInactivityTimers,
+    ideasStolen,
     isReturning,
     onHeadlineDimChange,
     resetChase,
@@ -330,6 +438,7 @@ export default function V2AttributionPopover({
     const nextClickCount = chaseClicks + 1;
 
     if (nextClickCount >= CHASE_CLICKS_REQUIRED) {
+      setIdeasStolen((currentCount) => currentCount + 1);
       resetChase();
       setIsDialogOpen(true);
       return;
@@ -370,10 +479,11 @@ export default function V2AttributionPopover({
       }
 
       const ideaRect = idea.getBoundingClientRect();
+      const attributionRect = event.currentTarget.getBoundingClientRect();
 
       hideCallout();
       didStealInCurrentChaseRef.current = false;
-      setChaseOrigin({ x: ideaRect.left, y: ideaRect.top });
+      setChaseOrigin({ x: ideaRect.left, y: attributionRect.top });
       setChasePosition(
         getRandomChasePosition(
           ideaRect,
@@ -404,7 +514,6 @@ export default function V2AttributionPopover({
       }
 
       didStealInCurrentChaseRef.current = true;
-      setIdeasStolen((currentCount) => currentCount + 1);
       advanceChase();
     },
     [advanceChase, resetChase]
@@ -456,14 +565,34 @@ export default function V2AttributionPopover({
       data-v2-hide-cursor='true'
       type='button'
       className={`${fontClassName} v2-social-attribution text-[10px] leading-none font-extralight text-zinc-500 hover:text-zinc-300 focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 sm:text-xs ${
-        !isSettled ? 'opacity-100' : 'opacity-20'
+        displayedCalloutMode === 'mock' || !isSettled
+          ? 'opacity-100'
+          : 'opacity-20'
       }`}
-      style={hoverStyle}
+      style={{
+        ...hoverStyle,
+        ...(isMockExitSettling ? { transitionDuration: '0ms' } : {})
+      }}
       onClick={handleAttributionClick}
       onPointerEnter={handleAttributionPointerEnter}
       onPointerLeave={handleAttributionPointerLeave}
     >
-      steal my <span ref={ideaOriginRef}>idea</span>, not my creativity
+      <span
+        className={displayedCalloutMode === 'mock' ? 'opacity-20' : undefined}
+      >
+        steal my{' '}
+      </span>
+      <span
+        ref={ideaOriginRef}
+        className={displayedCalloutMode === 'mock' ? 'text-white' : undefined}
+      >
+        idea
+      </span>
+      <span
+        className={displayedCalloutMode === 'mock' ? 'opacity-20' : undefined}
+      >
+        , not my creativity
+      </span>
     </button>
   );
 
@@ -544,7 +673,9 @@ export default function V2AttributionPopover({
                 ease: [0.16, 1, 0.3, 1]
               }}
             >
-              <span className='shrink-0 text-[10px] leading-none font-medium tracking-[0.12em] text-zinc-300'>
+              <span
+                className={`${fontClassName} shrink-0 text-xs leading-none font-medium tracking-[0.12em] text-zinc-300`}
+              >
                 keep chasing creativity
               </span>
               <span
@@ -578,29 +709,72 @@ export default function V2AttributionPopover({
         )
       : null;
 
+  const ideaReturnDevPanel =
+    IS_V2_IDEA_RETURN_DEV_PANEL_ENABLED && isClientMounted
+      ? createPortal(
+          <V2IdeaReturnDevPanel
+            calloutTransitionDuration={
+              chaseBarSettings.calloutTransitionDuration
+            }
+            calloutMode={calloutMode}
+            returnDelay={chaseBarSettings.ideaInactivityDuration}
+            onCalloutTransitionChange={handleCalloutTransitionChange}
+            onChange={handleIdeaReturnDelayChange}
+            onPreviewChange={handleCalloutPreviewChange}
+            onReset={handleIdeaReturnDelayReset}
+          />,
+          document.body
+        )
+      : null;
+
   return (
     <Dialog.Root
       open={isDialogOpen}
       onOpenChange={handleDialogOpenChange}
     >
       <div className='relative'>
-        {calloutMode ? (
-          <motion.div
-            role='status'
-            className={`${fontClassName} pointer-events-none absolute right-0 bottom-[calc(100%+0.5rem)] z-[13000] rounded-md border border-white/10 bg-zinc-950/95 px-2.5 py-2 text-[10px] leading-none font-normal whitespace-nowrap text-zinc-300 shadow-xl`}
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-          >
-            {calloutMode === 'mock'
-              ? 'hehe, could nott steal me'
-              : `ideas stolen: ${ideasStolen}`}
-          </motion.div>
-        ) : null}
+        <AnimatePresence
+          onExitComplete={() => {
+            if (!calloutMode) {
+              if (displayedCalloutMode === 'mock') {
+                setIsMockExitSettling(true);
+              }
+
+              setDisplayedCalloutMode(null);
+            }
+          }}
+        >
+          {calloutMode ? (
+            <motion.div
+              ref={calloutRef}
+              key={calloutMode}
+              role='status'
+              className={`${comicNeue.className} pointer-events-none absolute right-0 bottom-[calc(100%+0.75rem)] z-[13000] rounded-2xl border-2 border-black bg-white px-4 py-3 text-base leading-none font-bold whitespace-nowrap text-black italic shadow-[3px_3px_0_#52525b]`}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{
+                duration: shouldReduceMotion
+                  ? 0
+                  : chaseBarSettings.calloutTransitionDuration / 1000
+              }}
+            >
+              {calloutMode === 'mock'
+                ? 'hehe, could not steal me'
+                : `ideas stolen: ${Math.max(ideasStolen, 1)}`}
+              <span
+                aria-hidden='true'
+                className='absolute -bottom-[0.45rem] size-3 -translate-x-1/2 rotate-45 border-r-2 border-b-2 border-black bg-white'
+                style={{ left: calloutTailOffset ?? '75%' }}
+              />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
         {isChaseActive ? attributionPlaceholder : attributionButton}
       </div>
       {chaseLayer}
       {chaseBarDevPanel}
+      {ideaReturnDevPanel}
 
       <Dialog.Portal>
         <Dialog.Overlay className='fixed inset-0 z-[14000] bg-black/70' />

@@ -1,4 +1,5 @@
 export interface V2ChaseBarSettings {
+  calloutTransitionDuration: number;
   entranceDistance: number;
   gap: number;
   horizontalPadding: number;
@@ -20,6 +21,7 @@ export interface V2ChaseBarSettings {
 export type V2ChaseBarNumericSettingKey = keyof V2ChaseBarSettings;
 
 export const DEFAULT_V2_CHASE_BAR_SETTINGS: V2ChaseBarSettings = {
+  calloutTransitionDuration: 200,
   entranceDistance: 12,
   gap: 12,
   horizontalPadding: 12,
@@ -39,3 +41,5 @@ export const DEFAULT_V2_CHASE_BAR_SETTINGS: V2ChaseBarSettings = {
 };
 
 export const IS_V2_CHASE_BAR_DEV_PANEL_ENABLED = false;
+
+export const IS_V2_IDEA_RETURN_DEV_PANEL_ENABLED = false;

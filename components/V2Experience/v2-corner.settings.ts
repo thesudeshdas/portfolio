@@ -25,7 +25,7 @@ export const DEFAULT_V2_CORNER_SETTINGS: V2CornerSettings = {
   duration: 500,
   easing: 'ease-out',
   finalDelay: 600,
-  finalOpacity: 0.5,
+  finalOpacity: 0.2,
   finalScale: 1,
   finalTransitionDuration: 600,
   firstDelay: 100,
@@ -53,6 +53,6 @@ export const V2_CORNER_EASINGS = [
   { label: 'Linear', value: 'linear' }
 ];
 
-export const IS_V2_CORNER_DEV_PANEL_ENABLED = false;
+export const IS_V2_CORNER_DEV_PANEL_ENABLED = true;
 
 export const IS_V2_CORNER_FOCUS_MODE = false;

@@ -13,12 +13,19 @@ import { Noto_Emoji, Outfit } from 'next/font/google';
 import V2AttributionPopover from './V2AttributionPopover';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
+import V2SocialHoverDevPanel from './V2SocialHoverDevPanel';
 import V2WorkHoverDevPanel from './V2WorkHoverDevPanel';
 import {
   DEFAULT_V2_CORNER_SETTINGS,
   getV2CornerDelay,
   type V2CornerSettings
 } from './v2-corner.settings';
+import {
+  DEFAULT_V2_SOCIAL_HOVER_SETTINGS,
+  IS_V2_SOCIAL_HOVER_DEV_PANEL_ENABLED,
+  type V2SocialHoverNumericSettingKey,
+  type V2SocialHoverSettings
+} from './v2-social-hover.settings';
 import {
   DEFAULT_V2_WORK_HOVER_SETTINGS,
   IS_V2_WORK_HOVER_DEV_PANEL_ENABLED,
@@ -58,7 +65,7 @@ const socialLinks = [
     label: 'YouTube'
   },
   {
-    href: 'mailto:sudeshkumardas7@gmail.com',
+    href: 'mailto:dash@heywhoisdash.com',
     icon: FiMail,
     label: 'Email'
   }
@@ -104,6 +111,10 @@ function cornerRevealStyle(
 
 export default function V2Experience() {
   const cornerSettings = DEFAULT_V2_CORNER_SETTINGS;
+  const [socialHoverSettings, setSocialHoverSettings] =
+    useState<V2SocialHoverSettings>(() => ({
+      ...DEFAULT_V2_SOCIAL_HOVER_SETTINGS
+    }));
   const [workHoverSettings, setWorkHoverSettings] =
     useState<V2WorkHoverSettings>(() => ({
       ...DEFAULT_V2_WORK_HOVER_SETTINGS
@@ -151,6 +162,20 @@ export default function V2Experience() {
     setWorkHoverSettings({ ...DEFAULT_V2_WORK_HOVER_SETTINGS });
   }, []);
 
+  const handleSocialHoverSettingChange = useCallback(
+    (key: V2SocialHoverNumericSettingKey, value: number) => {
+      setSocialHoverSettings((currentSettings) => ({
+        ...currentSettings,
+        [key]: value
+      }));
+    },
+    []
+  );
+
+  const handleSocialHoverReset = useCallback(() => {
+    setSocialHoverSettings({ ...DEFAULT_V2_SOCIAL_HOVER_SETTINGS });
+  }, []);
+
   const workRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
@@ -165,6 +190,10 @@ export default function V2Experience() {
     1,
     1
   );
+  const settledSocialsRevealStyle = {
+    ...socialsRevealStyle,
+    opacity: areCornersSettled ? 1 : socialsRevealStyle.opacity
+  };
   const musicRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
@@ -178,6 +207,12 @@ export default function V2Experience() {
     '--v2-work-underline-duration': `${workHoverSettings.underlineDuration}ms`,
     '--v2-work-underline-gap': `${workHoverSettings.underlineGap}px`,
     '--v2-work-underline-width': `${workHoverSettings.underlineWidth}%`
+  } as CSSProperties;
+  const socialHoverStyle = {
+    '--v2-social-hover-duration': `${socialHoverSettings.duration}ms`,
+    '--v2-social-hover-scale': socialHoverSettings.scale,
+    '--v2-social-hover-stroke-width': socialHoverSettings.hoverStrokeWidth,
+    '--v2-social-resting-stroke-width': socialHoverSettings.restingStrokeWidth
   } as CSSProperties;
 
   return (
@@ -223,7 +258,7 @@ export default function V2Experience() {
           className={`v2-corner-item absolute right-2.5 bottom-2.5 flex origin-bottom-right flex-col items-end gap-3 motion-reduce:transition-none sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6 ${
             isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
-          style={socialsRevealStyle}
+          style={settledSocialsRevealStyle}
         >
           <div
             aria-label='Social media'
@@ -231,28 +266,36 @@ export default function V2Experience() {
           >
             {socialLinks.map((social) => {
               const Icon = social.icon;
+              const opensInNewTab = !social.href.startsWith('mailto:');
 
               return (
                 <a
                   key={social.label}
                   aria-label={social.label}
-                  className='inline-flex cursor-pointer transition-transform duration-300 ease-out hover:scale-[1.2] motion-reduce:transition-none'
+                  className={`v2-social-link inline-flex cursor-pointer ${
+                    areCornersSettled ? 'opacity-20' : 'opacity-100'
+                  }`}
                   href={social.href}
-                  rel='noopener noreferrer'
-                  target='_blank'
+                  rel={opensInNewTab ? 'noopener noreferrer' : undefined}
+                  style={socialHoverStyle}
+                  target={opensInNewTab ? '_blank' : undefined}
                   title={social.label}
                 >
                   <Icon
                     aria-hidden='true'
                     className='size-5 sm:size-6'
-                    strokeWidth={0.75}
+                    strokeWidth={socialHoverSettings.restingStrokeWidth}
                   />
                 </a>
               );
             })}
           </div>
 
-          <V2AttributionPopover fontClassName={outfit.className} />
+          <V2AttributionPopover
+            fontClassName={outfit.className}
+            hoverStyle={socialHoverStyle}
+            isSettled={areCornersSettled}
+          />
         </div>
       </section>
 
@@ -261,6 +304,14 @@ export default function V2Experience() {
           settings={workHoverSettings}
           onChange={handleWorkHoverSettingChange}
           onReset={handleWorkHoverReset}
+        />
+      ) : null}
+
+      {IS_V2_SOCIAL_HOVER_DEV_PANEL_ENABLED ? (
+        <V2SocialHoverDevPanel
+          settings={socialHoverSettings}
+          onChange={handleSocialHoverSettingChange}
+          onReset={handleSocialHoverReset}
         />
       ) : null}
     </main>

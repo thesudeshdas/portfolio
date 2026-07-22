@@ -288,6 +288,48 @@ body.v2-route [data-v2-content-cursor='true'] a {
   cursor: pointer !important;
 }
 
+body.v2-route .v2-social-link,
+body.v2-route .v2-social-link * {
+  cursor: pointer !important;
+}
+
+body.v2-route .v2-social-link {
+  scale: 1;
+  transition-duration: var(--v2-social-hover-duration);
+  transition-property: opacity, scale;
+  transition-timing-function: ease-out;
+}
+
+body.v2-route .v2-social-link:hover {
+  opacity: 1;
+  scale: var(--v2-social-hover-scale);
+}
+
+body.v2-route .v2-social-attribution {
+  transition: opacity var(--v2-social-hover-duration) ease-out;
+}
+
+body.v2-route .v2-social-attribution:hover {
+  opacity: 1;
+}
+
+body.v2-route .v2-social-attribution-chasing {
+  color: var(--color-zinc-300);
+  cursor: pointer !important;
+  opacity: 1;
+  transform-origin: top left;
+  transition: opacity var(--v2-social-hover-duration) ease-out;
+}
+
+body.v2-route .v2-social-link svg {
+  stroke-width: var(--v2-social-resting-stroke-width);
+  transition: stroke-width var(--v2-social-hover-duration) ease-out;
+}
+
+body.v2-route .v2-social-link:hover svg {
+  stroke-width: var(--v2-social-hover-stroke-width);
+}
+
 body.v2-route [data-v2-top-right-corner='true'] {
   cursor: pointer !important;
   scale: 1;
@@ -329,6 +371,9 @@ body.v2-route [data-v2-music-hit-target='true'] * {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body.v2-route .v2-social-attribution,
+  body.v2-route .v2-social-link,
+  body.v2-route .v2-social-link svg,
   body.v2-route [data-v2-top-right-corner='true'],
   body.v2-route [data-v2-top-right-corner='true']::after {
     transition-duration: 0ms;

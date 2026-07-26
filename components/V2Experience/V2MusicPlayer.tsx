@@ -13,6 +13,7 @@ import V2MusicDevPanel from './V2MusicDevPanel';
 import { v2MusicTracks } from './v2-music.data';
 import {
   DEFAULT_V2_MUSIC_SETTINGS,
+  IS_V2_MUSIC_AUTOPLAY_ENABLED,
   IS_V2_MUSIC_DEV_PANEL_ENABLED,
   type V2AlbumBorderVisibility,
   type V2MusicPlayerSettings
@@ -100,7 +101,7 @@ export default function V2MusicPlayer({
     let fadeFrame: number | undefined;
     let isCancelled = false;
 
-    if (!audio || !isRevealed) {
+    if (!audio || !isRevealed || !IS_V2_MUSIC_AUTOPLAY_ENABLED) {
       return;
     }
 

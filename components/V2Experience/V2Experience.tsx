@@ -16,6 +16,8 @@ import V2AttributionPopover from './V2AttributionPopover';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
 import V2SocialHoverDevPanel from './V2SocialHoverDevPanel';
+import V2WorkPanel from './V2WorkPanel';
+import V2WorkPanelDevPanel from './V2WorkPanelDevPanel';
 import V2WorkHoverDevPanel from './V2WorkHoverDevPanel';
 import {
   DEFAULT_V2_CORNER_SETTINGS,
@@ -35,6 +37,14 @@ import {
   type V2WorkHoverNumericSettingKey,
   type V2WorkHoverSettings
 } from './v2-work-hover.settings';
+import {
+  DEFAULT_V2_WORK_PANEL_SETTINGS,
+  IS_V2_WORK_PANEL_DEV_PANEL_ENABLED,
+  type V2WorkPanelDirection,
+  type V2WorkPanelDirectionSettingKey,
+  type V2WorkPanelNumericSettingKey,
+  type V2WorkPanelSettings
+} from './v2-work-panel.settings';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -122,6 +132,10 @@ export default function V2Experience() {
     useState<V2WorkHoverSettings>(() => ({
       ...DEFAULT_V2_WORK_HOVER_SETTINGS
     }));
+  const [workPanelSettings, setWorkPanelSettings] =
+    useState<V2WorkPanelSettings>(() => ({
+      ...DEFAULT_V2_WORK_PANEL_SETTINGS
+    }));
   const [areCornersSettled, setAreCornersSettled] = useState(
     IS_V2_SKIP_INITIAL_ANIMATION
   );
@@ -129,6 +143,7 @@ export default function V2Experience() {
     IS_V2_SKIP_INITIAL_ANIMATION
   );
   const [isHeadlineDimmed, setIsHeadlineDimmed] = useState(false);
+  const [isWorkPanelOpen, setIsWorkPanelOpen] = useState(false);
 
   const handleIntroStart = useCallback(() => {
     if (IS_V2_SKIP_INITIAL_ANIMATION) {
@@ -176,6 +191,38 @@ export default function V2Experience() {
 
   const handleWorkHoverReset = useCallback(() => {
     setWorkHoverSettings({ ...DEFAULT_V2_WORK_HOVER_SETTINGS });
+  }, []);
+
+  const handleWorkPanelOpen = useCallback(() => {
+    setIsWorkPanelOpen(true);
+  }, []);
+
+  const handleWorkPanelClose = useCallback(() => {
+    setIsWorkPanelOpen(false);
+  }, []);
+
+  const handleWorkPanelNumericSettingChange = useCallback(
+    (key: V2WorkPanelNumericSettingKey, value: number) => {
+      setWorkPanelSettings((currentSettings) => ({
+        ...currentSettings,
+        [key]: value
+      }));
+    },
+    []
+  );
+
+  const handleWorkPanelDirectionSettingChange = useCallback(
+    (key: V2WorkPanelDirectionSettingKey, value: V2WorkPanelDirection) => {
+      setWorkPanelSettings((currentSettings) => ({
+        ...currentSettings,
+        [key]: value
+      }));
+    },
+    []
+  );
+
+  const handleWorkPanelSettingsReset = useCallback(() => {
+    setWorkPanelSettings({ ...DEFAULT_V2_WORK_PANEL_SETTINGS });
   }, []);
 
   const handleSocialHoverSettingChange = useCallback(
@@ -245,11 +292,22 @@ export default function V2Experience() {
           style={{ ...workRevealStyle, lineHeight: '100%' }}
         >
           <span
+            aria-haspopup='dialog'
+            aria-label='Open work'
             data-v2-content-cursor='true'
             data-v2-hide-cursor='true'
             data-v2-top-right-corner={areCornersSettled ? 'true' : undefined}
-            className='relative inline-block'
+            className='relative inline-block focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300'
+            onClick={handleWorkPanelOpen}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleWorkPanelOpen();
+              }
+            }}
+            role='button'
             style={workHoverStyle}
+            tabIndex={areCornersSettled ? 0 : -1}
           >
             work
           </span>
@@ -319,6 +377,23 @@ export default function V2Experience() {
           />
         </div>
       </section>
+
+      <V2WorkPanel
+        fontClassName={outfit.className}
+        isOpen={isWorkPanelOpen}
+        onClose={handleWorkPanelClose}
+        settings={workPanelSettings}
+        workHoverStyle={workHoverStyle}
+      />
+
+      {IS_V2_WORK_PANEL_DEV_PANEL_ENABLED ? (
+        <V2WorkPanelDevPanel
+          settings={workPanelSettings}
+          onDirectionChange={handleWorkPanelDirectionSettingChange}
+          onNumericChange={handleWorkPanelNumericSettingChange}
+          onReset={handleWorkPanelSettingsReset}
+        />
+      ) : null}
 
       {IS_V2_WORK_HOVER_DEV_PANEL_ENABLED ? (
         <V2WorkHoverDevPanel

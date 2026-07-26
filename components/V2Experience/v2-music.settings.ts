@@ -47,3 +47,5 @@ export const DEFAULT_V2_MUSIC_SETTINGS: V2MusicPlayerSettings = {
 export const IS_V2_MUSIC_DEV_PANEL_ENABLED =
   process.env.NODE_ENV === 'development' &&
   process.env.NEXT_PUBLIC_V2_MUSIC_DEV_PANEL === 'true';
+
+export const IS_V2_MUSIC_AUTOPLAY_ENABLED = false;

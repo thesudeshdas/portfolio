@@ -365,6 +365,24 @@ body.v2-route [data-v2-top-right-corner='true']:hover::after {
   transition-delay: var(--v2-work-hover-duration);
 }
 
+body.v2-route .v2-work-panel-title {
+  position: relative;
+  display: inline-block;
+  scale: var(--v2-work-hover-scale);
+  transform-origin: left center;
+}
+
+body.v2-route .v2-work-panel-title::after {
+  position: absolute;
+  right: 0;
+  bottom: calc(-1 * var(--v2-work-underline-gap));
+  width: var(--v2-work-underline-width);
+  height: 1px;
+  background: currentColor;
+  content: '';
+  pointer-events: none;
+}
+
 body.v2-route [data-v2-music-hit-target='true'],
 body.v2-route [data-v2-music-hit-target='true'] * {
   cursor: pointer !important;

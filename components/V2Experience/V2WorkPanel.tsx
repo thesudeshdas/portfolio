@@ -4,6 +4,9 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { type CSSProperties, useEffect, useRef } from 'react';
 
+import type { IProject } from '@/types/project/project.types';
+
+import V2WorkPanelPrototype from './V2WorkPanelPrototype';
 import type {
   V2WorkPanelDirection,
   V2WorkPanelSettings
@@ -13,6 +16,7 @@ interface IV2WorkPanelProps {
   fontClassName: string;
   isOpen: boolean;
   onClose: () => void;
+  projects: IProject[];
   settings: V2WorkPanelSettings;
   workHoverStyle: CSSProperties;
 }
@@ -28,6 +32,15 @@ const directionAngles: Record<V2WorkPanelDirection, number> = {
   'top-left': -135
 };
 
+const FOCUSABLE_ELEMENT_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',');
+
 function getPanelOffset(direction: V2WorkPanelDirection, angleOffset: number) {
   const angle = ((directionAngles[direction] + angleOffset) * Math.PI) / 180;
   const travel = Math.SQRT2 * 100;
@@ -42,10 +55,12 @@ export default function V2WorkPanel({
   fontClassName,
   isOpen,
   onClose,
+  projects,
   settings,
   workHoverStyle
 }: IV2WorkPanelProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
@@ -66,6 +81,38 @@ export default function V2WorkPanel({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !panelRef.current) {
+        return;
+      }
+
+      const focusableElements = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          FOCUSABLE_ELEMENT_SELECTOR
+        )
+      ).filter((element) => element.tabIndex >= 0);
+      const firstFocusableElement = focusableElements[0];
+      const lastFocusableElement = focusableElements.at(-1);
+
+      if (!firstFocusableElement || !lastFocusableElement) {
+        return;
+      }
+
+      if (
+        event.shiftKey &&
+        (document.activeElement === firstFocusableElement ||
+          !panelRef.current.contains(document.activeElement))
+      ) {
+        event.preventDefault();
+        lastFocusableElement.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === lastFocusableElement
+      ) {
+        event.preventDefault();
+        firstFocusableElement.focus();
       }
     };
 
@@ -154,6 +201,7 @@ export default function V2WorkPanel({
           />
 
           <motion.section
+            ref={panelRef}
             aria-labelledby='v2-work-panel-title'
             aria-modal='true'
             className={`${fontClassName} fixed top-0 right-0 z-[12001] flex flex-col overflow-hidden bg-[#111112] text-zinc-100 shadow-[0_30px_100px_rgba(0,0,0,0.68)]`}
@@ -197,29 +245,7 @@ export default function V2WorkPanel({
               </motion.button>
             </header>
 
-            <div className='min-h-0 flex-1 overflow-y-auto px-5 pt-3 pb-8 sm:px-8 sm:pt-6 lg:px-16'>
-              <div className='grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-2 md:gap-10 lg:gap-16'>
-                <motion.a
-                  className='group relative flex aspect-[3/2] items-center justify-center rounded-xl border border-zinc-600 bg-[#121213] px-6 text-center transition-colors hover:border-zinc-300 focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300'
-                  href='/projects/stayhireable'
-                  whileHover={shouldReduceMotion ? undefined : { y: -4 }}
-                  whileTap={shouldReduceMotion ? undefined : { scale: 0.985 }}
-                >
-                  <span className='text-3xl leading-none font-light tracking-[-0.04em] text-zinc-300 transition-colors group-hover:text-zinc-50 sm:text-4xl'>
-                    stayhireable
-                  </span>
-                </motion.a>
-
-                <article className='relative flex aspect-[3/2] items-center justify-center rounded-xl border border-zinc-600 bg-[#121213] px-6 text-center'>
-                  <span className='absolute top-4 right-4 text-[10px] leading-none text-zinc-500'>
-                    coming soon
-                  </span>
-                  <span className='text-3xl leading-none font-light tracking-[-0.04em] text-zinc-300 sm:text-4xl'>
-                    dryve
-                  </span>
-                </article>
-              </div>
-            </div>
+            <V2WorkPanelPrototype projects={projects} />
           </motion.section>
         </motion.div>
       ) : null}

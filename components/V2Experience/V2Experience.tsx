@@ -11,6 +11,7 @@ import {
 import { Noto_Emoji, Outfit } from 'next/font/google';
 
 import V2Cursor from '@/components/V2Cursor/V2Cursor';
+import type { IProject } from '@/types/project/project.types';
 
 import V2AttributionPopover from './V2AttributionPopover';
 import V2IntroAnimation from './V2IntroAnimation';
@@ -122,7 +123,11 @@ function cornerRevealStyle(
   };
 }
 
-export default function V2Experience() {
+interface IV2ExperienceProps {
+  projects: IProject[];
+}
+
+export default function V2Experience({ projects }: IV2ExperienceProps) {
   const cornerSettings = DEFAULT_V2_CORNER_SETTINGS;
   const [socialHoverSettings, setSocialHoverSettings] =
     useState<V2SocialHoverSettings>(() => ({
@@ -382,6 +387,7 @@ export default function V2Experience() {
         fontClassName={outfit.className}
         isOpen={isWorkPanelOpen}
         onClose={handleWorkPanelClose}
+        projects={projects}
         settings={workPanelSettings}
         workHoverStyle={workHoverStyle}
       />

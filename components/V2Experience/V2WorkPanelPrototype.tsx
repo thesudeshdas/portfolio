@@ -11,10 +11,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { IProject, ProjectCategory } from '@/types/project/project.types';
 
-// PROTOTYPE: Three work-panel layouts, switchable with ?workVariant=,
+import {
+  ProjectScrollStories,
+  ScrollingProjectStack,
+  StickyProjectTimeline
+} from './V2WorkPanelScrollPrototypes';
+
+// PROTOTYPE: Six work-panel layouts, switchable with ?workVariant=,
 // on the existing /v2 route. Delete the losing variants after selection.
 
-type WorkVariant = 'index' | 'wall' | 'chapters';
+type WorkVariant =
+  | 'index'
+  | 'wall'
+  | 'chapters'
+  | 'stack'
+  | 'timeline'
+  | 'stories';
 
 interface IV2WorkPanelPrototypeProps {
   projects: IProject[];
@@ -43,6 +55,18 @@ const WORK_VARIANTS: IWorkVariantDescriptor[] = [
   {
     id: 'chapters',
     label: 'Company chapters'
+  },
+  {
+    id: 'stack',
+    label: 'Continuous stack'
+  },
+  {
+    id: 'timeline',
+    label: 'Sticky timeline'
+  },
+  {
+    id: 'stories',
+    label: 'Scroll stories'
   }
 ];
 
@@ -652,12 +676,25 @@ export default function V2WorkPanelPrototype({
     <div className='relative min-h-0 flex-1'>
       <div
         ref={scrollContainerRef}
-        className='h-full overflow-y-auto px-5 pt-3 pb-24 sm:px-8 sm:pt-6 lg:px-16'
+        className={`h-full overflow-y-auto ${
+          variant === 'stories'
+            ? 'snap-y snap-mandatory'
+            : 'px-5 pt-3 pb-24 sm:px-8 sm:pt-6 lg:px-16'
+        }`}
       >
         {variant === 'index' ? <EditorialIndex projects={projects} /> : null}
         {variant === 'wall' ? <PosterWall projects={projects} /> : null}
         {variant === 'chapters' ? (
           <CompanyChapters projects={projects} />
+        ) : null}
+        {variant === 'stack' ? (
+          <ScrollingProjectStack projects={projects} />
+        ) : null}
+        {variant === 'timeline' ? (
+          <StickyProjectTimeline projects={projects} />
+        ) : null}
+        {variant === 'stories' ? (
+          <ProjectScrollStories projects={projects} />
         ) : null}
       </div>
 

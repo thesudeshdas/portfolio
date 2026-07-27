@@ -1,23 +1,20 @@
 'use client';
 
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ArrowTopRightIcon
-} from '@radix-ui/react-icons';
+import { ArrowTopRightIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { IProject, ProjectCategory } from '@/types/project/project.types';
 
+import V2WorkPanelBentoPrototype from './V2WorkPanelBentoPrototype';
 import {
   ProjectScrollStories,
   ScrollingProjectStack,
   StickyProjectTimeline
 } from './V2WorkPanelScrollPrototypes';
 
-// PROTOTYPE: Six work-panel layouts, switchable with ?workVariant=,
+// PROTOTYPE: Seven work-panel layouts, switchable with ?workVariant=,
 // on the existing /v2 route. Delete the losing variants after selection.
 
 type WorkVariant =
@@ -26,9 +23,16 @@ type WorkVariant =
   | 'chapters'
   | 'stack'
   | 'timeline'
-  | 'stories';
+  | 'stories'
+  | 'bento';
 
 interface IV2WorkPanelPrototypeProps {
+  onBentoCategoryChange: (category: {
+    direction: number;
+    id: string;
+    label: string;
+  }) => void;
+  onBentoModeChange: (isActive: boolean) => void;
   projects: IProject[];
 }
 
@@ -67,6 +71,10 @@ const WORK_VARIANTS: IWorkVariantDescriptor[] = [
   {
     id: 'stories',
     label: 'Scroll stories'
+  },
+  {
+    id: 'bento',
+    label: 'Category bento'
   }
 ];
 
@@ -566,120 +574,33 @@ function CompanyChapters({ projects }: { projects: IProject[] }) {
   );
 }
 
-function WorkVariantSwitcher({
-  currentVariant,
-  onChange
-}: {
-  currentVariant: WorkVariant;
-  onChange: (variant: WorkVariant) => void;
-}) {
-  const activeIndex = WORK_VARIANTS.findIndex(
-    (variant) => variant.id === currentVariant
-  );
-  const activeVariant = WORK_VARIANTS[activeIndex];
-
-  const cycleVariant = (direction: -1 | 1) => {
-    const nextIndex =
-      (activeIndex + direction + WORK_VARIANTS.length) % WORK_VARIANTS.length;
-    onChange(WORK_VARIANTS[nextIndex].id);
-  };
-
-  return (
-    <div className='absolute bottom-4 left-1/2 z-20 -translate-x-1/2'>
-      <div className='flex items-center gap-1 border border-zinc-700 bg-zinc-950/95 p-1 text-zinc-200 shadow-2xl backdrop-blur'>
-        <button
-          aria-label='Previous work mock'
-          className='grid size-9 place-items-center text-zinc-500 transition-colors hover:text-zinc-100 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-300'
-          onClick={() => cycleVariant(-1)}
-          type='button'
-        >
-          <ArrowLeftIcon />
-        </button>
-        <div
-          aria-live='polite'
-          className='min-w-[178px] px-3 text-center'
-        >
-          <span className='block text-[9px] tracking-[0.16em] text-zinc-600 uppercase'>
-            Mock {activeIndex + 1} / {WORK_VARIANTS.length}
-          </span>
-          <span className='block text-xs leading-tight text-zinc-200'>
-            {activeVariant.label}
-          </span>
-        </div>
-        <button
-          aria-label='Next work mock'
-          className='grid size-9 place-items-center text-zinc-500 transition-colors hover:text-zinc-100 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-300'
-          onClick={() => cycleVariant(1)}
-          type='button'
-        >
-          <ArrowRightIcon />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function V2WorkPanelPrototype({
+  onBentoCategoryChange,
+  onBentoModeChange,
   projects
 }: IV2WorkPanelPrototypeProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [variant, setVariant] = useState<WorkVariant>(() => {
+  const [variant] = useState<WorkVariant>(() => {
     const urlVariant = new URLSearchParams(window.location.search).get(
       'workVariant'
     );
     const parsedVariant = urlVariant ?? undefined;
 
-    return isWorkVariant(parsedVariant) ? parsedVariant : 'index';
+    return isWorkVariant(parsedVariant) ? parsedVariant : 'bento';
   });
 
-  const changeVariant = useCallback((nextVariant: WorkVariant) => {
-    setVariant(nextVariant);
-    scrollContainerRef.current?.scrollTo({
-      behavior: 'auto',
-      top: 0
-    });
-
-    const url = new URL(window.location.href);
-    url.searchParams.set('workVariant', nextVariant);
-    window.history.replaceState(window.history.state, '', url);
-  }, []);
-
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target;
-      const isTyping =
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        (target instanceof HTMLElement && target.isContentEditable);
-
-      if (
-        isTyping ||
-        (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
-      ) {
-        return;
-      }
-
-      const activeIndex = WORK_VARIANTS.findIndex(
-        (item) => item.id === variant
-      );
-      const direction = event.key === 'ArrowLeft' ? -1 : 1;
-      const nextIndex =
-        (activeIndex + direction + WORK_VARIANTS.length) % WORK_VARIANTS.length;
-      changeVariant(WORK_VARIANTS[nextIndex].id);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [changeVariant, variant]);
+    onBentoModeChange(variant === 'bento');
+  }, [onBentoModeChange, variant]);
 
   return (
     <div className='relative min-h-0 flex-1'>
       <div
-        ref={scrollContainerRef}
-        className={`h-full overflow-y-auto ${
-          variant === 'stories'
-            ? 'snap-y snap-mandatory'
-            : 'px-5 pt-3 pb-24 sm:px-8 sm:pt-6 lg:px-16'
+        className={`h-full ${
+          variant === 'bento'
+            ? 'overflow-hidden'
+            : variant === 'stories'
+            ? 'snap-y snap-mandatory overflow-y-auto'
+            : 'overflow-y-auto px-5 pt-3 pb-24 sm:px-8 sm:pt-6 lg:px-16'
         }`}
       >
         {variant === 'index' ? <EditorialIndex projects={projects} /> : null}
@@ -696,14 +617,13 @@ export default function V2WorkPanelPrototype({
         {variant === 'stories' ? (
           <ProjectScrollStories projects={projects} />
         ) : null}
+        {variant === 'bento' ? (
+          <V2WorkPanelBentoPrototype
+            onCategoryChange={onBentoCategoryChange}
+            projects={projects}
+          />
+        ) : null}
       </div>
-
-      {process.env.NODE_ENV !== 'production' ? (
-        <WorkVariantSwitcher
-          currentVariant={variant}
-          onChange={changeVariant}
-        />
-      ) : null}
     </div>
   );
 }

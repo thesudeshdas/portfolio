@@ -2,7 +2,13 @@
 
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { type CSSProperties, useEffect, useRef } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 
 import type { IProject } from '@/types/project/project.types';
 
@@ -63,6 +69,18 @@ export default function V2WorkPanel({
   const panelRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
+  const [isBentoMode, setIsBentoMode] = useState(true);
+  const [bentoCategory, setBentoCategory] = useState({
+    direction: 1,
+    id: 'building',
+    label: 'currently building'
+  });
+  const handleBentoCategoryChange = useCallback(
+    (category: { direction: number; id: string; label: string }) => {
+      setBentoCategory(category);
+    },
+    []
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -213,20 +231,54 @@ export default function V2WorkPanel({
             variants={panelVariants}
           >
             <header className='flex h-[110px] shrink-0 items-center px-5 sm:px-8 lg:px-16'>
-              <h2
-                id='v2-work-panel-title'
-                className='v2-work-panel-title text-[24px] font-extralight'
-                style={workHoverStyle}
-              >
-                work
-              </h2>
+              <div className='flex items-baseline gap-5'>
+                <h2
+                  id='v2-work-panel-title'
+                  className={`v2-work-panel-title text-[24px] font-extralight transition-opacity duration-300 ${
+                    isBentoMode ? 'opacity-35' : 'opacity-100'
+                  }`}
+                  style={workHoverStyle}
+                >
+                  work
+                </h2>
+
+                {isBentoMode ? (
+                  <div className='h-6 overflow-hidden'>
+                    <AnimatePresence
+                      initial={false}
+                      mode='wait'
+                    >
+                      <motion.span
+                        key={bentoCategory.id}
+                        animate={{ opacity: 1, y: 0 }}
+                        aria-live='polite'
+                        className='block text-base font-light text-zinc-100'
+                        exit={{
+                          opacity: 0,
+                          y: bentoCategory.direction > 0 ? -12 : 12
+                        }}
+                        initial={{
+                          opacity: 0,
+                          y: bentoCategory.direction > 0 ? 12 : -12
+                        }}
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : 0.28,
+                          ease: [0.16, 1, 0.3, 1]
+                        }}
+                      >
+                        {bentoCategory.label}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                ) : null}
+              </div>
 
               <motion.button
                 ref={closeButtonRef}
                 aria-label='Close work panel'
                 data-v2-content-cursor='true'
                 data-v2-hide-cursor='true'
-                className='absolute top-[17px] right-[21.859375px] grid size-10 place-items-center text-zinc-100 opacity-55 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-zinc-300 sm:top-[29px] sm:right-[33.859375px] lg:top-[35px] lg:right-[39.859375px]'
+                className='absolute top-[17px] right-[21.859375px] grid size-10 place-items-center text-zinc-100 opacity-55 focus-visible:opacity-100 focus-visible:outline-none sm:top-[29px] sm:right-[33.859375px] lg:top-[35px] lg:right-[39.859375px]'
                 onClick={onClose}
                 transition={{
                   duration: shouldReduceMotion ? 0 : 0.15,
@@ -245,7 +297,11 @@ export default function V2WorkPanel({
               </motion.button>
             </header>
 
-            <V2WorkPanelPrototype projects={projects} />
+            <V2WorkPanelPrototype
+              onBentoCategoryChange={handleBentoCategoryChange}
+              onBentoModeChange={setIsBentoMode}
+              projects={projects}
+            />
           </motion.section>
         </motion.div>
       ) : null}

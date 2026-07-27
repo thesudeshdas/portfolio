@@ -1,0 +1,963 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="6200"
+  height="3680"
+  viewBox="0 0 6200 3680"
+>
+  <style>
+    .background {
+      fill: #111111;
+    }
+
+    .viewport-guide {
+      fill: none;
+      stroke: #2c2c2c;
+      stroke-dasharray: 18 18;
+      stroke-width: 2;
+    }
+
+    .divider {
+      stroke: #ececec;
+      stroke-width: 4;
+    }
+
+    .card {
+      fill: none;
+      stroke: #ececec;
+      stroke-width: 4;
+    }
+
+    .title {
+      fill: #ececec;
+      font-family: Inter, Arial, sans-serif;
+      font-size: 28px;
+      font-weight: 400;
+    }
+
+    .meta {
+      fill: #858585;
+      font-family: Inter, Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+
+    .category {
+      fill: #ececec;
+      font-family: Inter, Arial, sans-serif;
+      font-size: 34px;
+      font-weight: 500;
+    }
+
+    .category-meta {
+      fill: #858585;
+      font-family: Inter, Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      letter-spacing: 2px;
+    }
+
+    .canvas-title {
+      fill: #ececec;
+      font-family: Inter, Arial, sans-serif;
+      font-size: 32px;
+      font-weight: 500;
+    }
+  </style>
+
+  <rect
+    class="background"
+    width="6200"
+    height="3680"
+  />
+
+  <text
+    class="canvas-title"
+    x="120"
+    y="70"
+  >
+    work grid / width study
+  </text>
+  <text
+    class="meta"
+    x="6000"
+    y="70"
+    text-anchor="end"
+  >
+    28 PROJECTS · DESKTOP
+  </text>
+
+  <rect
+    class="viewport-guide"
+    x="120"
+    y="100"
+    width="1440"
+    height="3460"
+  />
+  <rect
+    class="viewport-guide"
+    x="1560"
+    y="100"
+    width="1440"
+    height="3460"
+  />
+  <rect
+    class="viewport-guide"
+    x="3000"
+    y="100"
+    width="1440"
+    height="3460"
+  />
+  <rect
+    class="viewport-guide"
+    x="4440"
+    y="100"
+    width="1440"
+    height="3460"
+  />
+
+  <text
+    class="meta"
+    x="140"
+    y="126"
+  >
+    VIEWPORT 01 · 1440PX
+  </text>
+  <text
+    class="meta"
+    x="1580"
+    y="126"
+  >
+    VIEWPORT 02 · 1440PX
+  </text>
+  <text
+    class="meta"
+    x="3020"
+    y="126"
+  >
+    VIEWPORT 03 · 1440PX
+  </text>
+  <text
+    class="meta"
+    x="4460"
+    y="126"
+  >
+    VIEWPORT 04 · 1440PX
+  </text>
+
+  <!-- Now building -->
+  <g transform="translate(120 160)">
+    <rect
+      class="card"
+      width="900"
+      height="360"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      01 · 900PX · 7.5/12
+    </text>
+    <text
+      class="title"
+      x="450"
+      y="188"
+      text-anchor="middle"
+    >
+      StayHireable
+    </text>
+  </g>
+
+  <g transform="translate(1036 160)">
+    <rect
+      class="card"
+      width="420"
+      height="360"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      02 · 420PX · 3.5/12
+    </text>
+    <text
+      class="title"
+      x="210"
+      y="188"
+      text-anchor="middle"
+    >
+      Dryve
+    </text>
+  </g>
+
+  <text
+    class="category"
+    x="1700"
+    y="320"
+  >
+    now building
+  </text>
+  <text
+    class="category-meta"
+    x="1700"
+    y="356"
+  >
+    02 PROJECTS
+  </text>
+
+  <line
+    class="divider"
+    x1="120"
+    y1="580"
+    x2="6000"
+    y2="580"
+  />
+
+  <!-- GrowthX -->
+  <g transform="translate(120 640)">
+    <rect
+      class="card"
+      width="720"
+      height="404"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      01 · 720PX · 6/12
+    </text>
+    <text
+      class="title"
+      x="360"
+      y="212"
+      text-anchor="middle"
+    >
+      GrowthX Member Connect
+    </text>
+  </g>
+
+  <g transform="translate(856 640)">
+    <rect
+      class="card"
+      width="420"
+      height="600"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      02 · 420PX · 3.5/12
+    </text>
+    <text
+      class="title"
+      x="210"
+      y="292"
+      text-anchor="middle"
+    >
+      GrowthX
+    </text>
+    <text
+      class="title"
+      x="210"
+      y="330"
+      text-anchor="middle"
+    >
+      Mobile App
+    </text>
+  </g>
+
+  <g transform="translate(1292 640)">
+    <rect
+      class="card"
+      width="520"
+      height="288"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      03 · 520PX · 4.3/12
+    </text>
+    <text
+      class="title"
+      x="260"
+      y="154"
+      text-anchor="middle"
+    >
+      Real-Time Event Chat
+    </text>
+  </g>
+
+  <g transform="translate(1292 944)">
+    <rect
+      class="card"
+      width="520"
+      height="296"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      04 · 520PX · 4.3/12
+    </text>
+    <text
+      class="title"
+      x="260"
+      y="158"
+      text-anchor="middle"
+    >
+      AI Career Roadmap
+    </text>
+  </g>
+
+  <g transform="translate(1828 640)">
+    <rect
+      class="card"
+      width="620"
+      height="288"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      05 · 620PX · 5.2/12
+    </text>
+    <text
+      class="title"
+      x="310"
+      y="136"
+      text-anchor="middle"
+    >
+      GrowthX Community Platform
+    </text>
+  </g>
+
+  <g transform="translate(1828 944)">
+    <rect
+      class="card"
+      width="620"
+      height="296"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      06 · 620PX · 5.2/12
+    </text>
+    <text
+      class="title"
+      x="310"
+      y="158"
+      text-anchor="middle"
+    >
+      GrowthX Talent Platform
+    </text>
+  </g>
+
+  <g transform="translate(2464 640)">
+    <rect
+      class="card"
+      width="500"
+      height="288"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      07 · 500PX · 4.2/12
+    </text>
+    <text
+      class="title"
+      x="250"
+      y="136"
+      text-anchor="middle"
+    >
+      ELEVATE Learning
+    </text>
+    <text
+      class="title"
+      x="250"
+      y="174"
+      text-anchor="middle"
+    >
+      Platform
+    </text>
+  </g>
+
+  <g transform="translate(2464 944)">
+    <rect
+      class="card"
+      width="500"
+      height="296"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      08 · 500PX · 4.2/12
+    </text>
+    <text
+      class="title"
+      x="250"
+      y="138"
+      text-anchor="middle"
+    >
+      Elevate Browser
+    </text>
+    <text
+      class="title"
+      x="250"
+      y="176"
+      text-anchor="middle"
+    >
+      Extension
+    </text>
+  </g>
+
+  <g transform="translate(2980 640)">
+    <rect
+      class="card"
+      width="720"
+      height="600"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      09 · 720PX · 6/12
+    </text>
+    <text
+      class="title"
+      x="360"
+      y="308"
+      text-anchor="middle"
+    >
+      Notifications Platform
+    </text>
+  </g>
+
+  <g transform="translate(3716 640)">
+    <rect
+      class="card"
+      width="620"
+      height="600"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      10 · 620PX · 5.2/12
+    </text>
+    <text
+      class="title"
+      x="310"
+      y="292"
+      text-anchor="middle"
+    >
+      Resume Review
+    </text>
+    <text
+      class="title"
+      x="310"
+      y="330"
+      text-anchor="middle"
+    >
+      System
+    </text>
+  </g>
+
+  <g transform="translate(4352 640)">
+    <rect
+      class="card"
+      width="560"
+      height="288"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      11 · 560PX · 4.7/12
+    </text>
+    <text
+      class="title"
+      x="280"
+      y="154"
+      text-anchor="middle"
+    >
+      GrowthX Events Platform
+    </text>
+  </g>
+
+  <g transform="translate(4352 944)">
+    <rect
+      class="card"
+      width="560"
+      height="296"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      12 · 560PX · 4.7/12
+    </text>
+    <text
+      class="title"
+      x="280"
+      y="138"
+      text-anchor="middle"
+    >
+      Admin / Internal
+    </text>
+    <text
+      class="title"
+      x="280"
+      y="176"
+      text-anchor="middle"
+    >
+      Ops Tooling
+    </text>
+  </g>
+
+  <text
+    class="category"
+    x="5140"
+    y="900"
+  >
+    growthx
+  </text>
+  <text
+    class="category-meta"
+    x="5140"
+    y="936"
+  >
+    12 PROJECTS · 3.4 VIEWPORTS
+  </text>
+
+  <line
+    class="divider"
+    x1="120"
+    y1="1300"
+    x2="6000"
+    y2="1300"
+  />
+
+  <!-- TalentPlace.ai -->
+  <g transform="translate(120 1360)">
+    <rect
+      class="card"
+      width="720"
+      height="600"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      01 · 720PX · 6/12
+    </text>
+    <text
+      class="title"
+      x="360"
+      y="292"
+      text-anchor="middle"
+    >
+      TalentPlace Job
+    </text>
+    <text
+      class="title"
+      x="360"
+      y="330"
+      text-anchor="middle"
+    >
+      Search Portal
+    </text>
+  </g>
+
+  <g transform="translate(856 1360)">
+    <rect
+      class="card"
+      width="600"
+      height="288"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      02 · 600PX · 5/12
+    </text>
+    <text
+      class="title"
+      x="300"
+      y="136"
+      text-anchor="middle"
+    >
+      Career Profile
+    </text>
+    <text
+      class="title"
+      x="300"
+      y="174"
+      text-anchor="middle"
+    >
+      Builder
+    </text>
+  </g>
+
+  <g transform="translate(856 1664)">
+    <rect
+      class="card"
+      width="600"
+      height="296"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      03 · 600PX · 5/12
+    </text>
+    <text
+      class="title"
+      x="300"
+      y="158"
+      text-anchor="middle"
+    >
+      Resume Builder,
+    </text>
+    <text
+      class="title"
+      x="300"
+      y="196"
+      text-anchor="middle"
+    >
+      Templates &amp; PDF
+    </text>
+    <text
+      class="title"
+      x="300"
+      y="234"
+      text-anchor="middle"
+    >
+      Generation
+    </text>
+  </g>
+
+  <text
+    class="category"
+    x="1650"
+    y="1620"
+  >
+    talentplace.ai
+  </text>
+  <text
+    class="category-meta"
+    x="1650"
+    y="1656"
+  >
+    03 PROJECTS · 1.0 VIEWPORT
+  </text>
+
+  <line
+    class="divider"
+    x1="120"
+    y1="2020"
+    x2="6000"
+    y2="2020"
+  />
+
+  <!-- NeoG -->
+  <g transform="translate(120 2080)">
+    <rect
+      class="card"
+      width="880"
+      height="360"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      01 · 880PX · 7.3/12
+    </text>
+    <text
+      class="title"
+      x="440"
+      y="188"
+      text-anchor="middle"
+    >
+      NeoG Camp
+    </text>
+  </g>
+
+  <g transform="translate(1016 2080)">
+    <rect
+      class="card"
+      width="520"
+      height="360"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      02 · 520PX · 4.3/12
+    </text>
+    <text
+      class="title"
+      x="260"
+      y="188"
+      text-anchor="middle"
+    >
+      NeoG Admissions
+    </text>
+  </g>
+
+  <text
+    class="category"
+    x="1740"
+    y="2240"
+  >
+    neog
+  </text>
+  <text
+    class="category-meta"
+    x="1740"
+    y="2276"
+  >
+    02 PROJECTS · 1 VIEWPORT
+  </text>
+
+  <line
+    class="divider"
+    x1="120"
+    y1="2500"
+    x2="6000"
+    y2="2500"
+  />
+
+  <!-- Open source -->
+  <g transform="translate(120 2560)">
+    <rect
+      class="card"
+      width="960"
+      height="360"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      01 · 960PX · 8/12
+    </text>
+    <text
+      class="title"
+      x="480"
+      y="188"
+      text-anchor="middle"
+    >
+      Take a Break
+    </text>
+  </g>
+
+  <text
+    class="category"
+    x="1260"
+    y="2720"
+  >
+    open source
+  </text>
+  <text
+    class="category-meta"
+    x="1260"
+    y="2756"
+  >
+    01 PROJECT · 0.7 VIEWPORT
+  </text>
+
+  <line
+    class="divider"
+    x1="120"
+    y1="2980"
+    x2="6000"
+    y2="2980"
+  />
+
+  <!-- Archive -->
+  <g transform="translate(120 3040)">
+    <rect
+      class="card"
+      width="760"
+      height="500"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      01 · 760PX · 6.3/12
+    </text>
+    <text
+      class="title"
+      x="380"
+      y="258"
+      text-anchor="middle"
+    >
+      Catalyst
+    </text>
+  </g>
+
+  <g transform="translate(896 3040)">
+    <rect
+      class="card"
+      width="520"
+      height="500"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      02 · 520PX · 4.3/12
+    </text>
+    <text
+      class="title"
+      x="260"
+      y="258"
+      text-anchor="middle"
+    >
+      Dashtra
+    </text>
+  </g>
+
+  <g transform="translate(1432 3040)">
+    <rect
+      class="card"
+      width="420"
+      height="240"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      03 · 420PX · 3.5/12
+    </text>
+    <text
+      class="title"
+      x="210"
+      y="132"
+      text-anchor="middle"
+    >
+      Tic Tac Toe
+    </text>
+  </g>
+
+  <g transform="translate(1432 3296)">
+    <rect
+      class="card"
+      width="420"
+      height="244"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      04 · 420PX · 3.5/12
+    </text>
+    <text
+      class="title"
+      x="210"
+      y="114"
+      text-anchor="middle"
+    >
+      Rock Paper
+    </text>
+    <text
+      class="title"
+      x="210"
+      y="152"
+      text-anchor="middle"
+    >
+      Scissors
+    </text>
+  </g>
+
+  <g transform="translate(1868 3040)">
+    <rect
+      class="card"
+      width="520"
+      height="500"
+      rx="28"
+    />
+    <text
+      class="meta"
+      x="28"
+      y="42"
+    >
+      05 · 520PX · 4.3/12
+    </text>
+    <text
+      class="title"
+      x="260"
+      y="258"
+      text-anchor="middle"
+    >
+      Etch a Sketch
+    </text>
+  </g>
+
+  <text
+    class="category"
+    x="2580"
+    y="3260"
+  >
+    archive
+  </text>
+  <text
+    class="category-meta"
+    x="2580"
+    y="3296"
+  >
+    05 PROJECTS · 1.6 VIEWPORTS
+  </text>
+</svg>

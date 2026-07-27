@@ -1,25 +1,21 @@
 ---
-title: GrowthX Community App / Member Connect
-description: Standalone community app with Member Connect matchmaking, posts, comments, DMs, search, notifications, Slack/email/platform notification flows and Claude moderation.
+title: GrowthX Member Connect
+description: Member discovery and matchmaking experience for finding relevant GrowthX members and starting meaningful conversations.
 category: work
 status: active
 role: Solo Product Engineer
-highlight: Reached ~270 peak WAU and 228 unique post viewers in the first month
+highlight: Focused member discovery and matchmaking workflow
 year: 2026
 organisation: GrowthX
 cover:
 techStack: ['react', 'typescript', 'vite']
 featured: true
-order: 4
+order: 4.2
 ---
 
-Built a standalone GrowthX community app from scratch for member discovery,
-discussion and connection workflows.
+Built Member Connect as a focused discovery and matchmaking experience inside
+the GrowthX community product.
 
-The product includes Member Connect matchmaking, posts, comments, DMs, search,
-notifications, Slack/email/platform notification flows and Claude-based
-moderation. It was built as a focused community surface rather than another
-tab inside the core GrowthX web product.
-
-Early Mixpanel evidence showed roughly 270 peak weekly active users and 228
-unique post viewers in the first month after launch.
+The experience helps members find relevant people, understand why they should
+connect and move from discovery into a conversation without navigating the
+broader community feed.

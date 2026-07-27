@@ -60,17 +60,6 @@ export const devProjectList: IDevProjectListItem[] = [
     featured: true
   },
   {
-    id: 'c1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
-    description: `B2B community platform work across events, learning, jobs, career tools, admin operations, SEO, analytics and backend services across 6 repositories`,
-    image: '/dash-white.png',
-    live: 'https://www.growthx.club',
-    organisation: 'GrowthX',
-    organisationLogo: growthXLogo,
-    techStack: [NextJS, TypeScript, ReduxToolkit, MUI, Express, MongoDB, Redis],
-    title: 'GrowthX Platform',
-    featured: true
-  },
-  {
     id: 'd1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
     description: `B2B hiring workflows for job posting, verification approvals, AI-powered job autofill, applicant tracking, member discovery, candidate curation and team invites`,
     image: '/dash-white.png',
@@ -94,13 +83,24 @@ export const devProjectList: IDevProjectListItem[] = [
   },
   {
     id: 'f1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
-    description: `Standalone community app with Member Connect matchmaking, posts, comments, DMs, search, notifications and Claude moderation, reaching ~270 peak WAU in the first month`,
+    description: `Standalone community platform with posts, comments, DMs, search, notifications and Claude moderation, reaching ~270 peak WAU in the first month`,
+    image: '/dash-white.png',
+    live: '/projects/growthx-community-platform',
+    organisation: 'GrowthX',
+    organisationLogo: growthXLogo,
+    techStack: [ReactJS, TypeScript, Vite, TailwindCSS, OpenAI],
+    title: 'GrowthX Community Platform',
+    featured: true
+  },
+  {
+    id: 'f2015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
+    description: `Member discovery and matchmaking experience for finding relevant GrowthX members and starting meaningful conversations`,
     image: '/dash-white.png',
     live: '/projects/growthx-community-member-connect',
     organisation: 'GrowthX',
     organisationLogo: growthXLogo,
-    techStack: [ReactJS, TypeScript, Vite, TailwindCSS, OpenAI],
-    title: 'GrowthX Community App',
+    techStack: [ReactJS, TypeScript, Vite, TailwindCSS],
+    title: 'GrowthX Member Connect',
     featured: true
   },
   {
@@ -148,13 +148,13 @@ export const devProjectList: IDevProjectListItem[] = [
   },
   {
     id: 'o4015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
-    description: `Frontend job search and apply portal with listings, search, filters, end-to-end apply flow, application summaries and candidate-facing views`,
+    description: `Data-driven job portal that queries ~100k candidates and recommends top matches with detailed matching reports`,
     image: '/dev/jobPortal.png',
-    live: '/projects/talentplace-job-search-apply-portal',
+    live: '/projects/job-portal',
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
     techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
-    title: 'TalentPlace Job Search Portal',
+    title: 'Job Portal',
     featured: false
   },
   {
@@ -170,24 +170,13 @@ export const devProjectList: IDevProjectListItem[] = [
   },
   {
     id: 'q3006t4u-v4n0-4o00-nr1p-6s03q7r95o50',
-    description: `Multi-template resume rendering engine with React document components, reusable template data and client-side true PDF generation`,
+    description: `Resume builder using 500+ career data points, 80+ templates, reusable React document components and client-side true PDF generation`,
     image: '/dev/resumeBuilder.png',
     live: '/projects/talentplace-pdf-generation',
     organisation: 'TalentPlace.ai',
     organisationLogo: talentplaceLogo,
-    techStack: [ReactJS, TypeScript, ChakraUI],
-    title: 'Resume Templates & PDF Generation',
-    featured: false
-  },
-  {
-    id: 'q4006t4u-v4n0-4o00-nr1p-6s03q7r95o50',
-    description: `Frontend platform migration into a Turborepo and pnpm monorepo with shared UI components, theme, icons, utilities and tooling`,
-    image: '/dev/resumeBuilder.png',
-    live: '/projects/talentplace-frontend-platform',
-    organisation: 'TalentPlace.ai',
-    organisationLogo: talentplaceLogo,
-    techStack: [ReactJS, TypeScript, ChakraUI, Turborepo],
-    title: 'TalentPlace Frontend Platform',
+    techStack: [ReactJS, TypeScript, ChakraUI, Turborepo, ReduxToolkit],
+    title: 'Resume Builder, Templates & PDF Generation',
     featured: false
   },
   {

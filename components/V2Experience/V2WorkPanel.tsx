@@ -250,15 +250,13 @@ export default function V2WorkPanel({
                     >
                       <motion.span
                         key={bentoCategory.id}
-                        animate={{ opacity: 1, y: 0 }}
+                        animate={{ y: 0 }}
                         aria-live='polite'
                         className='block text-base font-light text-zinc-100'
                         exit={{
-                          opacity: 0,
                           y: bentoCategory.direction > 0 ? -12 : 12
                         }}
                         initial={{
-                          opacity: 0,
                           y: bentoCategory.direction > 0 ? 12 : -12
                         }}
                         transition={{

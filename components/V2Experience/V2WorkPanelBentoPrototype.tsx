@@ -1,7 +1,8 @@
 'use client';
 
+import Lenis from 'lenis';
 import Image from 'next/image';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { IProject } from '@/types/project/project.types';
 
@@ -38,6 +39,10 @@ interface IBentoCategory extends Omit<IBentoLayout, 'items'> {
 }
 
 const MOBILE_PROJECT_SLUGS = new Set(['dryve', 'growthx-mobile-app']);
+const CATEGORY_EDGE_THRESHOLD = 72;
+const SCROLL_EDGE_TOLERANCE = 2;
+const LENIS_EASING = (progress: number) =>
+  Math.min(1, 1.001 - 2 ** (-10 * progress));
 
 const BENTO_LAYOUTS: IBentoLayout[] = [
   {
@@ -322,9 +327,16 @@ function BentoProjectCard({
   );
 }
 
-function BentoTrack({ category }: { category: IBentoCategory }) {
+function BentoTrack({
+  category,
+  trackRef
+}: {
+  category: IBentoCategory;
+  trackRef: (element: HTMLDivElement | null) => void;
+}) {
   return (
     <div
+      ref={trackRef}
       aria-label={`${category.label} horizontal projects`}
       className='h-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
       role='region'
@@ -373,88 +385,211 @@ export default function V2WorkPanelBentoPrototype({
   projects: IProject[];
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
+  const trackRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const verticalLenisRef = useRef<Lenis | null>(null);
   const activeCategoryIndexRef = useRef(0);
+  const boundaryDirectionRef = useRef(0);
+  const boundaryDistanceRef = useRef(0);
+  const lastBoundaryEventTimeRef = useRef(0);
+  const isTransitioningRef = useRef(false);
   const categories = useMemo(() => buildBentoCategories(projects), [projects]);
+
+  const moveToCategory = useCallback(
+    (direction: -1 | 1) => {
+      if (isTransitioningRef.current) {
+        return;
+      }
+
+      const nextIndex = activeCategoryIndexRef.current + direction;
+      const nextCategory = categories[nextIndex];
+      const nextSection = sectionRefs.current[nextIndex];
+      const verticalLenis = verticalLenisRef.current;
+
+      if (!nextCategory || !nextSection || !verticalLenis) {
+        return;
+      }
+
+      isTransitioningRef.current = true;
+      activeCategoryIndexRef.current = nextIndex;
+      boundaryDirectionRef.current = 0;
+      boundaryDistanceRef.current = 0;
+      onCategoryChange({
+        direction,
+        id: nextCategory.id,
+        label: nextCategory.label
+      });
+
+      const completeTransition = () => {
+        isTransitioningRef.current = false;
+      };
+      const shouldReduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+
+      verticalLenis.scrollTo(nextSection, {
+        duration: shouldReduceMotion ? undefined : 0.9,
+        easing: LENIS_EASING,
+        force: true,
+        immediate: shouldReduceMotion,
+        lock: true,
+        onComplete: completeTransition
+      });
+
+      if (shouldReduceMotion) {
+        completeTransition();
+      }
+    },
+    [categories, onCategoryChange]
+  );
 
   useEffect(() => {
     const root = rootRef.current;
+    const content = contentRef.current;
 
-    if (!root || categories.length === 0) {
+    if (!root || !content || categories.length === 0) {
       return;
     }
 
+    const verticalLenis = new Lenis({
+      autoRaf: false,
+      content,
+      gestureOrientation: 'vertical',
+      lerp: 0.075,
+      orientation: 'vertical',
+      overscroll: false,
+      smoothWheel: false,
+      wrapper: root
+    });
+
+    const horizontalLenis = categories.map((_, index) => {
+      const track = trackRefs.current[index];
+      const trackContent = track?.firstElementChild;
+
+      if (!track || !(trackContent instanceof HTMLElement)) {
+        return null;
+      }
+
+      const lenis = new Lenis({
+        autoRaf: false,
+        content: trackContent,
+        gestureOrientation: 'both',
+        lerp: 0.075,
+        orientation: 'horizontal',
+        overscroll: false,
+        smoothWheel: true,
+        wheelMultiplier: 0.9,
+        wrapper: track
+      });
+
+      lenis.on('virtual-scroll', ({ deltaX, deltaY }) => {
+        if (
+          index !== activeCategoryIndexRef.current ||
+          isTransitioningRef.current
+        ) {
+          return;
+        }
+
+        const horizontalDelta =
+          Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+
+        if (horizontalDelta === 0) {
+          return;
+        }
+
+        const direction = horizontalDelta > 0 ? 1 : -1;
+        const canScrollForward =
+          direction === 1 &&
+          lenis.targetScroll < lenis.limit - SCROLL_EDGE_TOLERANCE;
+        const canScrollBackward =
+          direction === -1 && lenis.targetScroll > SCROLL_EDGE_TOLERANCE;
+
+        if (canScrollForward || canScrollBackward) {
+          boundaryDirectionRef.current = 0;
+          boundaryDistanceRef.current = 0;
+          return;
+        }
+
+        const now = performance.now();
+        const startsNewBoundaryIntent =
+          boundaryDirectionRef.current !== direction ||
+          now - lastBoundaryEventTimeRef.current > 240;
+
+        boundaryDirectionRef.current = direction;
+        boundaryDistanceRef.current = startsNewBoundaryIntent
+          ? Math.abs(horizontalDelta)
+          : boundaryDistanceRef.current + Math.abs(horizontalDelta);
+        lastBoundaryEventTimeRef.current = now;
+
+        if (boundaryDistanceRef.current >= CATEGORY_EDGE_THRESHOLD) {
+          moveToCategory(direction);
+        }
+      });
+
+      return lenis;
+    });
+
+    verticalLenisRef.current = verticalLenis;
+    activeCategoryIndexRef.current = 0;
+    boundaryDirectionRef.current = 0;
+    boundaryDistanceRef.current = 0;
+    verticalLenis.scrollTo(0, { force: true, immediate: true });
     onCategoryChange({
       direction: 1,
       id: categories[0].id,
       label: categories[0].label
     });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((first, second) => {
-            return second.intersectionRatio - first.intersectionRatio;
-          })[0];
+    let animationFrame = 0;
+    const updateScroll = (time: number) => {
+      verticalLenis.raf(time);
+      horizontalLenis.forEach((lenis) => lenis?.raf(time));
+      animationFrame = window.requestAnimationFrame(updateScroll);
+    };
 
-        if (!visibleEntry) {
-          return;
-        }
+    animationFrame = window.requestAnimationFrame(updateScroll);
 
-        const nextIndex = Number(
-          visibleEntry.target.getAttribute('data-category-index')
-        );
-        const nextCategory = categories[nextIndex];
-        const previousIndex = activeCategoryIndexRef.current;
-
-        if (!nextCategory || nextIndex === previousIndex) {
-          return;
-        }
-
-        activeCategoryIndexRef.current = nextIndex;
-        onCategoryChange({
-          direction: nextIndex > previousIndex ? 1 : -1,
-          id: nextCategory.id,
-          label: nextCategory.label
-        });
-      },
-      {
-        root,
-        threshold: [0.45, 0.55, 0.65]
-      }
-    );
-
-    sectionRefs.current.forEach((section) => {
-      if (section) {
-        observer.observe(section);
-      }
-    });
-
-    return () => observer.disconnect();
-  }, [categories, onCategoryChange]);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      horizontalLenis.forEach((lenis) => lenis?.destroy());
+      verticalLenis.destroy();
+      verticalLenisRef.current = null;
+      isTransitioningRef.current = false;
+    };
+  }, [categories, moveToCategory, onCategoryChange]);
 
   return (
     <div
       ref={rootRef}
       aria-label='Scrollable project category bento'
-      className='relative h-full overflow-x-hidden overflow-y-auto overscroll-contain'
+      className='relative h-full overflow-hidden overscroll-contain'
       role='region'
       tabIndex={0}
     >
-      {categories.map((category, index) => (
-        <section
-          key={category.id}
-          ref={(section) => {
-            sectionRefs.current[index] = section;
-          }}
-          aria-label={`${category.label} projects`}
-          className='h-full min-h-full px-5 pt-1 pb-8 sm:px-8 sm:pt-3 lg:px-16'
-          data-category-index={index}
-        >
-          <BentoTrack category={category} />
-        </section>
-      ))}
+      <div
+        ref={contentRef}
+        className='h-full'
+      >
+        {categories.map((category, index) => (
+          <section
+            key={category.id}
+            ref={(section) => {
+              sectionRefs.current[index] = section;
+            }}
+            aria-label={`${category.label} projects`}
+            className='h-full min-h-full px-5 pt-1 pb-8 sm:px-8 sm:pt-3 lg:px-16'
+            data-category-index={index}
+          >
+            <BentoTrack
+              category={category}
+              trackRef={(track) => {
+                trackRefs.current[index] = track;
+              }}
+            />
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

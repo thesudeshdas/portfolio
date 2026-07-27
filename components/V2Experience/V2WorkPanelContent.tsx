@@ -39,6 +39,7 @@ interface IBentoCategory extends Omit<IBentoLayout, 'items'> {
 }
 
 const MOBILE_PROJECT_SLUGS = new Set(['dryve', 'growthx-mobile-app']);
+const BENTO_GAP = 5;
 const CATEGORY_EDGE_THRESHOLD = 72;
 const SCROLL_EDGE_TOLERANCE = 2;
 const LENIS_EASING = (progress: number) =>
@@ -48,19 +49,25 @@ const BENTO_LAYOUTS: IBentoLayout[] = [
   {
     id: 'building',
     label: 'currently building',
-    width: 317,
+    width: 319,
     height: 219,
     items: [
       { slug: 'stayhireable', x: 0, y: 0, width: 191, height: 107 },
       { slug: 'take-a-break', x: 0, y: 112, width: 191, height: 107 },
-      { slug: 'dryve', x: 194, y: 0, width: 123, height: 219 }
+      {
+        slug: 'dryve',
+        x: 191 + BENTO_GAP,
+        y: 0,
+        width: 123,
+        height: 219
+      }
     ]
   },
   {
     id: 'growthx',
     label: 'growthx',
     width: 857,
-    height: 219,
+    height: 222,
     labels: [{ text: 'growthx', x: 324, y: 91 }],
     items: [
       { slug: 'growthx-mobile-app', x: 0, y: 0, width: 123, height: 219 },
@@ -74,28 +81,28 @@ const BENTO_LAYOUTS: IBentoLayout[] = [
       {
         slug: 'growthx-event-chat',
         x: 128,
-        y: 81,
+        y: 78 + BENTO_GAP,
         width: 117,
         height: 138
       },
       {
         slug: 'growthx-chrome-extension',
         x: 250,
-        y: 81,
+        y: 78 + BENTO_GAP,
         width: 67,
         height: 67
       },
       {
         slug: 'growthx-notifications-platform',
         x: 250,
-        y: 152,
+        y: 78 + BENTO_GAP + 67 + BENTO_GAP,
         width: 67,
         height: 67
       },
       {
         slug: 'growthx-community-platform',
         x: 322,
-        y: 115,
+        y: 111 + BENTO_GAP,
         width: 186,
         height: 104
       },
@@ -109,7 +116,7 @@ const BENTO_LAYOUTS: IBentoLayout[] = [
       {
         slug: 'growthx-resume-review',
         x: 513,
-        y: 115,
+        y: 111 + BENTO_GAP,
         width: 54,
         height: 104
       },
@@ -130,7 +137,7 @@ const BENTO_LAYOUTS: IBentoLayout[] = [
       {
         slug: 'growthx-talent-platform',
         x: 664,
-        y: 112,
+        y: 108 + BENTO_GAP,
         width: 193,
         height: 108
       }
@@ -140,7 +147,7 @@ const BENTO_LAYOUTS: IBentoLayout[] = [
     id: 'talentplace-neog',
     label: 'talentplace.ai + neog',
     width: 481,
-    height: 219,
+    height: 220,
     labels: [
       { text: 'talentplace.ai', x: 179, y: 2 },
       { text: 'neog', x: 381, y: 203 }
@@ -160,54 +167,108 @@ const BENTO_LAYOUTS: IBentoLayout[] = [
         width: 174,
         height: 97
       },
-      { slug: 'job-portal', x: 128, y: 122, width: 174, height: 97 },
+      {
+        slug: 'job-portal',
+        x: 128,
+        y: 21 + 97 + BENTO_GAP,
+        width: 174,
+        height: 97
+      },
       { slug: 'neog-camp', x: 307, y: 0, width: 174, height: 97 },
-      { slug: 'neog-admissions', x: 307, y: 101, width: 174, height: 97 }
+      {
+        slug: 'neog-admissions',
+        x: 307,
+        y: 97 + BENTO_GAP,
+        width: 174,
+        height: 97
+      }
     ]
   },
   {
     id: 'archive',
     label: 'graveyard',
-    width: 465,
-    height: 218,
+    width: 471,
+    height: 219,
     labels: [{ text: 'graveyard', x: 0, y: 0 }],
     items: [
       { slug: 'catalyst', x: 0, y: 17, width: 114, height: 64 },
-      { slug: 'tic-tac-toe', x: 117, y: 17, width: 114, height: 64 },
-      { slug: 'fun-with-flags', x: 234, y: 17, width: 114, height: 64 },
       {
-        slug: 'how-well-do-you-know-me',
-        x: 351,
+        slug: 'tic-tac-toe',
+        x: 114 + BENTO_GAP,
         y: 17,
         width: 114,
         height: 64
       },
-      { slug: 'etch-a-sketch', x: 0, y: 85, width: 114, height: 64 },
+      {
+        slug: 'fun-with-flags',
+        x: (114 + BENTO_GAP) * 2,
+        y: 17,
+        width: 114,
+        height: 64
+      },
+      {
+        slug: 'how-well-do-you-know-me',
+        x: (114 + BENTO_GAP) * 3,
+        y: 17,
+        width: 114,
+        height: 64
+      },
+      {
+        slug: 'etch-a-sketch',
+        x: 0,
+        y: 17 + 64 + BENTO_GAP,
+        width: 114,
+        height: 64
+      },
       {
         slug: 'rock-paper-scissors',
-        x: 117,
-        y: 85,
+        x: 114 + BENTO_GAP,
+        y: 17 + 64 + BENTO_GAP,
         width: 114,
         height: 64
       },
       {
         slug: 'speak-shakespeare',
-        x: 234,
-        y: 85,
+        x: (114 + BENTO_GAP) * 2,
+        y: 17 + 64 + BENTO_GAP,
         width: 114,
         height: 64
       },
-      { slug: 'covid-19-quiz', x: 351, y: 85, width: 114, height: 64 },
-      { slug: 'dashtra', x: 0, y: 154, width: 114, height: 64 },
+      {
+        slug: 'covid-19-quiz',
+        x: (114 + BENTO_GAP) * 3,
+        y: 17 + 64 + BENTO_GAP,
+        width: 114,
+        height: 64
+      },
+      {
+        slug: 'dashtra',
+        x: 0,
+        y: 17 + (64 + BENTO_GAP) * 2,
+        width: 114,
+        height: 64
+      },
       {
         slug: 'skill-recommendation-app',
-        x: 117,
-        y: 154,
+        x: 114 + BENTO_GAP,
+        y: 17 + (64 + BENTO_GAP) * 2,
         width: 114,
         height: 64
       },
-      { slug: 'speak-banana', x: 234, y: 154, width: 114, height: 64 },
-      { slug: 'library', x: 351, y: 154, width: 114, height: 64 }
+      {
+        slug: 'speak-banana',
+        x: (114 + BENTO_GAP) * 2,
+        y: 17 + (64 + BENTO_GAP) * 2,
+        width: 114,
+        height: 64
+      },
+      {
+        slug: 'library',
+        x: (114 + BENTO_GAP) * 3,
+        y: 17 + (64 + BENTO_GAP) * 2,
+        width: 114,
+        height: 64
+      }
     ]
   }
 ];
@@ -335,40 +396,53 @@ function BentoTrack({
   trackRef: (element: HTMLDivElement | null) => void;
 }) {
   return (
-    <div
-      ref={trackRef}
-      aria-label={`${category.label} horizontal projects`}
-      className='h-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-      role='region'
-      tabIndex={0}
-    >
+    <div className='relative h-full'>
       <div
-        className='relative inline-block h-full w-auto max-w-none'
-        style={{ aspectRatio: `${category.width} / ${category.height}` }}
+        ref={trackRef}
+        aria-label={`${category.label} horizontal projects`}
+        className='h-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+        role='region'
+        tabIndex={0}
       >
-        {category.labels?.map((label) => (
-          <span
-            key={`${category.id}-${label.text}`}
-            className='pointer-events-none absolute z-10 text-[10px] leading-none text-zinc-300'
-            style={{
-              left: `${(label.x / category.width) * 100}%`,
-              top: `${(label.y / category.height) * 100}%`
-            }}
+        <div className='inline-flex h-full w-max max-w-none px-5 sm:px-8 lg:px-16'>
+          <div
+            className='relative h-full w-auto shrink-0'
+            style={{ aspectRatio: `${category.width} / ${category.height}` }}
           >
-            {label.text}
-          </span>
-        ))}
-        {category.projects.map(({ layout, project }, index) => (
-          <BentoProjectCard
-            key={project.slug}
-            canvasHeight={category.height}
-            canvasWidth={category.width}
-            layout={layout}
-            project={project}
-            projectIndex={index}
-          />
-        ))}
+            {category.labels?.map((label) => (
+              <span
+                key={`${category.id}-${label.text}`}
+                className='pointer-events-none absolute z-10 text-[10px] leading-none text-zinc-300'
+                style={{
+                  left: `${(label.x / category.width) * 100}%`,
+                  top: `${(label.y / category.height) * 100}%`
+                }}
+              >
+                {label.text}
+              </span>
+            ))}
+            {category.projects.map(({ layout, project }, index) => (
+              <BentoProjectCard
+                key={project.slug}
+                canvasHeight={category.height}
+                canvasWidth={category.width}
+                layout={layout}
+                project={project}
+                projectIndex={index}
+              />
+            ))}
+          </div>
+        </div>
       </div>
+
+      <span
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-y-0 left-0 z-20 w-12 bg-gradient-to-r from-[#111112] via-[#111112]/85 to-transparent'
+      />
+      <span
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-y-0 right-0 z-20 w-12 bg-gradient-to-l from-[#111112] via-[#111112]/85 to-transparent'
+      />
     </div>
   );
 }
@@ -392,6 +466,7 @@ export default function V2WorkPanelContent({
   const activeCategoryIndexRef = useRef(0);
   const boundaryDirectionRef = useRef(0);
   const boundaryDistanceRef = useRef(0);
+  const boundaryNeedsFreshGestureRef = useRef(false);
   const lastBoundaryEventTimeRef = useRef(0);
   const isTransitioningRef = useRef(false);
   const categories = useMemo(() => buildBentoCategories(projects), [projects]);
@@ -415,6 +490,7 @@ export default function V2WorkPanelContent({
       activeCategoryIndexRef.current = nextIndex;
       boundaryDirectionRef.current = 0;
       boundaryDistanceRef.current = 0;
+      boundaryNeedsFreshGestureRef.current = false;
       onCategoryChange({
         direction,
         id: nextCategory.id,
@@ -479,6 +555,20 @@ export default function V2WorkPanelContent({
         orientation: 'horizontal',
         overscroll: false,
         smoothWheel: true,
+        virtualScroll: ({ event }) => {
+          if (
+            index === activeCategoryIndexRef.current &&
+            !isTransitioningRef.current
+          ) {
+            return true;
+          }
+
+          if (event.cancelable) {
+            event.preventDefault();
+          }
+
+          return false;
+        },
         wheelMultiplier: 0.9,
         wrapper: track
       });
@@ -506,12 +596,25 @@ export default function V2WorkPanelContent({
           direction === -1 && lenis.targetScroll > SCROLL_EDGE_TOLERANCE;
 
         if (canScrollForward || canScrollBackward) {
-          boundaryDirectionRef.current = 0;
+          boundaryDirectionRef.current = direction;
           boundaryDistanceRef.current = 0;
+          boundaryNeedsFreshGestureRef.current = true;
+          lastBoundaryEventTimeRef.current = performance.now();
           return;
         }
 
         const now = performance.now();
+        const continuesHorizontalGesture =
+          boundaryNeedsFreshGestureRef.current &&
+          boundaryDirectionRef.current === direction &&
+          now - lastBoundaryEventTimeRef.current <= 240;
+
+        if (continuesHorizontalGesture) {
+          lastBoundaryEventTimeRef.current = now;
+          return;
+        }
+
+        boundaryNeedsFreshGestureRef.current = false;
         const startsNewBoundaryIntent =
           boundaryDirectionRef.current !== direction ||
           now - lastBoundaryEventTimeRef.current > 240;
@@ -534,6 +637,7 @@ export default function V2WorkPanelContent({
     activeCategoryIndexRef.current = 0;
     boundaryDirectionRef.current = 0;
     boundaryDistanceRef.current = 0;
+    boundaryNeedsFreshGestureRef.current = false;
     verticalLenis.scrollTo(0, { force: true, immediate: true });
     onCategoryChange({
       direction: 1,
@@ -578,7 +682,7 @@ export default function V2WorkPanelContent({
               sectionRefs.current[index] = section;
             }}
             aria-label={`${category.label} projects`}
-            className='h-full min-h-full px-5 pt-1 pb-8 sm:px-8 sm:pt-3 lg:px-16'
+            className='h-full min-h-full pt-1 pb-8 sm:pt-3'
             data-category-index={index}
           >
             <BentoTrack

@@ -230,7 +230,7 @@ export default function V2WorkPanel({
             variants={panelVariants}
           >
             <header className='flex h-[110px] shrink-0 items-center px-5 sm:px-8 lg:px-16'>
-              <div className='flex items-baseline gap-5'>
+              <div className='flex items-baseline gap-8'>
                 <h2
                   id='v2-work-panel-title'
                   className='v2-work-panel-title text-[24px] font-extralight opacity-35'

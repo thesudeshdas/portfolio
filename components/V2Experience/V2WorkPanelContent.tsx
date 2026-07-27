@@ -2,7 +2,7 @@
 
 import Lenis from 'lenis';
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { IProject } from '@/types/project/project.types';
 
@@ -41,6 +41,13 @@ interface IBentoCategory extends Omit<IBentoLayout, 'items'> {
 const MOBILE_PROJECT_SLUGS = new Set(['dryve', 'growthx-mobile-app']);
 const BENTO_GAP = 5;
 const CATEGORY_EDGE_THRESHOLD = 72;
+const PROJECT_HOVER_ACCENTS = [
+  'rgba(99, 102, 241, 0.36)',
+  'rgba(20, 184, 166, 0.32)',
+  'rgba(249, 115, 22, 0.32)',
+  'rgba(236, 72, 153, 0.3)'
+];
+const PROJECT_HOVER_RESUME_MS = 300;
 const SCROLL_EDGE_TOLERANCE = 2;
 const LENIS_EASING = (progress: number) =>
   Math.min(1, 1.001 - 2 ** (-10 * progress));
@@ -305,6 +312,8 @@ function BentoProjectShell({
         project.slug === 'dryve' ? 'Dryve, coming soon' : project.title
       }
       className={className}
+      data-v2-content-cursor='true'
+      data-v2-hide-cursor='true'
       style={style}
     >
       {children}
@@ -315,12 +324,14 @@ function BentoProjectShell({
 function BentoProjectCard({
   canvasHeight,
   canvasWidth,
+  isProjectHoverEnabled,
   layout,
   project,
   projectIndex
 }: {
   canvasHeight: number;
   canvasWidth: number;
+  isProjectHoverEnabled: boolean;
   layout: IBentoLayoutItem;
   project: IProject;
   projectIndex: number;
@@ -330,7 +341,7 @@ function BentoProjectCard({
 
   return (
     <BentoProjectShell
-      className='group absolute isolate overflow-hidden border border-zinc-800 bg-[#151516] p-3 transition-colors hover:border-zinc-500 focus-visible:z-10 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-200 sm:p-4'
+      className='group absolute isolate overflow-hidden bg-[#151516] p-3 focus-visible:z-10 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-200 sm:p-4'
       project={project}
       style={{
         height: `${(layout.height / canvasHeight) * 100}%`,
@@ -344,14 +355,32 @@ function BentoProjectCard({
           <Image
             fill
             alt=''
-            className='-z-20 object-cover opacity-20 grayscale transition duration-700 group-hover:scale-[1.025] group-hover:opacity-38 group-hover:grayscale-0'
+            className={`-z-20 object-cover opacity-20 grayscale transition duration-700 ${
+              isProjectHoverEnabled
+                ? 'group-hover:scale-[1.025] group-hover:opacity-70 group-hover:grayscale-0'
+                : ''
+            }`}
             sizes={isMobileProject ? '32vw' : '48vw'}
             src={project.cover}
           />
           <span className='absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/70 to-black/20' />
         </>
       ) : (
-        <span className='absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_15%,rgba(255,255,255,0.065),transparent_32%)]' />
+        <>
+          <span className='absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_15%,rgba(255,255,255,0.065),transparent_32%)]' />
+          <span
+            className={`absolute inset-0 -z-10 opacity-0 transition-opacity duration-700 ${
+              isProjectHoverEnabled ? 'group-hover:opacity-100' : ''
+            }`}
+            style={{
+              backgroundImage: `radial-gradient(circle at 85% 15%, ${
+                PROJECT_HOVER_ACCENTS[
+                  projectIndex % PROJECT_HOVER_ACCENTS.length
+                ]
+              }, transparent 46%)`
+            }}
+          />
+        </>
       )}
 
       <span className='flex h-full flex-col justify-between'>
@@ -390,9 +419,11 @@ function BentoProjectCard({
 
 function BentoTrack({
   category,
+  isProjectHoverEnabled,
   trackRef
 }: {
   category: IBentoCategory;
+  isProjectHoverEnabled: boolean;
   trackRef: (element: HTMLDivElement | null) => void;
 }) {
   return (
@@ -426,6 +457,7 @@ function BentoTrack({
                 key={project.slug}
                 canvasHeight={category.height}
                 canvasWidth={category.width}
+                isProjectHoverEnabled={isProjectHoverEnabled}
                 layout={layout}
                 project={project}
                 projectIndex={index}
@@ -469,7 +501,21 @@ export default function V2WorkPanelContent({
   const boundaryNeedsFreshGestureRef = useRef(false);
   const lastBoundaryEventTimeRef = useRef(0);
   const isTransitioningRef = useRef(false);
+  const projectHoverTimeoutRef = useRef<number | null>(null);
+  const [isProjectHoverEnabled, setIsProjectHoverEnabled] = useState(true);
   const categories = useMemo(() => buildBentoCategories(projects), [projects]);
+  const pauseProjectHover = useCallback(() => {
+    setIsProjectHoverEnabled(false);
+
+    if (projectHoverTimeoutRef.current !== null) {
+      window.clearTimeout(projectHoverTimeoutRef.current);
+    }
+
+    projectHoverTimeoutRef.current = window.setTimeout(() => {
+      setIsProjectHoverEnabled(true);
+      projectHoverTimeoutRef.current = null;
+    }, PROJECT_HOVER_RESUME_MS);
+  }, []);
 
   const moveToCategory = useCallback(
     (direction: -1 | 1) => {
@@ -539,6 +585,8 @@ export default function V2WorkPanelContent({
       wrapper: root
     });
 
+    verticalLenis.on('scroll', pauseProjectHover);
+
     const horizontalLenis = categories.map((_, index) => {
       const track = trackRefs.current[index];
       const trackContent = track?.firstElementChild;
@@ -573,6 +621,7 @@ export default function V2WorkPanelContent({
         wrapper: track
       });
 
+      lenis.on('scroll', pauseProjectHover);
       lenis.on('virtual-scroll', ({ deltaX, deltaY }) => {
         if (
           index !== activeCategoryIndexRef.current ||
@@ -658,10 +707,14 @@ export default function V2WorkPanelContent({
       window.cancelAnimationFrame(animationFrame);
       horizontalLenis.forEach((lenis) => lenis?.destroy());
       verticalLenis.destroy();
+      if (projectHoverTimeoutRef.current !== null) {
+        window.clearTimeout(projectHoverTimeoutRef.current);
+        projectHoverTimeoutRef.current = null;
+      }
       verticalLenisRef.current = null;
       isTransitioningRef.current = false;
     };
-  }, [categories, moveToCategory, onCategoryChange]);
+  }, [categories, moveToCategory, onCategoryChange, pauseProjectHover]);
 
   return (
     <div
@@ -687,6 +740,7 @@ export default function V2WorkPanelContent({
           >
             <BentoTrack
               category={category}
+              isProjectHoverEnabled={isProjectHoverEnabled}
               trackRef={(track) => {
                 trackRefs.current[index] = track;
               }}

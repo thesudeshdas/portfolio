@@ -1,8 +1,6 @@
 'use client';
 
-import { ArrowTopRightIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useMemo, useRef } from 'react';
 
 import type { IProject } from '@/types/project/project.types';
@@ -235,26 +233,16 @@ function BentoProjectShell({
   project: IProject;
   style: React.CSSProperties;
 }) {
-  if (project.slug === 'dryve') {
-    return (
-      <article
-        aria-label='Dryve, coming soon'
-        className={className}
-        style={style}
-      >
-        {children}
-      </article>
-    );
-  }
-
   return (
-    <Link
+    <article
+      aria-label={
+        project.slug === 'dryve' ? 'Dryve, coming soon' : project.title
+      }
       className={className}
-      href={`/projects/${project.slug}`}
       style={style}
     >
       {children}
-    </Link>
+    </article>
   );
 }
 
@@ -327,9 +315,6 @@ function BentoProjectCard({
                 ? 'Mobile app · coming soon'
                 : project.highlight ?? project.role}
             </span>
-            {project.slug === 'dryve' ? null : (
-              <ArrowTopRightIcon className='shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5' />
-            )}
           </span>
         </span>
       </span>

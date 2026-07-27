@@ -1,6 +1,7 @@
 'use client';
 
 import Lenis from 'lenis';
+import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -38,10 +39,12 @@ interface IBentoCategory extends Omit<IBentoLayout, 'items'> {
   projects: IBentoProject[];
 }
 
+export type V2WorkPanelViewMode = 'categories' | 'collapsing' | 'projects';
+
 const MOBILE_PROJECT_SLUGS = new Set(['dryve', 'growthx-mobile-app']);
 const BENTO_GAP = 5;
 const CATEGORY_EDGE_THRESHOLD = 72;
-const PROJECT_HOVER_ACCENTS = [
+export const V2_WORK_PANEL_ACCENTS = [
   'rgba(99, 102, 241, 0.36)',
   'rgba(20, 184, 166, 0.32)',
   'rgba(249, 115, 22, 0.32)',
@@ -49,6 +52,7 @@ const PROJECT_HOVER_ACCENTS = [
 ];
 const PROJECT_HOVER_RESUME_MS = 300;
 const SCROLL_EDGE_TOLERANCE = 2;
+const NOOP_CATEGORY_GRID_SELECT = () => undefined;
 const LENIS_EASING = (progress: number) =>
   Math.min(1, 1.001 - 2 ** (-10 * progress));
 
@@ -312,8 +316,10 @@ function BentoProjectShell({
         project.slug === 'dryve' ? 'Dryve, coming soon' : project.title
       }
       className={className}
+      data-project-title={project.title}
       data-v2-content-cursor='true'
       data-v2-hide-cursor='true'
+      data-v2-project-card='true'
       style={style}
     >
       {children}
@@ -374,8 +380,8 @@ function BentoProjectCard({
             }`}
             style={{
               backgroundImage: `radial-gradient(circle at 85% 15%, ${
-                PROJECT_HOVER_ACCENTS[
-                  projectIndex % PROJECT_HOVER_ACCENTS.length
+                V2_WORK_PANEL_ACCENTS[
+                  projectIndex % V2_WORK_PANEL_ACCENTS.length
                 ]
               }, transparent 46%)`
             }}
@@ -481,14 +487,18 @@ function BentoTrack({
 
 export default function V2WorkPanelContent({
   onCategoryChange,
-  projects
+  onCategoryGridSelect = NOOP_CATEGORY_GRID_SELECT,
+  projects,
+  viewMode = 'projects'
 }: {
   onCategoryChange: (category: {
     direction: number;
     id: string;
     label: string;
   }) => void;
+  onCategoryGridSelect?: () => void;
   projects: IProject[];
+  viewMode?: V2WorkPanelViewMode;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -564,6 +574,31 @@ export default function V2WorkPanelContent({
       }
     },
     [categories, onCategoryChange]
+  );
+  const handleCategoryGridSelect = useCallback(
+    (index: number) => {
+      const category = categories[index];
+      const section = sectionRefs.current[index];
+      const verticalLenis = verticalLenisRef.current;
+
+      if (!category || !section || !verticalLenis) {
+        return;
+      }
+
+      const direction = index >= activeCategoryIndexRef.current ? 1 : -1;
+      activeCategoryIndexRef.current = index;
+      boundaryDirectionRef.current = 0;
+      boundaryDistanceRef.current = 0;
+      boundaryNeedsFreshGestureRef.current = false;
+      verticalLenis.scrollTo(section, { force: true, immediate: true });
+      onCategoryChange({
+        direction,
+        id: category.id,
+        label: category.label
+      });
+      onCategoryGridSelect();
+    },
+    [categories, onCategoryChange, onCategoryGridSelect]
   );
 
   useEffect(() => {
@@ -722,11 +757,17 @@ export default function V2WorkPanelContent({
       aria-label='Scrollable work projects'
       className='relative h-full overflow-hidden overscroll-contain'
       role='region'
-      tabIndex={0}
+      tabIndex={viewMode === 'projects' ? 0 : -1}
     >
       <div
         ref={contentRef}
-        className='h-full'
+        aria-hidden={viewMode !== 'projects'}
+        className={`h-full transition-opacity duration-150 ${
+          viewMode === 'projects'
+            ? 'opacity-100'
+            : 'pointer-events-none opacity-0'
+        }`}
+        inert={viewMode !== 'projects'}
       >
         {categories.map((category, index) => (
           <section
@@ -736,6 +777,7 @@ export default function V2WorkPanelContent({
             }}
             aria-label={`${category.label} projects`}
             className='h-full min-h-full pt-1 pb-8 sm:pt-3'
+            data-category-id={category.id}
             data-category-index={index}
           >
             <BentoTrack
@@ -748,6 +790,45 @@ export default function V2WorkPanelContent({
           </section>
         ))}
       </div>
+
+      <AnimatePresence>
+        {viewMode === 'categories' ? (
+          <motion.div
+            key='v2-work-category-grid'
+            animate={{ opacity: 1 }}
+            className='absolute inset-0 grid grid-cols-1 gap-4 overflow-y-auto px-5 pb-8 sm:grid-cols-2 sm:px-8 sm:pb-10 lg:px-16'
+            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {categories.map((category, index) => (
+              <button
+                key={category.id}
+                aria-label={`Show ${category.label} projects`}
+                data-v2-content-cursor='true'
+                className='group relative grid min-h-44 place-items-center overflow-hidden bg-[#151516] text-zinc-200 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-200'
+                onClick={() => handleCategoryGridSelect(index)}
+                type='button'
+              >
+                <span
+                  aria-hidden='true'
+                  className='absolute inset-0 opacity-55 transition-opacity duration-300 group-hover:opacity-100'
+                  style={{
+                    backgroundImage: `radial-gradient(circle at 70% 30%, ${
+                      V2_WORK_PANEL_ACCENTS[
+                        index % V2_WORK_PANEL_ACCENTS.length
+                      ]
+                    }, transparent 62%)`
+                  }}
+                />
+                <span className='relative z-10 text-base font-light'>
+                  {category.label}
+                </span>
+              </button>
+            ))}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

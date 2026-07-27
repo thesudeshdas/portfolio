@@ -12,10 +12,7 @@ import {
 
 import type { IProject } from '@/types/project/project.types';
 
-import V2WorkPanelContent, {
-  V2_WORK_PANEL_ACCENTS,
-  type V2WorkPanelViewMode
-} from './V2WorkPanelContent';
+import V2WorkPanelContent from './V2WorkPanelContent';
 import type {
   V2WorkPanelDirection,
   V2WorkPanelSettings
@@ -29,23 +26,6 @@ interface IV2WorkPanelProps {
   settings: V2WorkPanelSettings;
   workHoverStyle: CSSProperties;
 }
-
-interface ICollapseCardSnapshot {
-  height: number;
-  left: number;
-  title: string;
-  top: number;
-  width: number;
-}
-
-interface ICollapseTarget {
-  x: number;
-  y: number;
-}
-
-const CARD_COLLAPSE_DURATION_SECONDS = 0.52;
-const CARD_COLLAPSE_SCALE = 0.04;
-const CARD_COLLAPSE_STAGGER_SECONDS = 0.07;
 
 const directionAngles: Record<V2WorkPanelDirection, number> = {
   top: -90,
@@ -85,18 +65,10 @@ export default function V2WorkPanel({
   settings,
   workHoverStyle
 }: IV2WorkPanelProps) {
-  const categoryButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
-  const [collapseCards, setCollapseCards] = useState<ICollapseCardSnapshot[]>(
-    []
-  );
-  const [collapseTarget, setCollapseTarget] = useState<ICollapseTarget | null>(
-    null
-  );
-  const [viewMode, setViewMode] = useState<V2WorkPanelViewMode>('projects');
   const [workCategory, setWorkCategory] = useState({
     direction: 1,
     id: 'building',
@@ -108,62 +80,6 @@ export default function V2WorkPanel({
     },
     []
   );
-  const handleCategoryClick = useCallback(() => {
-    const panel = panelRef.current;
-    const categoryButton = categoryButtonRef.current;
-
-    if (!panel || !categoryButton || viewMode !== 'projects') {
-      return;
-    }
-
-    const panelRect = panel.getBoundingClientRect();
-    const categoryRect = categoryButton.getBoundingClientRect();
-    const activeSection = Array.from(
-      panel.querySelectorAll<HTMLElement>('[data-category-id]')
-    ).find((section) => section.dataset.categoryId === workCategory.id);
-    const cards = Array.from(
-      activeSection?.querySelectorAll<HTMLElement>(
-        '[data-v2-project-card="true"]'
-      ) ?? []
-    )
-      .map((card) => {
-        const rect = card.getBoundingClientRect();
-
-        return {
-          height: rect.height,
-          left: rect.left - panelRect.left,
-          title: card.dataset.projectTitle ?? '',
-          top: rect.top - panelRect.top,
-          width: rect.width
-        };
-      })
-      .filter(
-        (card) =>
-          card.left + card.width > 0 &&
-          card.left < panelRect.width &&
-          card.top + card.height > 0 &&
-          card.top < panelRect.height
-      );
-
-    if (cards.length === 0) {
-      return;
-    }
-
-    setCollapseTarget({
-      x: categoryRect.left - panelRect.left + categoryRect.width / 2,
-      y: categoryRect.top - panelRect.top + categoryRect.height / 2
-    });
-    setCollapseCards(cards);
-    setViewMode('collapsing');
-  }, [viewMode, workCategory.id]);
-  const handleCardCollapseComplete = useCallback(() => {
-    setCollapseCards([]);
-    setViewMode('categories');
-  }, []);
-  const handleCategoryGridSelect = useCallback(() => {
-    setCollapseTarget(null);
-    setViewMode('projects');
-  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -225,16 +141,6 @@ export default function V2WorkPanel({
       previousFocusRef.current?.focus();
     };
   }, [isOpen, onClose]);
-
-  useEffect(() => {
-    if (isOpen) {
-      return;
-    }
-
-    setCollapseCards([]);
-    setCollapseTarget(null);
-    setViewMode('projects');
-  }, [isOpen]);
 
   const entryTransition = shouldReduceMotion
     ? { duration: 0 }
@@ -338,34 +244,24 @@ export default function V2WorkPanel({
                     initial={false}
                     mode='wait'
                   >
-                    {viewMode !== 'categories' ? (
-                      <motion.button
-                        key={workCategory.id}
-                        ref={categoryButtonRef}
-                        animate={{ opacity: 1, y: 0 }}
-                        aria-label='Show all work categories'
-                        aria-live='polite'
-                        className='block text-left text-base font-light text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 disabled:pointer-events-none'
-                        data-v2-content-cursor='true'
-                        disabled={viewMode === 'collapsing'}
-                        exit={{
-                          opacity: 0,
-                          y: workCategory.direction > 0 ? -12 : 12
-                        }}
-                        initial={{
-                          opacity: 0,
-                          y: workCategory.direction > 0 ? 12 : -12
-                        }}
-                        onClick={handleCategoryClick}
-                        transition={{
-                          duration: shouldReduceMotion ? 0 : 0.28,
-                          ease: [0.16, 1, 0.3, 1]
-                        }}
-                        type='button'
-                      >
-                        {workCategory.label}
-                      </motion.button>
-                    ) : null}
+                    <motion.span
+                      key={workCategory.id}
+                      animate={{ y: 0 }}
+                      aria-live='polite'
+                      className='block text-base font-light text-zinc-100'
+                      exit={{
+                        y: workCategory.direction > 0 ? -12 : 12
+                      }}
+                      initial={{
+                        y: workCategory.direction > 0 ? 12 : -12
+                      }}
+                      transition={{
+                        duration: shouldReduceMotion ? 0 : 0.28,
+                        ease: [0.16, 1, 0.3, 1]
+                      }}
+                    >
+                      {workCategory.label}
+                    </motion.span>
                   </AnimatePresence>
                 </div>
               </div>
@@ -397,68 +293,9 @@ export default function V2WorkPanel({
             <div className='relative min-h-0 flex-1 overflow-hidden'>
               <V2WorkPanelContent
                 onCategoryChange={handleWorkCategoryChange}
-                onCategoryGridSelect={handleCategoryGridSelect}
                 projects={projects}
-                viewMode={viewMode}
               />
             </div>
-
-            {viewMode === 'collapsing' && collapseTarget ? (
-              <div
-                aria-hidden='true'
-                className='pointer-events-none absolute inset-0 z-30 overflow-hidden'
-              >
-                {collapseCards.map((card, index) => (
-                  <motion.div
-                    key={`${card.title}-${index}`}
-                    animate={{
-                      opacity: [1, 1, 0],
-                      scale: CARD_COLLAPSE_SCALE,
-                      x: collapseTarget.x - (card.left + card.width / 2),
-                      y: collapseTarget.y - (card.top + card.height / 2)
-                    }}
-                    className='absolute isolate overflow-hidden bg-[#151516] p-3 text-zinc-200 sm:p-4'
-                    initial={{
-                      opacity: 1,
-                      scale: 1,
-                      x: 0,
-                      y: 0
-                    }}
-                    onAnimationComplete={
-                      index === collapseCards.length - 1
-                        ? handleCardCollapseComplete
-                        : undefined
-                    }
-                    style={{
-                      backgroundImage: `radial-gradient(circle at 80% 20%, ${
-                        V2_WORK_PANEL_ACCENTS[
-                          index % V2_WORK_PANEL_ACCENTS.length
-                        ]
-                      }, transparent 58%)`,
-                      height: card.height,
-                      left: card.left,
-                      top: card.top,
-                      transformOrigin: 'center',
-                      width: card.width
-                    }}
-                    transition={{
-                      delay: shouldReduceMotion
-                        ? 0
-                        : index * CARD_COLLAPSE_STAGGER_SECONDS,
-                      duration: shouldReduceMotion
-                        ? 0
-                        : CARD_COLLAPSE_DURATION_SECONDS,
-                      ease: [0.16, 1, 0.3, 1],
-                      times: [0, 0.72, 1]
-                    }}
-                  >
-                    <span className='flex h-full items-end text-sm font-extralight sm:text-base'>
-                      {card.title}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            ) : null}
           </motion.section>
         </motion.div>
       ) : null}

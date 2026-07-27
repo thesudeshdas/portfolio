@@ -7,15 +7,15 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { IProject, ProjectCategory } from '@/types/project/project.types';
 
-import V2WorkPanelBentoPrototype from './V2WorkPanelBentoPrototype';
+import V2WorkPanelContent from './V2WorkPanelContent';
 import {
   ProjectScrollStories,
   ScrollingProjectStack,
   StickyProjectTimeline
 } from './V2WorkPanelScrollPrototypes';
 
-// PROTOTYPE: Seven work-panel layouts, switchable with ?workVariant=,
-// on the existing /v2 route. Delete the losing variants after selection.
+// ARCHIVE: Seven work-panel layout explorations retained for design history.
+// Production /v2 work renders V2WorkPanelContent directly.
 
 type WorkVariant =
   | 'index'
@@ -618,7 +618,7 @@ export default function V2WorkPanelPrototype({
           <ProjectScrollStories projects={projects} />
         ) : null}
         {variant === 'bento' ? (
-          <V2WorkPanelBentoPrototype
+          <V2WorkPanelContent
             onCategoryChange={onBentoCategoryChange}
             projects={projects}
           />

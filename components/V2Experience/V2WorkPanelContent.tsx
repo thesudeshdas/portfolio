@@ -373,7 +373,7 @@ function BentoTrack({
   );
 }
 
-export default function V2WorkPanelBentoPrototype({
+export default function V2WorkPanelContent({
   onCategoryChange,
   projects
 }: {
@@ -562,7 +562,7 @@ export default function V2WorkPanelBentoPrototype({
   return (
     <div
       ref={rootRef}
-      aria-label='Scrollable project category bento'
+      aria-label='Scrollable work projects'
       className='relative h-full overflow-hidden overscroll-contain'
       role='region'
       tabIndex={0}

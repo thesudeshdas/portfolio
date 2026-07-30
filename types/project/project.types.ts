@@ -19,6 +19,7 @@ export interface IProject {
   year: string;
   organisation?: string;
   cover?: string;
+  video?: string;
   live?: string;
   sourceCode?: string;
   techStack: string[];

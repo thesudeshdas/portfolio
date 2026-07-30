@@ -2,7 +2,7 @@
 
 import Lenis from 'lenis';
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { IProject } from '@/types/project/project.types';
 
@@ -41,6 +41,7 @@ interface IBentoCategory extends Omit<IBentoLayout, 'items'> {
 const MOBILE_PROJECT_SLUGS = new Set(['dryve', 'growthx-mobile-app']);
 const BENTO_GAP = 5;
 const CATEGORY_EDGE_THRESHOLD = 72;
+const CARD_HOVER_REENABLE_DELAY_MS = 300;
 const SCROLL_EDGE_TOLERANCE = 2;
 const LENIS_EASING = (progress: number) =>
   Math.min(1, 1.001 - 2 ** (-10 * progress));
@@ -291,11 +292,15 @@ function buildBentoCategories(projects: IProject[]): IBentoCategory[] {
 function BentoProjectShell({
   children,
   className,
+  onPointerEnter,
+  onPointerLeave,
   project,
   style
 }: {
   children: React.ReactNode;
   className: string;
+  onPointerEnter?: React.PointerEventHandler<HTMLElement>;
+  onPointerLeave?: React.PointerEventHandler<HTMLElement>;
   project: IProject;
   style: React.CSSProperties;
 }) {
@@ -304,7 +309,11 @@ function BentoProjectShell({
       aria-label={
         project.slug === 'dryve' ? 'Dryve, coming soon' : project.title
       }
+      data-v2-content-cursor='true'
+      data-v2-hide-cursor='true'
       className={className}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       style={style}
     >
       {children}
@@ -315,22 +324,75 @@ function BentoProjectShell({
 function BentoProjectCard({
   canvasHeight,
   canvasWidth,
+  isHoverEnabled,
   layout,
-  project,
-  projectIndex
+  project
 }: {
   canvasHeight: number;
   canvasWidth: number;
+  isHoverEnabled: boolean;
   layout: IBentoLayoutItem;
   project: IProject;
-  projectIndex: number;
 }) {
   const isMobileProject = MOBILE_PROJECT_SLUGS.has(project.slug);
   const isFeatureCard = layout.width * layout.height >= 20000;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isPointerOverRef = useRef(false);
+
+  const pauseVideo = useCallback(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    video.pause();
+    video.currentTime = 0;
+  }, []);
+
+  const playVideo = useCallback(() => {
+    const video = videoRef.current;
+
+    if (
+      !video ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+
+    video.currentTime = 0;
+    void video.play().catch(() => undefined);
+  }, []);
+
+  const handlePointerEnter = useCallback(() => {
+    isPointerOverRef.current = true;
+
+    if (isHoverEnabled) {
+      playVideo();
+    }
+  }, [isHoverEnabled, playVideo]);
+
+  const handlePointerLeave = useCallback(() => {
+    isPointerOverRef.current = false;
+    pauseVideo();
+  }, [pauseVideo]);
+
+  useEffect(() => {
+    if (!isHoverEnabled) {
+      pauseVideo();
+      return;
+    }
+
+    if (isPointerOverRef.current) {
+      playVideo();
+    }
+  }, [isHoverEnabled, pauseVideo, playVideo]);
 
   return (
     <BentoProjectShell
-      className='group absolute isolate overflow-hidden border border-zinc-800 bg-[#151516] p-3 transition-colors hover:border-zinc-500 focus-visible:z-10 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-200 sm:p-4'
+      className='group absolute isolate overflow-hidden bg-[#151516] p-3 focus-visible:z-10 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-200 sm:p-4'
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
       project={project}
       style={{
         height: `${(layout.height / canvasHeight) * 100}%`,
@@ -344,20 +406,53 @@ function BentoProjectCard({
           <Image
             fill
             alt=''
-            className='-z-20 object-cover opacity-20 grayscale transition duration-700 group-hover:scale-[1.025] group-hover:opacity-38 group-hover:grayscale-0'
-            sizes={isMobileProject ? '32vw' : '48vw'}
+            className={`-z-20 object-cover opacity-20 grayscale ${
+              isHoverEnabled
+                ? 'transition duration-700 group-hover:scale-[1.025] group-hover:opacity-100 group-hover:grayscale-0'
+                : ''
+            }`}
+            quality={90}
+            sizes={`${Math.ceil((layout.width / canvasHeight) * 100)}vh`}
             src={project.cover}
           />
-          <span className='absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/70 to-black/20' />
+          {project.video ? (
+            <video
+              ref={videoRef}
+              aria-hidden='true'
+              className={`absolute inset-0 -z-20 size-full object-cover opacity-0 ${
+                isHoverEnabled
+                  ? 'transition-opacity duration-300 group-hover:opacity-100'
+                  : ''
+              }`}
+              loop
+              muted
+              playsInline
+              poster={project.cover}
+              preload='metadata'
+              src={project.video}
+            />
+          ) : null}
+          <span
+            className={`absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/70 to-black/20 ${
+              isHoverEnabled
+                ? 'transition-opacity duration-300 group-hover:opacity-0'
+                : ''
+            }`}
+          />
         </>
       ) : (
         <span className='absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_15%,rgba(255,255,255,0.065),transparent_32%)]' />
       )}
 
-      <span className='flex h-full flex-col justify-between'>
-        <span className='flex items-start justify-between gap-2 text-[8px] tracking-[0.13em] text-zinc-600 uppercase'>
+      <span
+        className={`flex h-full flex-col justify-between ${
+          project.cover && isHoverEnabled
+            ? 'transition-opacity duration-300 group-hover:opacity-0'
+            : ''
+        }`}
+      >
+        <span className='text-[8px] tracking-[0.13em] text-zinc-600 uppercase'>
           <span>{project.organisation ?? project.year}</span>
-          <span>{(projectIndex + 1).toString().padStart(2, '0')}</span>
         </span>
 
         <span>
@@ -390,9 +485,11 @@ function BentoProjectCard({
 
 function BentoTrack({
   category,
+  isHoverEnabled,
   trackRef
 }: {
   category: IBentoCategory;
+  isHoverEnabled: boolean;
   trackRef: (element: HTMLDivElement | null) => void;
 }) {
   return (
@@ -421,14 +518,14 @@ function BentoTrack({
                 {label.text}
               </span>
             ))}
-            {category.projects.map(({ layout, project }, index) => (
+            {category.projects.map(({ layout, project }) => (
               <BentoProjectCard
                 key={project.slug}
                 canvasHeight={category.height}
                 canvasWidth={category.width}
+                isHoverEnabled={isHoverEnabled}
                 layout={layout}
                 project={project}
-                projectIndex={index}
               />
             ))}
           </div>
@@ -469,7 +566,22 @@ export default function V2WorkPanelContent({
   const boundaryNeedsFreshGestureRef = useRef(false);
   const lastBoundaryEventTimeRef = useRef(0);
   const isTransitioningRef = useRef(false);
+  const hoverReenableTimeoutRef = useRef<number | null>(null);
+  const [isCardHoverEnabled, setIsCardHoverEnabled] = useState(true);
   const categories = useMemo(() => buildBentoCategories(projects), [projects]);
+
+  const markScrollActivity = useCallback(() => {
+    setIsCardHoverEnabled(false);
+
+    if (hoverReenableTimeoutRef.current !== null) {
+      window.clearTimeout(hoverReenableTimeoutRef.current);
+    }
+
+    hoverReenableTimeoutRef.current = window.setTimeout(() => {
+      setIsCardHoverEnabled(true);
+      hoverReenableTimeoutRef.current = null;
+    }, CARD_HOVER_REENABLE_DELAY_MS);
+  }, []);
 
   const moveToCategory = useCallback(
     (direction: -1 | 1) => {
@@ -588,6 +700,8 @@ export default function V2WorkPanelContent({
           return;
         }
 
+        markScrollActivity();
+
         const direction = horizontalDelta > 0 ? 1 : -1;
         const canScrollForward =
           direction === 1 &&
@@ -629,6 +743,7 @@ export default function V2WorkPanelContent({
           moveToCategory(direction);
         }
       });
+      lenis.on('scroll', markScrollActivity);
 
       return lenis;
     });
@@ -644,6 +759,7 @@ export default function V2WorkPanelContent({
       id: categories[0].id,
       label: categories[0].label
     });
+    verticalLenis.on('scroll', markScrollActivity);
 
     let animationFrame = 0;
     const updateScroll = (time: number) => {
@@ -656,12 +772,21 @@ export default function V2WorkPanelContent({
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
-      horizontalLenis.forEach((lenis) => lenis?.destroy());
+      horizontalLenis.forEach((lenis) => {
+        lenis?.off('scroll', markScrollActivity);
+        lenis?.destroy();
+      });
+      verticalLenis.off('scroll', markScrollActivity);
       verticalLenis.destroy();
       verticalLenisRef.current = null;
       isTransitioningRef.current = false;
+
+      if (hoverReenableTimeoutRef.current !== null) {
+        window.clearTimeout(hoverReenableTimeoutRef.current);
+        hoverReenableTimeoutRef.current = null;
+      }
     };
-  }, [categories, moveToCategory, onCategoryChange]);
+  }, [categories, markScrollActivity, moveToCategory, onCategoryChange]);
 
   return (
     <div
@@ -687,6 +812,7 @@ export default function V2WorkPanelContent({
           >
             <BentoTrack
               category={category}
+              isHoverEnabled={isCardHoverEnabled}
               trackRef={(track) => {
                 trackRefs.current[index] = track;
               }}

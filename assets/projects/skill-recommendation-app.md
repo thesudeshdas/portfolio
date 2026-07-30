@@ -6,6 +6,8 @@ status: sunset
 role: Solo
 highlight: Early React recommendation interface
 year: 2020
+cover: /dev/project-videos/skill-recommendation-app.jpg
+video: /dev/project-videos/skill-recommendation-app.mp4
 live: https://jdrbo.csb.app/
 sourceCode: https://github.com/thesudeshdas/skill-recommendation-app
 techStack: ['react', 'javascript', 'css3']

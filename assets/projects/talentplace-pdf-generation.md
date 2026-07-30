@@ -7,7 +7,8 @@ role: Frontend Developer
 highlight: 500+ data points, 80+ templates and true PDF generation
 year: 2023-2024
 organisation: TalentPlace.ai
-cover: /dev/resumeBuilder.png
+cover: /dev/project-videos/talentplace-pdf-generation.jpg
+video: /dev/project-videos/talentplace-pdf-generation.mp4
 techStack: ['react', 'typescript', 'chakraui', 'turborepo', 'redux']
 featured: false
 order: 21

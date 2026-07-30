@@ -5,7 +5,8 @@ category: graveyard
 status: sunset
 role: Solo
 year: 2021
-cover: /dev/etchASketch.png
+cover: /dev/project-videos/etch-a-sketch.jpg
+video: /dev/project-videos/etch-a-sketch.mp4
 live: https://thesudeshdas.github.io/etch-a-sketch/
 sourceCode: https://github.com/thesudeshdas/etch-a-sketch
 techStack: ['html5', 'javascript', 'css3']

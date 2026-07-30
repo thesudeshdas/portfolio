@@ -7,7 +7,8 @@ role: Frontend Lead
 highlight: End-to-end B2B hiring pipeline for GrowthX partner companies
 year: 2024-2026
 organisation: GrowthX
-cover:
+cover: /dev/project-videos/growthx-talent-platform.jpg
+video: /dev/project-videos/growthx-talent-platform.mp4
 live: https://talent.growthx.club/
 techStack: ['nextjs', 'typescript', 'redux', 'mui']
 featured: true

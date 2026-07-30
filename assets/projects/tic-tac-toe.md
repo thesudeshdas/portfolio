@@ -5,7 +5,8 @@ category: graveyard
 status: sunset
 role: Solo
 year: 2021
-cover: /dev/ticTacToe.png
+cover: /dev/project-videos/tic-tac-toe.jpg
+video: /dev/project-videos/tic-tac-toe.mp4
 live: https://dash-tic-tac-toe.netlify.app/
 sourceCode: https://github.com/thesudeshdas/tic-tac-toe
 techStack: ['html5', 'javascript', 'bootstrap']

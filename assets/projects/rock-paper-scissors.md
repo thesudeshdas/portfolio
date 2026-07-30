@@ -5,7 +5,8 @@ category: graveyard
 status: sunset
 role: Solo
 year: 2021
-cover: /dev/rockPaperScissors.png
+cover: /dev/project-videos/rock-paper-scissors.jpg
+video: /dev/project-videos/rock-paper-scissors.mp4
 live: https://dash-rock-paper-scissors.netlify.app/
 sourceCode: https://github.com/thesudeshdas/rock-paper-scissors
 techStack: ['html5', 'javascript', 'css3']

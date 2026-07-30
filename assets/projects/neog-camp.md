@@ -6,7 +6,8 @@ status: archived
 role: Frontend Developer
 year: 2022
 organisation: NeoG
-cover: /dev/neog.png
+cover: /dev/project-videos/neog-camp.jpg
+video: /dev/project-videos/neog-camp.mp4
 live: https://neog.camp/
 techStack: ['nextjs', 'typescript', 'chakraui']
 order: 3

@@ -6,6 +6,8 @@ status: sunset
 role: Solo
 highlight: Early React project built during NeoGCamp levelZero
 year: 2020
+cover: /dev/project-videos/fun-with-flags.jpg
+video: /dev/project-videos/fun-with-flags.mp4
 live: https://e7qco.csb.app/
 sourceCode: https://github.com/thesudeshdas/fun-with-flags
 techStack: ['react', 'javascript', 'css3']

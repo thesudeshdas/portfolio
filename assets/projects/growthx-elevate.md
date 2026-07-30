@@ -7,7 +7,8 @@ role: Frontend Lead
 highlight: Primary GrowthX learning and outcomes product surface
 year: 2024-2026
 organisation: GrowthX
-cover:
+cover: /dev/project-videos/growthx-elevate.jpg
+video: /dev/project-videos/growthx-elevate.mp4
 techStack: ['nextjs', 'typescript', 'redux', 'mui']
 featured: true
 order: 6

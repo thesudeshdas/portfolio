@@ -7,7 +7,8 @@ role: Full Stack Engineer
 highlight: Eliminated 504 timeouts via async polling architecture
 year: 2025-2026
 organisation: GrowthX
-cover:
+cover: /dev/project-videos/growthx-ai-roadmap.jpg
+video: /dev/project-videos/growthx-ai-roadmap.mp4
 live: https://growthx.club/ai-roadmap
 techStack: ['nextjs', 'typescript', 'openai', 'aws', 'express', 'mongodb']
 featured: true

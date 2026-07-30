@@ -7,7 +7,8 @@ role: Frontend Developer
 highlight: Primary frontend engineer across v1, TypeScript rewrite and monorepo edition
 year: 2023-2024
 organisation: TalentPlace.ai
-cover: /dev/resumeBuilder.png
+cover: /dev/project-videos/talentplace-career-profile-builder.jpg
+video: /dev/project-videos/talentplace-career-profile-builder.mp4
 live: https://www.talentplace.ai/
 techStack: ['react', 'typescript', 'vite', 'chakraui', 'redux', 'reacthookform']
 featured: false

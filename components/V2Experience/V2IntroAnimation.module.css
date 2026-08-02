@@ -32,9 +32,35 @@
   -webkit-mask-size: 220% 100%;
 }
 
-.questionTarget {
+.questionHoverAnchor {
+  position: relative;
+  display: inline-block;
   margin-left: 0.14em;
+}
+
+.questionTarget {
   opacity: 0;
+}
+
+.questionHoverZone {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  width: var(--v2-question-zone-width);
+  height: var(--v2-question-zone-height);
+  border: 1px solid transparent;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.questionHoverZoneVisible {
+  border-color: #ef4444;
+}
+
+.questionHoverZoneEnabled {
+  pointer-events: auto;
 }
 
 .handShell,
@@ -75,6 +101,12 @@
   height: 45vh;
   opacity: 0;
   transform: translate(-50%, -50%);
+  color: #f4f4f5;
+  transition: color 160ms ease-out;
+}
+
+.questionShellHovered {
+  color: #ef4444;
 }
 
 .questionShell svg {
@@ -87,7 +119,7 @@
 .questionCurve {
   fill: none;
   opacity: 0;
-  stroke: #f4f4f5;
+  stroke: currentColor;
   stroke-dasharray: 1 100;
   stroke-dashoffset: 1;
   stroke-linecap: round;
@@ -103,14 +135,14 @@
   width: 24%;
   aspect-ratio: 1;
   border-radius: 9999px;
-  background: #f4f4f5;
+  background: currentColor;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0);
   transform-origin: center;
 }
 
 .questionTracer {
-  fill: #f4f4f5;
+  fill: currentColor;
   opacity: 0;
   transform-box: view-box;
   transform-origin: 0 0;

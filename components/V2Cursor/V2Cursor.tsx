@@ -5,12 +5,10 @@ import { useEffect, useRef } from 'react';
 
 const CURSOR_COLOR = '#a1a1aa';
 const CURSOR_SIZE_PX = 16;
-const CURSOR_IDLE_HIDE_MS = 1000;
 const CURSOR_MOVE_RESET_MS = 120;
 const MOVING_CURSOR_SCALE = 0.5;
 
 export default function V2Cursor() {
-  const idleTimeoutRef = useRef<number | null>(null);
   const moveTimeoutRef = useRef<number | null>(null);
   const opacity = useMotionValue(0);
   const scale = useMotionValue(1);
@@ -19,7 +17,7 @@ export default function V2Cursor() {
   const y = useMotionValue(-CURSOR_SIZE_PX);
 
   useEffect(() => {
-    const clearTimeoutRef = (timeoutRef: typeof idleTimeoutRef) => {
+    const clearTimeoutRef = (timeoutRef: typeof moveTimeoutRef) => {
       if (timeoutRef.current === null) {
         return;
       }
@@ -34,7 +32,6 @@ export default function V2Cursor() {
     };
 
     const handlePointerMove = (event: PointerEvent) => {
-      clearTimeoutRef(idleTimeoutRef);
       clearTimeoutRef(moveTimeoutRef);
 
       const isOverNativeCursorArea =
@@ -55,17 +52,12 @@ export default function V2Cursor() {
       moveTimeoutRef.current = window.setTimeout(() => {
         scale.set(1);
       }, CURSOR_MOVE_RESET_MS);
-
-      idleTimeoutRef.current = window.setTimeout(() => {
-        hideCursor();
-      }, CURSOR_IDLE_HIDE_MS);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
     document.addEventListener('mouseleave', hideCursor);
 
     return () => {
-      clearTimeoutRef(idleTimeoutRef);
       clearTimeoutRef(moveTimeoutRef);
       window.removeEventListener('pointermove', handlePointerMove);
       document.removeEventListener('mouseleave', hideCursor);

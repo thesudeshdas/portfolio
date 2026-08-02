@@ -23,6 +23,7 @@
 - Connect Strava and/or Mi Fitness to show my fitness activity, progress, and selected health or workout highlights.
 - Write a blog post breaking down how this portfolio site was conceived, designed, built, and evolved, including its technical and creative decisions.
 - Create an AI workflow section showing how I use AI, the files and systems behind my workflows, and the roles played by assistants such as Delilah and Cortana.
+- Add a Pink Panther character running somewhere in the background. Visitors can chase and catch it to unlock a reward.
 
 ## V2 animation ledger
 

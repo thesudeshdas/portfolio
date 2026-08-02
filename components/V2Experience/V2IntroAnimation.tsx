@@ -1,9 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 
 import styles from './V2IntroAnimation.module.css';
-import { IS_V2_CORNER_FOCUS_MODE } from './v2-corner.settings';
 import V2IntroDevPanel from './V2IntroDevPanel';
 import {
   DEFAULT_V2_INTRO_SETTINGS,
@@ -84,16 +89,30 @@ export default function V2IntroAnimation({
   emojiClassName,
   fontClassName,
   isDimmed = false,
+  isQuestionHoverEnabled = false,
+  isQuestionHovered = false,
   onComplete,
-  onStart
+  onStart,
+  playFullAnimation,
+  questionZoneHeight,
+  questionZoneWidth,
+  replayToken = 0,
+  showQuestionHoverZone = false
 }: {
   emojiClassName: string;
   fontClassName?: string;
   isDimmed?: boolean;
+  isQuestionHoverEnabled?: boolean;
+  isQuestionHovered?: boolean;
   onComplete?: () => void;
   onStart?: () => void;
+  playFullAnimation: boolean;
+  questionZoneHeight: number;
+  questionZoneWidth: number;
+  replayToken?: number;
+  showQuestionHoverZone?: boolean;
 }) {
-  const [replayToken, setReplayToken] = useState(0);
+  const [internalReplayToken, setInternalReplayToken] = useState(0);
   const [settings, setSettings] = useState<V2IntroSettings>(() => ({
     ...DEFAULT_V2_INTRO_SETTINGS
   }));
@@ -125,7 +144,7 @@ export default function V2IntroAnimation({
   }, []);
 
   const handleReplay = useCallback(() => {
-    setReplayToken((currentToken) => currentToken + 1);
+    setInternalReplayToken((currentToken) => currentToken + 1);
   }, []);
 
   const handleReset = useCallback(() => {
@@ -342,7 +361,7 @@ export default function V2IntroAnimation({
       resetStage();
       onStart?.();
 
-      if (IS_V2_CORNER_FOCUS_MODE) {
+      if (!playFullAnimation) {
         showFinalStage();
         return;
       }
@@ -621,7 +640,15 @@ export default function V2IntroAnimation({
       window.cancelAnimationFrame(resizeFrame);
       window.removeEventListener('resize', handleResize);
     };
-  }, [fontClassName, onComplete, onStart, replayToken, settings]);
+  }, [
+    fontClassName,
+    internalReplayToken,
+    onComplete,
+    onStart,
+    playFullAnimation,
+    replayToken,
+    settings
+  ]);
 
   return (
     <div
@@ -658,11 +685,28 @@ export default function V2IntroAnimation({
           who is Dash
         </span>
         <span
-          ref={questionTargetRef}
-          className={styles.questionTarget}
-          aria-hidden='true'
+          className={styles.questionHoverAnchor}
+          style={
+            {
+              '--v2-question-zone-height': `${questionZoneHeight}px`,
+              '--v2-question-zone-width': `${questionZoneWidth}px`
+            } as CSSProperties
+          }
         >
-          ?
+          <span
+            ref={questionTargetRef}
+            className={styles.questionTarget}
+            aria-hidden='true'
+          >
+            ?
+          </span>
+          <span
+            aria-hidden='true'
+            data-v2-question-hover-zone='true'
+            className={`${styles.questionHoverZone} ${
+              showQuestionHoverZone ? styles.questionHoverZoneVisible : ''
+            } ${isQuestionHoverEnabled ? styles.questionHoverZoneEnabled : ''}`}
+          />
         </span>
       </h1>
 
@@ -682,7 +726,9 @@ export default function V2IntroAnimation({
 
       <div
         ref={questionShellRef}
-        className={styles.questionShell}
+        className={`${styles.questionShell} ${
+          isQuestionHovered ? styles.questionShellHovered : ''
+        }`}
         aria-hidden='true'
       >
         <svg viewBox='0 0 100 150'>

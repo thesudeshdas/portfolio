@@ -1,6 +1,12 @@
 'use client';
 
-import { type CSSProperties, useCallback, useEffect, useState } from 'react';
+import {
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
 import {
   FiGithub,
   FiInstagram,
@@ -17,6 +23,8 @@ import V2AttributionPopover from './V2AttributionPopover';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
 import V2SocialHoverDevPanel from './V2SocialHoverDevPanel';
+import V2SpotlightDevPanel from './V2SpotlightDevPanel';
+import V2SpotlightMosaic from './V2SpotlightMosaic';
 import V2WorkPanel from './V2WorkPanel';
 import V2WorkPanelDevPanel from './V2WorkPanelDevPanel';
 import V2WorkHoverDevPanel from './V2WorkHoverDevPanel';
@@ -32,6 +40,12 @@ import {
   type V2SocialHoverNumericSettingKey,
   type V2SocialHoverSettings
 } from './v2-social-hover.settings';
+import {
+  DEFAULT_V2_SPOTLIGHT_SETTINGS,
+  IS_V2_SPOTLIGHT_DEV_PANEL_ENABLED,
+  type V2SpotlightNumericSettingKey,
+  type V2SpotlightSettings
+} from './v2-spotlight.settings';
 import {
   DEFAULT_V2_WORK_HOVER_SETTINGS,
   IS_V2_WORK_HOVER_DEV_PANEL_ENABLED,
@@ -141,31 +155,49 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     useState<V2WorkPanelSettings>(() => ({
       ...DEFAULT_V2_WORK_PANEL_SETTINGS
     }));
+  const [spotlightSettings, setSpotlightSettings] =
+    useState<V2SpotlightSettings>(() => ({
+      ...DEFAULT_V2_SPOTLIGHT_SETTINGS
+    }));
+  const [isFullIntroEnabled, setIsFullIntroEnabled] = useState(
+    !IS_V2_SKIP_INITIAL_ANIMATION
+  );
+  const [introReplayToken, setIntroReplayToken] = useState(0);
   const [areCornersSettled, setAreCornersSettled] = useState(
     IS_V2_SKIP_INITIAL_ANIMATION
   );
   const [isIntroComplete, setIsIntroComplete] = useState(
     IS_V2_SKIP_INITIAL_ANIMATION
   );
+  const [isIntroInteractionReady, setIsIntroInteractionReady] = useState(
+    IS_V2_SKIP_INITIAL_ANIMATION
+  );
   const [isHeadlineDimmed, setIsHeadlineDimmed] = useState(false);
+  const [isQuestionHovered, setIsQuestionHovered] = useState(false);
+  const [isSpotlightSuppressed, setIsSpotlightSuppressed] = useState(false);
+  const [isWorkZoneHovered, setIsWorkZoneHovered] = useState(false);
   const [isWorkPanelOpen, setIsWorkPanelOpen] = useState(false);
 
   const handleIntroStart = useCallback(() => {
-    if (IS_V2_SKIP_INITIAL_ANIMATION) {
+    if (!isFullIntroEnabled) {
       return;
     }
 
     setAreCornersSettled(false);
     setIsIntroComplete(false);
-  }, []);
+    setIsIntroInteractionReady(false);
+    setIsQuestionHovered(false);
+    setIsSpotlightSuppressed(false);
+    setIsWorkZoneHovered(false);
+  }, [isFullIntroEnabled]);
 
   const handleIntroComplete = useCallback(() => {
     setIsIntroComplete(true);
 
-    if (IS_V2_SKIP_INITIAL_ANIMATION) {
+    if (!isFullIntroEnabled) {
       setAreCornersSettled(true);
     }
-  }, []);
+  }, [isFullIntroEnabled]);
 
   const cornerSettleDelay =
     getV2CornerDelay(cornerSettings, 2) +
@@ -173,16 +205,101 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     cornerSettings.finalDelay;
 
   useEffect(() => {
-    if (IS_V2_SKIP_INITIAL_ANIMATION || !isIntroComplete) {
+    if (!isFullIntroEnabled || !isIntroComplete) {
       return;
     }
 
+    let interactionTimer: number | null = null;
     const settleTimer = window.setTimeout(() => {
       setAreCornersSettled(true);
+
+      interactionTimer = window.setTimeout(() => {
+        setIsIntroInteractionReady(true);
+      }, cornerSettings.finalTransitionDuration);
     }, cornerSettleDelay);
 
-    return () => window.clearTimeout(settleTimer);
-  }, [cornerSettleDelay, isIntroComplete]);
+    return () => {
+      window.clearTimeout(settleTimer);
+
+      if (interactionTimer !== null) {
+        window.clearTimeout(interactionTimer);
+      }
+    };
+  }, [
+    cornerSettleDelay,
+    cornerSettings.finalTransitionDuration,
+    isFullIntroEnabled,
+    isIntroComplete
+  ]);
+
+  const handleSpotlightSettingChange = useCallback(
+    (key: V2SpotlightNumericSettingKey, value: number) => {
+      setSpotlightSettings((currentSettings) => ({
+        ...currentSettings,
+        [key]: value
+      }));
+    },
+    []
+  );
+
+  const handleSpotlightReset = useCallback(() => {
+    setSpotlightSettings({ ...DEFAULT_V2_SPOTLIGHT_SETTINGS });
+  }, []);
+
+  const handleSpotlightZonePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      const target = event.target;
+      const isInsideQuestionZone =
+        target instanceof Element &&
+        target.closest('[data-v2-question-hover-zone="true"]') !== null;
+      const isInsideCornerZone =
+        target instanceof Element &&
+        target.closest('[data-v2-spotlight-exclusion-zone="true"]') !== null;
+      const isInsideWorkZone =
+        target instanceof Element &&
+        target.closest('[data-v2-work-exclusion-zone="true"]') !== null;
+
+      setIsQuestionHovered((currentValue) =>
+        currentValue === isInsideQuestionZone
+          ? currentValue
+          : isInsideQuestionZone
+      );
+      setIsSpotlightSuppressed((currentValue) => {
+        const nextValue = isInsideQuestionZone || isInsideCornerZone;
+
+        return currentValue === nextValue ? currentValue : nextValue;
+      });
+      setIsWorkZoneHovered((currentValue) =>
+        currentValue === isInsideWorkZone ? currentValue : isInsideWorkZone
+      );
+    },
+    []
+  );
+
+  const handleFullIntroEnabledChange = useCallback((isEnabled: boolean) => {
+    setIsFullIntroEnabled(isEnabled);
+    setAreCornersSettled(!isEnabled);
+    setIsIntroComplete(!isEnabled);
+    setIsIntroInteractionReady(!isEnabled);
+    setIsQuestionHovered(false);
+    setIsSpotlightSuppressed(false);
+    setIsWorkZoneHovered(false);
+    setIntroReplayToken((currentToken) => currentToken + 1);
+  }, []);
+
+  const handleIntroReplay = useCallback(() => {
+    if (!isFullIntroEnabled) {
+      return;
+    }
+
+    setAreCornersSettled(false);
+    setIsIntroComplete(false);
+    setIsIntroInteractionReady(false);
+    setIsQuestionHovered(false);
+    setIsSpotlightSuppressed(false);
+    setIsWorkZoneHovered(false);
+    setIntroReplayToken((currentToken) => currentToken + 1);
+  }, [isFullIntroEnabled]);
 
   const handleWorkHoverSettingChange = useCallback(
     (key: V2WorkHoverNumericSettingKey, value: number) => {
@@ -284,35 +401,53 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
   } as CSSProperties;
 
   return (
-    <main className='v2-page min-h-[100dvh] bg-black p-1.5 text-zinc-200 sm:p-2.5'>
-      <V2Cursor />
+    <main
+      className='v2-page min-h-[100dvh] overflow-hidden bg-black p-1.5 text-zinc-200 sm:p-2.5'
+      onPointerLeave={() => {
+        setIsQuestionHovered(false);
+        setIsSpotlightSuppressed(false);
+        setIsWorkZoneHovered(false);
+      }}
+      onPointerMove={handleSpotlightZonePointerMove}
+    >
+      {isIntroInteractionReady ? <V2Cursor /> : null}
 
       <section className='relative flex min-h-[calc(100dvh-0.75rem)] items-center justify-center sm:min-h-[calc(100dvh-1.25rem)]'>
+        <V2SpotlightMosaic
+          isEnabled={isIntroInteractionReady}
+          isSuppressed={isSpotlightSuppressed}
+          settings={spotlightSettings}
+        />
+
         <span
+          aria-haspopup='dialog'
+          aria-label='Open work'
+          data-v2-content-cursor='true'
+          data-v2-hide-cursor='true'
+          data-v2-spotlight-exclusion-zone='true'
+          data-v2-work-exclusion-zone='true'
           className={`${
             outfit.className
-          } v2-corner-item absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
+          } v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-work absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-zinc-300 motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
             areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={{ ...workRevealStyle, lineHeight: '100%' }}
+          onClick={handleWorkPanelOpen}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleWorkPanelOpen();
+            }
+          }}
+          role='button'
+          tabIndex={areCornersSettled ? 0 : -1}
         >
           <span
-            aria-haspopup='dialog'
-            aria-label='Open work'
-            data-v2-content-cursor='true'
-            data-v2-hide-cursor='true'
             data-v2-top-right-corner={areCornersSettled ? 'true' : undefined}
-            className='relative inline-block focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300'
-            onClick={handleWorkPanelOpen}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                handleWorkPanelOpen();
-              }
-            }}
-            role='button'
+            className={`relative inline-block ${
+              isWorkZoneHovered ? 'v2-work-zone-hovered' : ''
+            }`}
             style={workHoverStyle}
-            tabIndex={areCornersSettled ? 0 : -1}
           >
             work
           </span>
@@ -322,8 +457,14 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
           emojiClassName={notoEmoji.className}
           fontClassName={outfit.className}
           isDimmed={isHeadlineDimmed}
+          isQuestionHoverEnabled={isIntroInteractionReady}
+          isQuestionHovered={isQuestionHovered}
           onComplete={handleIntroComplete}
           onStart={handleIntroStart}
+          playFullAnimation={isFullIntroEnabled}
+          questionZoneHeight={spotlightSettings.questionZoneHeight}
+          questionZoneWidth={spotlightSettings.questionZoneWidth}
+          replayToken={introReplayToken}
         />
 
         <V2MusicPlayer
@@ -336,7 +477,8 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
         />
 
         <div
-          className={`v2-corner-item absolute right-2.5 bottom-2.5 flex origin-bottom-right flex-col items-end gap-3 motion-reduce:transition-none sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6 ${
+          data-v2-spotlight-exclusion-zone='true'
+          className={`v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-socials absolute right-2.5 bottom-2.5 flex origin-bottom-right flex-col items-end gap-3 motion-reduce:transition-none sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6 ${
             isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={settledSocialsRevealStyle}
@@ -355,7 +497,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
                   aria-label={social.label}
                   data-v2-content-cursor='true'
                   data-v2-hide-cursor='true'
-                  className={`v2-social-link inline-flex cursor-pointer ${
+                  className={`v2-social-link v2-expanded-hit-target inline-flex cursor-pointer ${
                     areCornersSettled ? 'opacity-20' : 'opacity-100'
                   }`}
                   href={social.href}
@@ -391,6 +533,17 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
         settings={workPanelSettings}
         workHoverStyle={workHoverStyle}
       />
+
+      {IS_V2_SPOTLIGHT_DEV_PANEL_ENABLED ? (
+        <V2SpotlightDevPanel
+          isFullIntroEnabled={isFullIntroEnabled}
+          settings={spotlightSettings}
+          onChange={handleSpotlightSettingChange}
+          onFullIntroEnabledChange={handleFullIntroEnabledChange}
+          onReplayIntro={handleIntroReplay}
+          onReset={handleSpotlightReset}
+        />
+      ) : null}
 
       {IS_V2_WORK_PANEL_DEV_PANEL_ENABLED ? (
         <V2WorkPanelDevPanel

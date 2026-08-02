@@ -45,16 +45,20 @@ export default function V2MusicPlayer({
   const audioRef = useRef<HTMLAudioElement>(null);
   const cancelAutoplayRef = useRef<() => void>(() => undefined);
   const continuePlaybackRef = useRef(false);
+  const metadataHideTimerRef = useRef<number | undefined>(undefined);
+  const metadataRevealFrameRef = useRef<number | undefined>(undefined);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [hasPlaybackError, setHasPlaybackError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isMetadataMounted, setIsMetadataMounted] = useState(false);
+  const [isMetadataVisible, setIsMetadataVisible] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [settings, setSettings] = useState<V2MusicPlayerSettings>(() => ({
     ...DEFAULT_V2_MUSIC_SETTINGS
   }));
   const currentTrack = v2MusicTracks[currentTrackIndex];
-  const isMetadataExpanded = isPlaying && isHovered;
-  const metadataOpacity = !isPlaying
+  const isMetadataExpanded = isMetadataVisible && isHovered;
+  const metadataOpacity = !isMetadataVisible
     ? 0
     : isMetadataExpanded
     ? settings.hoverMetadataOpacity
@@ -62,13 +66,40 @@ export default function V2MusicPlayer({
   const metadataScale = isMetadataExpanded
     ? settings.hoverMetadataScale
     : settings.playingMetadataScale;
-  const metadataTranslateX = isPlaying ? 0 : -settings.metadataSlideDistance;
+  const metadataTranslateX = isMetadataVisible
+    ? 0
+    : -settings.metadataSlideDistance;
   const vinylReveal =
     isPlaying || isHovered
       ? settings.playingVinylReveal
       : settings.pausedVinylReveal;
   const isAlbumBorderVisible =
     settings.albumBorderVisibility === 'always' || isPlaying;
+
+  const hideMetadata = useCallback(() => {
+    if (metadataRevealFrameRef.current !== undefined) {
+      window.cancelAnimationFrame(metadataRevealFrameRef.current);
+    }
+
+    window.clearTimeout(metadataHideTimerRef.current);
+    setIsMetadataVisible(false);
+    metadataHideTimerRef.current = window.setTimeout(() => {
+      setIsMetadataMounted(false);
+    }, settings.metadataTransitionMs);
+  }, [settings.metadataTransitionMs]);
+
+  const showMetadata = useCallback(() => {
+    window.clearTimeout(metadataHideTimerRef.current);
+
+    if (metadataRevealFrameRef.current !== undefined) {
+      window.cancelAnimationFrame(metadataRevealFrameRef.current);
+    }
+
+    setIsMetadataMounted(true);
+    metadataRevealFrameRef.current = window.requestAnimationFrame(() => {
+      setIsMetadataVisible(true);
+    });
+  }, []);
 
   const playCurrentTrack = useCallback(
     async (showPlaybackError = true, initialVolume = DEFAULT_VOLUME) => {
@@ -90,11 +121,22 @@ export default function V2MusicPlayer({
           setHasPlaybackError(true);
         }
         setIsPlaying(false);
+        hideMetadata();
         return false;
       }
     },
-    []
+    [hideMetadata]
   );
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(metadataHideTimerRef.current);
+
+      if (metadataRevealFrameRef.current !== undefined) {
+        window.cancelAnimationFrame(metadataRevealFrameRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -230,6 +272,7 @@ export default function V2MusicPlayer({
   function playNextTrack() {
     continuePlaybackRef.current = true;
     setIsPlaying(false);
+    hideMetadata();
     setCurrentTrackIndex(
       (trackIndex) => (trackIndex + 1) % v2MusicTracks.length
     );
@@ -256,15 +299,29 @@ export default function V2MusicPlayer({
         data-v2-content-cursor='true'
         data-v2-hide-cursor='true'
         data-v2-music-player
-        className={`v2-corner-item v2-music-player-shell absolute bottom-2.5 left-2.5 origin-bottom-left motion-reduce:transition-none sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6 ${
+        data-v2-spotlight-exclusion-zone='true'
+        className={`v2-corner-item v2-music-player-shell v2-spotlight-exclusion-zone v2-spotlight-exclusion-music absolute bottom-2.5 left-2.5 origin-bottom-left cursor-pointer motion-reduce:transition-none sm:bottom-4.5 sm:left-4.5 lg:bottom-6 lg:left-6 ${
           isRevealed ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
         style={revealStyle}
+        onClick={(event) => {
+          const target = event.target;
+
+          if (target instanceof Element && target.closest('button')) {
+            return;
+          }
+
+          toggleAudio();
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        <span
+          aria-hidden='true'
+          className='v2-music-zone-hit-target'
+        />
         <div
-          className='flex items-center'
+          className='relative z-10 flex items-center'
           style={{
             transform: `scale(${settings.componentScale})`,
             transformOrigin: 'bottom left',
@@ -281,9 +338,16 @@ export default function V2MusicPlayer({
               continuePlaybackRef.current = false;
               setHasPlaybackError(true);
               setIsPlaying(false);
+              hideMetadata();
             }}
-            onPause={() => setIsPlaying(false)}
-            onPlay={() => setIsPlaying(true)}
+            onPause={() => {
+              setIsPlaying(false);
+              hideMetadata();
+            }}
+            onPlay={() => {
+              setIsPlaying(true);
+              showMetadata();
+            }}
           />
 
           <button
@@ -291,7 +355,7 @@ export default function V2MusicPlayer({
             aria-pressed={isPlaying}
             data-v2-content-cursor='true'
             data-v2-hide-cursor='true'
-            className='relative h-16 w-[104px] shrink-0 cursor-pointer focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-400'
+            className='v2-expanded-hit-target relative h-16 w-[104px] shrink-0 cursor-pointer focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-400'
             type='button'
             onClick={toggleAudio}
           >
@@ -350,36 +414,36 @@ export default function V2MusicPlayer({
             </span>
           </button>
 
-          <div
-            className={`${fontClassName} v2-music-metadata relative z-0 ml-3 max-w-[min(18rem,calc(100vw-9rem))] min-w-0 origin-left sm:ml-4`}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: `${settings.metadataGap}px`,
-              opacity: metadataOpacity,
-              pointerEvents: 'none',
-              transform: `translateX(${metadataTranslateX}px) scale(${metadataScale})`,
-              transition: `opacity ${settings.metadataTransitionMs}ms ease-out, transform ${settings.metadataTransitionMs}ms ease-out`
-            }}
-          >
-            <span
-              className='block truncate text-base leading-none text-zinc-100 sm:text-lg'
-              style={{ fontWeight: settings.songWeight }}
+          {isMetadataMounted ? (
+            <div
+              className={`${fontClassName} v2-music-metadata relative z-0 ml-3 flex max-w-[min(18rem,calc(100vw-9rem))] min-w-0 origin-left flex-col sm:ml-4`}
+              style={{
+                gap: `${settings.metadataGap}px`,
+                opacity: metadataOpacity,
+                pointerEvents: 'none',
+                transform: `translateX(${metadataTranslateX}px) scale(${metadataScale})`,
+                transition: `opacity ${settings.metadataTransitionMs}ms ease-out, transform ${settings.metadataTransitionMs}ms ease-out`
+              }}
             >
-              {currentTrack.title}
-            </span>
-            <span
-              className='block truncate text-[11px] leading-none text-zinc-300 sm:text-xs'
-              style={{ fontWeight: settings.artistWeight }}
-            >
-              {currentTrack.artist}
-            </span>
-            {hasPlaybackError ? (
-              <span className='block text-[10px] leading-none text-red-300'>
-                Audio unavailable
+              <span
+                className='block truncate text-base leading-none text-zinc-100 sm:text-lg'
+                style={{ fontWeight: settings.songWeight }}
+              >
+                {currentTrack.title}
               </span>
-            ) : null}
-          </div>
+              <span
+                className='block truncate text-[11px] leading-none text-zinc-300 sm:text-xs'
+                style={{ fontWeight: settings.artistWeight }}
+              >
+                {currentTrack.artist}
+              </span>
+              {hasPlaybackError ? (
+                <span className='block text-[10px] leading-none text-red-300'>
+                  Audio unavailable
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </>

@@ -564,7 +564,7 @@ export default function V2AttributionPopover({
       data-v2-content-cursor='true'
       data-v2-hide-cursor='true'
       type='button'
-      className={`${fontClassName} v2-social-attribution text-[10px] leading-none font-extralight text-zinc-500 hover:text-zinc-300 focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 sm:text-xs ${
+      className={`${fontClassName} v2-social-attribution v2-expanded-hit-target text-[10px] leading-none font-extralight text-zinc-500 hover:text-zinc-300 focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 sm:text-xs ${
         displayedCalloutMode === 'mock' || !isSettled
           ? 'opacity-100'
           : 'opacity-20'

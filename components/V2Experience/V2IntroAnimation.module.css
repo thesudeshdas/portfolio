@@ -3,6 +3,27 @@
   text-align: center;
 }
 
+.spotlightExclusion {
+  position: relative;
+  z-index: 1;
+}
+
+.spotlightExclusion::before {
+  position: absolute;
+  z-index: 0;
+  inset: -0.32em -0.42em;
+  border-radius: 42% / 55%;
+  background: #000;
+  content: '';
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.spotlightExclusion > span {
+  position: relative;
+  z-index: 1;
+}
+
 .hey {
   opacity: 0;
 }

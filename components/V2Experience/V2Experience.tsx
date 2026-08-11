@@ -386,7 +386,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
         <V2SpotlightMosaic
           isEnabled={isIntroInteractionReady}
           isSuppressed={isSpotlightSuppressed || isIdeaChaseActive}
-          isVisibleWhenIdle
+          isVisibleWhenIdle={false}
           settings={spotlightSettings}
         />
 

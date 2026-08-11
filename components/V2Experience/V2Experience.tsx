@@ -173,6 +173,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     IS_V2_SKIP_INITIAL_ANIMATION
   );
   const [isHeadlineDimmed, setIsHeadlineDimmed] = useState(false);
+  const [isIdeaChaseActive, setIsIdeaChaseActive] = useState(false);
   const [isQuestionHovered, setIsQuestionHovered] = useState(false);
   const [isSpotlightSuppressed, setIsSpotlightSuppressed] = useState(false);
   const [isWorkZoneHovered, setIsWorkZoneHovered] = useState(false);
@@ -415,7 +416,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
       <section className='relative flex min-h-[calc(100dvh-0.75rem)] items-center justify-center sm:min-h-[calc(100dvh-1.25rem)]'>
         <V2SpotlightMosaic
           isEnabled={isIntroInteractionReady}
-          isSuppressed={isSpotlightSuppressed}
+          isSuppressed={isSpotlightSuppressed || isIdeaChaseActive}
           settings={spotlightSettings}
         />
 
@@ -520,6 +521,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
             fontClassName={outfit.className}
             hoverStyle={socialHoverStyle}
             isSettled={areCornersSettled}
+            onChaseActiveChange={setIsIdeaChaseActive}
             onHeadlineDimChange={setIsHeadlineDimmed}
           />
         </div>

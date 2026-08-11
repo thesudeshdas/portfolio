@@ -53,6 +53,7 @@ interface V2AttributionPopoverProps {
   fontClassName: string;
   hoverStyle: CSSProperties;
   isSettled: boolean;
+  onChaseActiveChange: (isActive: boolean) => void;
   onHeadlineDimChange: (isDimmed: boolean) => void;
 }
 
@@ -110,6 +111,7 @@ export default function V2AttributionPopover({
   fontClassName,
   hoverStyle,
   isSettled,
+  onChaseActiveChange,
   onHeadlineDimChange
 }: V2AttributionPopoverProps) {
   const ideaOriginRef = useRef<HTMLSpanElement | null>(null);
@@ -151,6 +153,17 @@ export default function V2AttributionPopover({
   useEffect(() => {
     setIsClientMounted(true);
   }, []);
+
+  useEffect(() => {
+    onChaseActiveChange(isChaseActive);
+  }, [isChaseActive, onChaseActiveChange]);
+
+  useEffect(
+    () => () => {
+      onChaseActiveChange(false);
+    },
+    [onChaseActiveChange]
+  );
 
   useEffect(() => {
     if (calloutMode) {
@@ -599,7 +612,7 @@ export default function V2AttributionPopover({
   const attributionPlaceholder = (
     <span
       aria-hidden='true'
-      className={`${fontClassName} v2-social-attribution text-[10px] leading-none font-extralight text-zinc-500 opacity-20 sm:text-xs`}
+      className={`${fontClassName} v2-social-attribution text-[10px] leading-none font-extralight text-zinc-500 opacity-100 sm:text-xs`}
     >
       steal my <span className='invisible'>idea</span>, not my creativity
     </span>

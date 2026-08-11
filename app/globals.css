@@ -104,8 +104,17 @@
   opacity: 1 !important;
 }
 
+.v2-corner-item:hover .v2-corner-visual {
+  opacity: 1 !important;
+}
+
 .v2-spotlight-exclusion-zone {
   --v2-corner-edge-offset: 16px;
+  --v2-corner-fade-color: #000;
+  --v2-corner-fade-expansion: 240%;
+  --v2-corner-fade-gradient-size: 100%;
+  --v2-corner-fade-solid-stop: 40%;
+  --v2-corner-fade-transparent-stop: 100%;
 
   isolation: isolate;
 }
@@ -115,7 +124,7 @@
   z-index: -1;
   border-radius: inherit;
   content: '';
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .v2-spotlight-exclusion-work {
@@ -127,12 +136,14 @@
 }
 
 .v2-spotlight-exclusion-work::before {
-  inset: 0 0 -25% -25%;
+  inset: 0 0 calc(-1 * var(--v2-corner-fade-expansion))
+    calc(-1 * var(--v2-corner-fade-expansion));
   background: radial-gradient(
-    ellipse at top right,
-    #000 0%,
-    #000 58%,
-    transparent 100%
+    ellipse var(--v2-corner-fade-gradient-size)
+      var(--v2-corner-fade-gradient-size) at top right,
+    var(--v2-corner-fade-color) 0%,
+    var(--v2-corner-fade-color) var(--v2-corner-fade-solid-stop),
+    transparent var(--v2-corner-fade-transparent-stop)
   );
 }
 
@@ -143,12 +154,14 @@
 }
 
 .v2-spotlight-exclusion-music::before {
-  inset: -25% -25% 0 0;
+  inset: calc(-1 * var(--v2-corner-fade-expansion))
+    calc(-1 * var(--v2-corner-fade-expansion)) 0 0;
   background: radial-gradient(
-    ellipse at bottom left,
-    #000 0%,
-    #000 58%,
-    transparent 100%
+    ellipse var(--v2-corner-fade-gradient-size)
+      var(--v2-corner-fade-gradient-size) at bottom left,
+    var(--v2-corner-fade-color) 0%,
+    var(--v2-corner-fade-color) var(--v2-corner-fade-solid-stop),
+    transparent var(--v2-corner-fade-transparent-stop)
   );
 }
 
@@ -167,12 +180,14 @@
 }
 
 .v2-spotlight-exclusion-socials::before {
-  inset: -25% -12.5% 0 -12.5%;
+  inset: calc(-1 * var(--v2-corner-fade-expansion)) 0 0
+    calc(-1 * var(--v2-corner-fade-expansion));
   background: radial-gradient(
-    ellipse at bottom right,
-    #000 0%,
-    #000 58%,
-    transparent 100%
+    ellipse var(--v2-corner-fade-gradient-size)
+      var(--v2-corner-fade-gradient-size) at bottom right,
+    var(--v2-corner-fade-color) 0%,
+    var(--v2-corner-fade-color) var(--v2-corner-fade-solid-stop),
+    transparent var(--v2-corner-fade-transparent-stop)
   );
 }
 

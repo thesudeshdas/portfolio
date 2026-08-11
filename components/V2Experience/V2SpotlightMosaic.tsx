@@ -49,10 +49,12 @@ const mosaicImages = [
 export default function V2SpotlightMosaic({
   isEnabled,
   isSuppressed,
+  isVisibleWhenIdle,
   settings
 }: {
   isEnabled: boolean;
   isSuppressed: boolean;
+  isVisibleWhenIdle: boolean;
   settings: V2SpotlightSettings;
 }) {
   const idleTimeoutRef = useRef<number | null>(null);
@@ -193,12 +195,37 @@ export default function V2SpotlightMosaic({
         pointerFrameRef.current = window.requestAnimationFrame(positionBlob);
       }
 
-      scheduleSpotlightHide();
+      if (!isVisibleWhenIdle) {
+        scheduleSpotlightHide();
+      }
     };
 
     const handleResize = () => {
       bounds = mosaic.getBoundingClientRect();
     };
+
+    if (isVisibleWhenIdle) {
+      if (!isBlobInitializedRef.current) {
+        const centerX = bounds.width / 2;
+        const centerY = bounds.height / 2;
+
+        pointerTargetRef.current.x = centerX;
+        pointerTargetRef.current.y = centerY;
+        blobPointsRef.current.forEach((point) => {
+          point.x = centerX;
+          point.y = centerY;
+        });
+        isBlobInitializedRef.current = true;
+      }
+
+      mosaic.classList.add(styles.visible);
+
+      if (pointerFrameRef.current === null) {
+        pointerFrameRef.current = window.requestAnimationFrame(positionBlob);
+      }
+    } else if (isBlobInitializedRef.current) {
+      scheduleSpotlightHide();
+    }
 
     window.addEventListener('pointermove', handlePointerMove, {
       passive: true
@@ -211,13 +238,19 @@ export default function V2SpotlightMosaic({
 
       if (pointerFrameRef.current !== null) {
         window.cancelAnimationFrame(pointerFrameRef.current);
+        pointerFrameRef.current = null;
       }
 
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('mouseleave', hideSpotlight);
     };
-  }, [isEnabled, settings.blobStretch, settings.idleHideDelay]);
+  }, [
+    isEnabled,
+    isVisibleWhenIdle,
+    settings.blobStretch,
+    settings.idleHideDelay
+  ]);
 
   const spotlightStyle = {
     '--v2-spotlight-contrast': `${settings.contrast}%`,

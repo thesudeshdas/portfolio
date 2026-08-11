@@ -23,7 +23,6 @@ import V2AttributionPopover from './V2AttributionPopover';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
 import V2SocialHoverDevPanel from './V2SocialHoverDevPanel';
-import V2SpotlightDevPanel from './V2SpotlightDevPanel';
 import V2SpotlightMosaic from './V2SpotlightMosaic';
 import V2WorkPanel from './V2WorkPanel';
 import V2WorkPanelDevPanel from './V2WorkPanelDevPanel';
@@ -42,8 +41,6 @@ import {
 } from './v2-social-hover.settings';
 import {
   DEFAULT_V2_SPOTLIGHT_SETTINGS,
-  IS_V2_SPOTLIGHT_DEV_PANEL_ENABLED,
-  type V2SpotlightNumericSettingKey,
   type V2SpotlightSettings
 } from './v2-spotlight.settings';
 import {
@@ -155,14 +152,9 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     useState<V2WorkPanelSettings>(() => ({
       ...DEFAULT_V2_WORK_PANEL_SETTINGS
     }));
-  const [spotlightSettings, setSpotlightSettings] =
-    useState<V2SpotlightSettings>(() => ({
-      ...DEFAULT_V2_SPOTLIGHT_SETTINGS
-    }));
-  const [isFullIntroEnabled, setIsFullIntroEnabled] = useState(
-    !IS_V2_SKIP_INITIAL_ANIMATION
-  );
-  const [introReplayToken, setIntroReplayToken] = useState(0);
+  const spotlightSettings: V2SpotlightSettings = DEFAULT_V2_SPOTLIGHT_SETTINGS;
+  const isFullIntroEnabled = !IS_V2_SKIP_INITIAL_ANIMATION;
+  const introReplayToken = 0;
   const [areCornersSettled, setAreCornersSettled] = useState(
     IS_V2_SKIP_INITIAL_ANIMATION
   );
@@ -233,20 +225,6 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     isIntroComplete
   ]);
 
-  const handleSpotlightSettingChange = useCallback(
-    (key: V2SpotlightNumericSettingKey, value: number) => {
-      setSpotlightSettings((currentSettings) => ({
-        ...currentSettings,
-        [key]: value
-      }));
-    },
-    []
-  );
-
-  const handleSpotlightReset = useCallback(() => {
-    setSpotlightSettings({ ...DEFAULT_V2_SPOTLIGHT_SETTINGS });
-  }, []);
-
   const handleSpotlightZonePointerMove = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
       const target = event.target;
@@ -276,31 +254,6 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     },
     []
   );
-
-  const handleFullIntroEnabledChange = useCallback((isEnabled: boolean) => {
-    setIsFullIntroEnabled(isEnabled);
-    setAreCornersSettled(!isEnabled);
-    setIsIntroComplete(!isEnabled);
-    setIsIntroInteractionReady(!isEnabled);
-    setIsQuestionHovered(false);
-    setIsSpotlightSuppressed(false);
-    setIsWorkZoneHovered(false);
-    setIntroReplayToken((currentToken) => currentToken + 1);
-  }, []);
-
-  const handleIntroReplay = useCallback(() => {
-    if (!isFullIntroEnabled) {
-      return;
-    }
-
-    setAreCornersSettled(false);
-    setIsIntroComplete(false);
-    setIsIntroInteractionReady(false);
-    setIsQuestionHovered(false);
-    setIsSpotlightSuppressed(false);
-    setIsWorkZoneHovered(false);
-    setIntroReplayToken((currentToken) => currentToken + 1);
-  }, [isFullIntroEnabled]);
 
   const handleWorkHoverSettingChange = useCallback(
     (key: V2WorkHoverNumericSettingKey, value: number) => {
@@ -369,6 +322,10 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     0,
     1
   );
+  const settledWorkRevealStyle = {
+    ...workRevealStyle,
+    opacity: areCornersSettled ? 1 : workRevealStyle.opacity
+  };
   const socialsRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
@@ -387,6 +344,13 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     2,
     -1
   );
+  const settledMusicRevealStyle = {
+    ...musicRevealStyle,
+    opacity: areCornersSettled ? 1 : musicRevealStyle.opacity
+  };
+  const cornerContentOpacity = areCornersSettled
+    ? cornerSettings.finalOpacity
+    : 1;
   const workHoverStyle = {
     '--v2-work-hover-duration': `${workHoverSettings.duration}ms`,
     '--v2-work-hover-scale': workHoverSettings.scale,
@@ -400,7 +364,6 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     '--v2-social-hover-stroke-width': socialHoverSettings.hoverStrokeWidth,
     '--v2-social-resting-stroke-width': socialHoverSettings.restingStrokeWidth
   } as CSSProperties;
-
   return (
     <main
       className='v2-page min-h-[100dvh] overflow-hidden bg-black p-1.5 text-zinc-200 sm:p-2.5'
@@ -417,6 +380,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
         <V2SpotlightMosaic
           isEnabled={isIntroInteractionReady}
           isSuppressed={isSpotlightSuppressed || isIdeaChaseActive}
+          isVisibleWhenIdle
           settings={spotlightSettings}
         />
 
@@ -432,7 +396,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
           } v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-work absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-zinc-300 motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
             areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
-          style={{ ...workRevealStyle, lineHeight: '100%' }}
+          style={{ ...settledWorkRevealStyle, lineHeight: '100%' }}
           onClick={handleWorkPanelOpen}
           onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') {
@@ -444,13 +408,23 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
           tabIndex={areCornersSettled ? 0 : -1}
         >
           <span
-            data-v2-top-right-corner={areCornersSettled ? 'true' : undefined}
-            className={`relative inline-block ${
-              isWorkZoneHovered ? 'v2-work-zone-hovered' : ''
-            }`}
-            style={workHoverStyle}
+            className='v2-corner-visual inline-block'
+            style={{
+              opacity: cornerContentOpacity,
+              transitionDuration: `${cornerSettings.finalTransitionDuration}ms`,
+              transitionProperty: 'opacity',
+              transitionTimingFunction: cornerSettings.easing
+            }}
           >
-            work
+            <span
+              data-v2-top-right-corner={areCornersSettled ? 'true' : undefined}
+              className={`relative inline-block ${
+                isWorkZoneHovered ? 'v2-work-zone-hovered' : ''
+              }`}
+              style={workHoverStyle}
+            >
+              work
+            </span>
           </span>
         </span>
 
@@ -473,8 +447,10 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
             getV2CornerDelay(cornerSettings, 2) + cornerSettings.duration
           }
           fontClassName={outfit.className}
+          contentOpacity={cornerContentOpacity}
+          contentOpacityTransitionMs={cornerSettings.finalTransitionDuration}
           isRevealed={isIntroComplete}
-          revealStyle={musicRevealStyle}
+          revealStyle={settledMusicRevealStyle}
         />
 
         <div
@@ -535,17 +511,6 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
         settings={workPanelSettings}
         workHoverStyle={workHoverStyle}
       />
-
-      {IS_V2_SPOTLIGHT_DEV_PANEL_ENABLED ? (
-        <V2SpotlightDevPanel
-          isFullIntroEnabled={isFullIntroEnabled}
-          settings={spotlightSettings}
-          onChange={handleSpotlightSettingChange}
-          onFullIntroEnabledChange={handleFullIntroEnabledChange}
-          onReplayIntro={handleIntroReplay}
-          onReset={handleSpotlightReset}
-        />
-      ) : null}
 
       {IS_V2_WORK_PANEL_DEV_PANEL_ENABLED ? (
         <V2WorkPanelDevPanel

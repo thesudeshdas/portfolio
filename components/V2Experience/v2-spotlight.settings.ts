@@ -27,5 +27,3 @@ export const DEFAULT_V2_SPOTLIGHT_SETTINGS: V2SpotlightSettings = {
   saturation: 100,
   tileRadius: 0
 };
-
-export const IS_V2_SPOTLIGHT_DEV_PANEL_ENABLED = false;

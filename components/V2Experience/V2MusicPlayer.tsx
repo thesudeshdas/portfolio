@@ -33,11 +33,15 @@ function getVinylTranslateX(revealPercent: number) {
 
 export default function V2MusicPlayer({
   autoplayDelayMs,
+  contentOpacity,
+  contentOpacityTransitionMs,
   fontClassName,
   isRevealed,
   revealStyle
 }: {
   autoplayDelayMs: number;
+  contentOpacity: number;
+  contentOpacityTransitionMs: number;
   fontClassName: string;
   isRevealed: boolean;
   revealStyle: CSSProperties;
@@ -321,11 +325,12 @@ export default function V2MusicPlayer({
           className='v2-music-zone-hit-target'
         />
         <div
-          className='relative z-10 flex items-center'
+          className='v2-corner-visual relative z-10 flex items-center'
           style={{
+            opacity: contentOpacity,
             transform: `scale(${settings.componentScale})`,
             transformOrigin: 'bottom left',
-            transition: `transform ${settings.metadataTransitionMs}ms ease-out`
+            transition: `opacity ${contentOpacityTransitionMs}ms ease-out, transform ${settings.metadataTransitionMs}ms ease-out`
           }}
         >
           <audio

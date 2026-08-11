@@ -106,10 +106,13 @@
 
 .v2-spotlight-exclusion-zone {
   --v2-corner-edge-offset: 16px;
+
+  isolation: isolate;
 }
 
 .v2-spotlight-exclusion-zone::before {
   position: absolute;
+  z-index: -1;
   border-radius: inherit;
   content: '';
   pointer-events: auto;
@@ -125,6 +128,12 @@
 
 .v2-spotlight-exclusion-work::before {
   inset: 0 0 -25% -25%;
+  background: radial-gradient(
+    ellipse at top right,
+    #000 0%,
+    #000 58%,
+    transparent 100%
+  );
 }
 
 .v2-spotlight-exclusion-music {
@@ -135,6 +144,12 @@
 
 .v2-spotlight-exclusion-music::before {
   inset: -25% -25% 0 0;
+  background: radial-gradient(
+    ellipse at bottom left,
+    #000 0%,
+    #000 58%,
+    transparent 100%
+  );
 }
 
 .v2-music-zone-hit-target {
@@ -153,6 +168,12 @@
 
 .v2-spotlight-exclusion-socials::before {
   inset: -25% -12.5% 0 -12.5%;
+  background: radial-gradient(
+    ellipse at bottom right,
+    #000 0%,
+    #000 58%,
+    transparent 100%
+  );
 }
 
 .v2-expanded-hit-target {

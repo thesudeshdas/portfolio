@@ -140,7 +140,7 @@ export const devProjectList: IDevProjectListItem[] = [
     id: 'j1015s3t-u3m9-4n99-mq0o-5r92p6q84n60',
     description: `Career evidence platform with Career Vault, structured journal, resume builder, LaTeX PDF compilation, job-search phases and local MCP tools for agent-assisted resume workflows`,
     image: '/dash-white.png',
-    live: '/projects/stayhireable',
+    live: 'https://stayhireable.heywhoisdash.com/',
     techStack: [ReactJS, TypeScript, Supabase, LaTeX],
     title: 'StayHireable',
     sourceCode: 'https://github.com/thesudeshdas/stayhireable',

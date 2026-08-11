@@ -6,6 +6,7 @@ status: active
 role: Solo
 highlight: Career Vault, journal evidence, resume builder, job-search phases and MCP tools
 year: 2026
+live: https://stayhireable.heywhoisdash.com/
 sourceCode: https://github.com/thesudeshdas/stayhireable
 techStack: ['react', 'typescript', 'tailwindcss', 'vite', 'supabase', 'latex']
 featured: true

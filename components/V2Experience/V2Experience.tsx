@@ -8,6 +8,7 @@ import {
   useState
 } from 'react';
 import {
+  FiCalendar,
   FiGithub,
   FiInstagram,
   FiLinkedin,
@@ -93,6 +94,11 @@ const socialLinks = [
     href: 'mailto:dash@heywhoisdash.com',
     icon: FiMail,
     label: 'Email'
+  },
+  {
+    href: 'https://cal.com/heywhoisdash',
+    icon: FiCalendar,
+    label: 'Book a meeting'
   }
 ];
 

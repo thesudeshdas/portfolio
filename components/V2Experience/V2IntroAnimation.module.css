@@ -120,14 +120,49 @@
   left: 64%;
   width: 30vh;
   height: 45vh;
+  filter: none;
   opacity: 0;
+  rotate: 0deg;
+  scale: 1;
+  translate: 0 0;
   transform: translate(-50%, -50%);
+  transform-origin: 50% 58%;
   color: #f4f4f5;
-  transition: color 160ms ease-out;
+  transition:
+    color 160ms ease-out,
+    filter 180ms ease-out,
+    rotate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .questionShellHovered {
-  color: #ef4444;
+  animation: question-hover-glitch 460ms steps(2, end) infinite;
+  color: #f4f4f5;
+}
+
+@keyframes question-hover-glitch {
+  0%,
+  100% {
+    filter: drop-shadow(-4px 0 #ef4444) drop-shadow(4px 0 #22d3ee);
+    translate: 0 0;
+  }
+  20% {
+    filter: drop-shadow(5px 0 #ef4444) drop-shadow(-3px 0 #22d3ee);
+    translate: -3px 1px;
+  }
+  40% {
+    filter: drop-shadow(-2px 0 #ef4444) drop-shadow(6px 0 #22d3ee);
+    translate: 2px -2px;
+  }
+  60% {
+    filter: drop-shadow(4px 0 #ef4444) drop-shadow(-5px 0 #22d3ee);
+    translate: -1px 2px;
+  }
+  80% {
+    filter: drop-shadow(-5px 0 #ef4444) drop-shadow(3px 0 #22d3ee);
+    translate: 3px -1px;
+  }
 }
 
 .questionShell svg {
@@ -167,4 +202,19 @@
   opacity: 0;
   transform-box: view-box;
   transform-origin: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .questionShell {
+    transition: color 160ms ease-out;
+  }
+
+  .questionShellHovered {
+    animation: none;
+    color: #ef4444;
+    filter: none;
+    rotate: 0deg;
+    scale: 1;
+    translate: 0 0;
+  }
 }

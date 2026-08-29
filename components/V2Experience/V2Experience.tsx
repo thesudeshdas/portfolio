@@ -18,6 +18,7 @@ import {
 import { Noto_Emoji, Outfit } from 'next/font/google';
 
 import V2Cursor from '@/components/V2Cursor/V2Cursor';
+import { ANALYTICS_EVENTS, trackEvent } from '@/lib/analytics';
 import type { IProject } from '@/types/project/project.types';
 
 import V2AttributionPopover from './V2AttributionPopover';
@@ -192,6 +193,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
 
   const handleIntroComplete = useCallback(() => {
     setIsIntroComplete(true);
+    trackEvent(ANALYTICS_EVENTS.v2IntroCompleted);
 
     if (!isFullIntroEnabled) {
       setAreCornersSettled(true);
@@ -277,10 +279,12 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
 
   const handleWorkPanelOpen = useCallback(() => {
     setIsWorkPanelOpen(true);
+    trackEvent(ANALYTICS_EVENTS.v2WorkPanelOpened);
   }, []);
 
   const handleWorkPanelClose = useCallback(() => {
     setIsWorkPanelOpen(false);
+    trackEvent(ANALYTICS_EVENTS.v2WorkPanelClosed);
   }, []);
 
   const handleWorkPanelNumericSettingChange = useCallback(
@@ -484,6 +488,11 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
                     areCornersSettled ? 'opacity-20' : 'opacity-100'
                   }`}
                   href={social.href}
+                  onClick={() => {
+                    trackEvent(ANALYTICS_EVENTS.v2SocialLinkClicked, {
+                      social_platform: social.label
+                    });
+                  }}
                   rel={opensInNewTab ? 'noopener noreferrer' : undefined}
                   style={socialHoverStyle}
                   target={opensInNewTab ? '_blank' : undefined}

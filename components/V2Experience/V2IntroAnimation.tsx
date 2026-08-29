@@ -24,7 +24,11 @@ type ElementBox = {
   width: number;
 };
 
+type IdiomStage = 'hidden' | 'first' | 'second';
+
 const QUESTION_VISIBLE_LEFT_RATIO = 0.15;
+const IDIOM_SECOND_LINE_DELAY_MS = 1800;
+const IS_IDIOM_REVEAL_ENABLED = false;
 
 function place(element: HTMLElement, box: ElementBox) {
   Object.assign(element.style, {
@@ -113,6 +117,7 @@ export default function V2IntroAnimation({
   showQuestionHoverZone?: boolean;
 }) {
   const [internalReplayToken, setInternalReplayToken] = useState(0);
+  const [idiomStage, setIdiomStage] = useState<IdiomStage>('hidden');
   const [settings, setSettings] = useState<V2IntroSettings>(() => ({
     ...DEFAULT_V2_INTRO_SETTINGS
   }));
@@ -125,6 +130,27 @@ export default function V2IntroAnimation({
   const questionTargetRef = useRef<HTMLSpanElement>(null);
   const questionTracerRef = useRef<SVGCircleElement>(null);
   const wordTargetRef = useRef<HTMLSpanElement>(null);
+  const idiomTimerRef = useRef<number | null>(null);
+
+  const revealIdiom = useCallback(() => {
+    if (idiomTimerRef.current !== null) {
+      window.clearTimeout(idiomTimerRef.current);
+    }
+
+    setIdiomStage('first');
+    idiomTimerRef.current = window.setTimeout(() => {
+      setIdiomStage('second');
+      idiomTimerRef.current = null;
+    }, IDIOM_SECOND_LINE_DELAY_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (idiomTimerRef.current !== null) {
+        window.clearTimeout(idiomTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSettingChange = useCallback(
     (key: Exclude<keyof V2IntroSettings, 'easing'>, value: number) => {
@@ -700,15 +726,64 @@ export default function V2IntroAnimation({
           >
             ?
           </span>
-          <span
-            aria-hidden='true'
-            data-v2-question-hover-zone='true'
-            className={`${styles.questionHoverZone} ${
-              showQuestionHoverZone ? styles.questionHoverZoneVisible : ''
-            } ${isQuestionHoverEnabled ? styles.questionHoverZoneEnabled : ''}`}
-          />
+          {IS_IDIOM_REVEAL_ENABLED ? (
+            <button
+              aria-label='Reveal idiom'
+              data-v2-question-hover-zone='true'
+              disabled={!isQuestionHoverEnabled}
+              className={`${styles.questionHoverZone} ${
+                showQuestionHoverZone ? styles.questionHoverZoneVisible : ''
+              } ${
+                isQuestionHoverEnabled ? styles.questionHoverZoneEnabled : ''
+              }`}
+              onClick={revealIdiom}
+              type='button'
+            />
+          ) : (
+            <span
+              aria-hidden='true'
+              data-v2-question-hover-zone='true'
+              className={`${styles.questionHoverZone} ${
+                showQuestionHoverZone ? styles.questionHoverZoneVisible : ''
+              } ${
+                isQuestionHoverEnabled ? styles.questionHoverZoneEnabled : ''
+              }`}
+            />
+          )}
         </span>
       </h1>
+
+      {IS_IDIOM_REVEAL_ENABLED && idiomStage !== 'hidden' ? (
+        <>
+          <p
+            aria-hidden='true'
+            className={`${styles.idiom} ${fontClassName ?? ''}`}
+          >
+            <span
+              className={`${styles.idiomLine} ${
+                idiomStage === 'first' ? styles.idiomLineVisible : ''
+              }`}
+            >
+              curiousity killed the cat
+            </span>
+            <span
+              className={`${styles.idiomLine} ${
+                idiomStage === 'second' ? styles.idiomLineVisible : ''
+              }`}
+            >
+              satisfaction brought it back
+            </span>
+          </p>
+          <span
+            aria-live='polite'
+            className='sr-only'
+          >
+            {idiomStage === 'first'
+              ? 'curiousity killed the cat'
+              : 'satisfaction brought it back'}
+          </span>
+        </>
+      ) : null}
 
       <div
         ref={handShellRef}

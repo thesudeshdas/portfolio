@@ -9,6 +9,8 @@ import {
   useState
 } from 'react';
 
+import { ANALYTICS_EVENTS, trackEvent } from '@/lib/analytics';
+
 import V2MusicDevPanel from './V2MusicDevPanel';
 import { v2MusicTracks } from './v2-music.data';
 import {
@@ -265,11 +267,19 @@ export default function V2MusicPlayer({
 
     if (!audio.paused) {
       continuePlaybackRef.current = false;
+      trackEvent(ANALYTICS_EVENTS.v2MusicControlUsed, {
+        action: 'pause',
+        track_title: currentTrack.title
+      });
       audio.pause();
       return;
     }
 
     continuePlaybackRef.current = true;
+    trackEvent(ANALYTICS_EVENTS.v2MusicControlUsed, {
+      action: 'play',
+      track_title: currentTrack.title
+    });
     void playCurrentTrack();
   }
 

@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import LenisProvider from '@/components/LenisProvider/LenisProvider';
+import Analytics from '@/components/Analytics/Analytics';
 
 // import components
 import { AppNav, Footer } from '@/components/index';
@@ -29,6 +30,8 @@ export default function RootLayout({
       <body
         className={`${inter.className} flex min-h-full flex-col items-stretch`}
       >
+        <Analytics />
+
         <ThemeProvider
           attribute='class'
           defaultTheme='system'

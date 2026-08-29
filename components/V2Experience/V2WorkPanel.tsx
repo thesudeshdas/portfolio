@@ -10,6 +10,7 @@ import {
   useState
 } from 'react';
 
+import { ANALYTICS_EVENTS, trackEvent } from '@/lib/analytics';
 import type { IProject } from '@/types/project/project.types';
 
 import V2WorkPanelContent from './V2WorkPanelContent';
@@ -77,6 +78,10 @@ export default function V2WorkPanel({
   const handleWorkCategoryChange = useCallback(
     (category: { direction: number; id: string; label: string }) => {
       setWorkCategory(category);
+      trackEvent(ANALYTICS_EVENTS.v2WorkCategoryViewed, {
+        category_id: category.id,
+        category_label: category.label
+      });
     },
     []
   );

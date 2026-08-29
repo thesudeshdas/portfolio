@@ -3,6 +3,32 @@
   text-align: center;
 }
 
+.idiom {
+  position: absolute;
+  top: calc(100% + clamp(1.25rem, 3vh, 2.5rem));
+  left: 50%;
+  display: grid;
+  width: max-content;
+  max-width: 85vw;
+  color: #f4f4f5;
+  font-size: clamp(1rem, 1.75vw, 1.5rem);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.idiomLine {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity 650ms ease-in-out;
+}
+
+.idiomLineVisible {
+  opacity: 0.9;
+}
+
 .spotlightExclusion {
   position: relative;
   z-index: 1;
@@ -70,8 +96,12 @@
   z-index: 3;
   width: var(--v2-question-zone-width);
   height: var(--v2-question-zone-height);
+  padding: 0;
   border: 1px solid transparent;
   border-radius: 50%;
+  appearance: none;
+  background: transparent;
+  outline: none;
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
@@ -205,6 +235,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .idiomLine {
+    transition-duration: 0ms;
+  }
+
   .questionShell {
     transition: color 160ms ease-out;
   }

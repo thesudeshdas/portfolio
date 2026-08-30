@@ -3,7 +3,14 @@
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import type { IV2Writing } from '@/types/writing/writing.types';
@@ -28,7 +35,6 @@ function WritingMeta({ writing }: { writing: IV2Writing }) {
     <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500'>
       <time dateTime={writing.date}>{formatDate(writing.date)}</time>
       <span>{writing.readingMinutes} min read</span>
-      <span>{writing.tags.join(', ')}</span>
     </div>
   );
 }
@@ -59,13 +65,15 @@ function ReadMore({
             onClick={() => onSelect(writing)}
             type='button'
           >
-            <Image
-              alt={`Cover for ${writing.title}`}
-              className='aspect-[16/10] w-full object-cover grayscale transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0'
-              height={500}
-              src={writing.image}
-              width={800}
-            />
+            <span className='relative block aspect-video w-full overflow-hidden'>
+              <Image
+                fill
+                alt={`Cover for ${writing.title}`}
+                className='object-cover grayscale transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0'
+                sizes='(max-width: 640px) 100vw, 33vw'
+                src={writing.image}
+              />
+            </span>
 
             <span className='mt-4 block text-xl !leading-[1.2] font-light tracking-[-0.025em] text-zinc-200 transition-colors group-hover:text-white'>
               {writing.title}
@@ -86,13 +94,13 @@ function ReadMore({
 function MarkdownArticle({
   onHeaderTitleChange,
   onSelect,
-  scrollRoot,
+  scrollRootRef,
   writing,
   writings
 }: {
   onHeaderTitleChange: (title: string | null) => void;
   onSelect: (writing: IV2Writing) => void;
-  scrollRoot: HTMLElement | null;
+  scrollRootRef: RefObject<HTMLDivElement | null>;
   writing: IV2Writing;
   writings: IV2Writing[];
 }) {
@@ -100,6 +108,7 @@ function MarkdownArticle({
 
   useEffect(() => {
     const title = titleRef.current;
+    const scrollRoot = scrollRootRef.current;
 
     if (!title || !scrollRoot) {
       return;
@@ -127,7 +136,7 @@ function MarkdownArticle({
       observer.disconnect();
       onHeaderTitleChange(null);
     };
-  }, [onHeaderTitleChange, scrollRoot, writing.title]);
+  }, [onHeaderTitleChange, scrollRootRef, writing.title]);
 
   return (
     <article className='v2-writing-article mx-auto w-full max-w-[800px] pb-20'>
@@ -139,9 +148,37 @@ function MarkdownArticle({
         >
           {writing.title}
         </h3>
-        <p className='v2-writing-description mt-6 max-w-[62ch] text-sm leading-7 text-zinc-400 sm:text-base'>
-          {writing.description}
-        </p>
+
+        <div className='relative mt-8 aspect-video w-full overflow-hidden'>
+          <Image
+            fill
+            alt={writing.imageAlt}
+            className='object-cover'
+            priority
+            sizes='(max-width: 900px) 100vw, 800px'
+            src={writing.image}
+          />
+        </div>
+
+        <div className='mt-3 text-sm text-zinc-500'>
+          <ReactMarkdown
+            components={{
+              a: ({ children, href }) => (
+                <a
+                  className='underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-zinc-200'
+                  href={href}
+                  rel='noopener noreferrer'
+                  target='_blank'
+                >
+                  {children}
+                </a>
+              ),
+              p: ({ children }) => <span>{children}</span>
+            }}
+          >
+            {writing.attribution}
+          </ReactMarkdown>
+        </div>
       </header>
 
       <ReactMarkdown
@@ -164,16 +201,19 @@ function MarkdownArticle({
               {children}
             </h3>
           ),
+          hr: () => <hr className='my-10 border-zinc-800' />,
           img: ({ alt, src }) =>
             src ? (
-              <Image
-                alt={alt ?? ''}
-                className='my-10 aspect-[16/9] w-full rounded-sm object-cover grayscale'
-                height={900}
-                src={src}
-                unoptimized
-                width={1600}
-              />
+              <span className='relative my-10 block aspect-video w-full overflow-hidden rounded-sm'>
+                <Image
+                  fill
+                  unoptimized
+                  alt={alt ?? ''}
+                  className='object-cover grayscale'
+                  sizes='(max-width: 900px) 100vw, 800px'
+                  src={src}
+                />
+              </span>
             ) : null,
           li: ({ children }) => (
             <li className='pl-1 text-sm leading-7 text-zinc-300 sm:text-base sm:leading-8'>
@@ -318,7 +358,7 @@ export default function V2WritingsPanelContent({
             <MarkdownArticle
               onHeaderTitleChange={onActiveWritingTitleChange}
               onSelect={handleSelect}
-              scrollRoot={scrollContainerRef.current}
+              scrollRootRef={scrollContainerRef}
               writing={activeWriting}
               writings={writings.filter(
                 (writing) => writing.slug !== activeWriting.slug
@@ -337,16 +377,13 @@ export default function V2WritingsPanelContent({
             }}
           >
             <div className='v2-writing-index'>
-              {writings.map((writing, index) => (
+              {writings.map((writing) => (
                 <button
                   key={writing.slug}
-                  className='v2-writing-index-item group grid w-full gap-4 border-t border-zinc-800 py-7 text-left transition-opacity duration-300 focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-zinc-400 active:scale-[0.995] sm:grid-cols-[52px_minmax(0,1fr)_180px_auto] sm:items-center sm:py-9'
+                  className='v2-writing-index-item group grid w-full gap-4 border-t border-zinc-800 py-7 text-left transition-opacity duration-300 focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-zinc-400 active:scale-[0.995] sm:grid-cols-[minmax(0,1fr)_180px_auto] sm:items-center sm:py-9'
                   onClick={() => handleSelect(writing)}
                   type='button'
                 >
-                  <span className='text-sm text-zinc-700'>
-                    {(index + 1).toString().padStart(2, '0')}
-                  </span>
                   <span className='max-w-3xl text-2xl leading-tight font-extralight tracking-[-0.035em] text-zinc-300 transition-transform duration-300 group-hover:translate-x-2 group-hover:text-white sm:text-4xl'>
                     {writing.title}
                   </span>

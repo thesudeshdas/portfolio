@@ -63,9 +63,11 @@ export async function getAllV2Writings(): Promise<IV2Writing[]> {
       const wordCount = markdown.trim().split(/\s+/).filter(Boolean).length;
 
       return {
+        attribution: metadata.attribution,
         date: metadata.date,
         description: metadata.description,
         image: metadata.image,
+        imageAlt: metadata.imageAlt,
         markdown,
         readingMinutes: Math.max(1, Math.ceil(wordCount / 220)),
         slug: filename.replace(/\.md$/, ''),

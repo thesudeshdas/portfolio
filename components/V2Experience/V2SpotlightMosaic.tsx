@@ -19,32 +19,37 @@ interface BlobTarget extends BlobPoint {
 const BLOB_FOLLOW_SPEEDS = [0.48, 0.2, 0.12];
 const POINTER_STOP_THRESHOLD_MS = 80;
 
+const UNSPLASH_IMAGE_BASE_URL = 'https://images.unsplash.com';
+const UNSPLASH_IMAGE_PARAMS = '?auto=format&fit=crop&w=800&q=82';
+
 const mosaicImages = [
-  '/dev/project-videos/growthx-talent-platform.jpg',
-  '/images/music/eternal-garden.jpg',
-  '/dev/project-videos/talentplace-career-profile-builder.jpg',
-  '/dev/takeABreak.jpg',
-  '/dev/project-videos/neog-camp.jpg',
-  '/images/music/jazz-mango.jpg',
-  '/dev/project-videos/growthx-ai-roadmap.jpg',
-  '/gojo-compressed.png',
-  '/dev/project-videos/fun-with-flags.jpg',
-  '/images/music/blue-dream.jpg',
-  '/dev/project-videos/growthx-elevate.jpg',
-  '/dev/project-videos/etch-a-sketch.jpg',
-  '/images/music/book-bag.jpg',
-  '/dev/project-videos/speak-shakespeare.jpg',
-  '/dev/dashtra.png',
-  '/dev/project-videos/rock-paper-scissors.jpg',
-  '/images/music/natural-light.jpg',
-  '/dev/catalyst.png',
-  '/dev/project-videos/tic-tac-toe.jpg',
-  '/dev/neog.png',
-  '/dev/project-videos/skill-recommendation-app.jpg',
-  '/dev/admissions.png',
-  '/dev/project-videos/speak-banana.jpg',
-  '/dev/jobPortal.png'
-];
+  'photo-1720727226792-96093dc8cadb',
+  'photo-1720727226811-44865cb31c23',
+  'photo-1689268573450-e8506b8d31d9',
+  'photo-1717501219402-4444fcef55e7',
+  'photo-1715464881691-414b4028c0a0',
+  'photo-1715464502545-090ee1dc122f',
+  'photo-1714911463721-193701866e58',
+  'photo-1715465115490-3048d08ca12b',
+  'photo-1705973483661-552b4be318c6',
+  'photo-1621974639426-4cbecbd347eb',
+  'photo-1685871286419-58e4fc0de8e1',
+  'photo-1674381553426-48184d934c4c',
+  'photo-1674492959000-437090de3acc',
+  'photo-1674488961498-352eef9e4ea6',
+  'photo-1632516643720-e7f5d7d6ecc9',
+  'photo-1665355307573-fdf3a2f79a83',
+  'photo-1634186612805-06d3bd15376b',
+  'photo-1634515870103-d741817c25b4',
+  'photo-1618005182384-a83a8bd57fbe',
+  'photo-1669295384050-a1d4357bd1d7',
+  'photo-1604079628040-94301bb21b91',
+  'photo-1620121692029-d088224ddc74',
+  'photo-1567095761054-7a02e69e5c43',
+  'photo-1618005198919-d3d4b5a92ead'
+].map(
+  (imageId) => `${UNSPLASH_IMAGE_BASE_URL}/${imageId}${UNSPLASH_IMAGE_PARAMS}`
+);
 
 export default function V2SpotlightMosaic({
   isEnabled,

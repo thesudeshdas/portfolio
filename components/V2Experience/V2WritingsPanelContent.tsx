@@ -18,6 +18,7 @@ import type { IV2Writing } from '@/types/writing/writing.types';
 interface IV2WritingsPanelContentProps {
   initialWritingSlug?: string;
   onActiveWritingTitleChange: (title: string | null) => void;
+  onWritingSlugChange: (slug: string | undefined) => void;
   writings: IV2Writing[];
 }
 
@@ -252,6 +253,7 @@ function MarkdownArticle({
 export default function V2WritingsPanelContent({
   initialWritingSlug,
   onActiveWritingTitleChange,
+  onWritingSlugChange,
   writings
 }: IV2WritingsPanelContentProps) {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(() =>
@@ -269,11 +271,9 @@ export default function V2WritingsPanelContent({
     (writing: IV2Writing) => {
       setSelectedSlug(writing.slug);
       onActiveWritingTitleChange(null);
+      onWritingSlugChange(writing.slug);
 
-      if (
-        window.location.pathname.startsWith('/writings') &&
-        window.location.pathname !== `/writings/${writing.slug}`
-      ) {
+      if (window.location.pathname !== `/writings/${writing.slug}`) {
         window.history.pushState(null, '', `/writings/${writing.slug}`);
       }
 
@@ -284,39 +284,29 @@ export default function V2WritingsPanelContent({
         });
       });
     },
-    [onActiveWritingTitleChange, shouldReduceMotion]
+    [onActiveWritingTitleChange, onWritingSlugChange, shouldReduceMotion]
   );
   const handleBack = useCallback(() => {
     setSelectedSlug(null);
     onActiveWritingTitleChange(null);
+    onWritingSlugChange(undefined);
 
-    if (
-      window.location.pathname.startsWith('/writings') &&
-      window.location.pathname !== '/writings'
-    ) {
+    if (window.location.pathname !== '/writings') {
       window.history.pushState(null, '', '/writings');
     }
-  }, [onActiveWritingTitleChange]);
+  }, [onActiveWritingTitleChange, onWritingSlugChange]);
 
   useEffect(() => {
-    const handlePopState = () => {
-      const slugMatch = window.location.pathname.match(
-        /^\/writings\/([^/]+)\/?$/
-      );
-      const routeSlug = slugMatch ? decodeURIComponent(slugMatch[1]) : null;
-      const nextSlug = writings.some((writing) => writing.slug === routeSlug)
-        ? routeSlug
-        : null;
+    const nextSlug = writings.some(
+      (writing) => writing.slug === initialWritingSlug
+    )
+      ? initialWritingSlug ?? null
+      : null;
 
-      setSelectedSlug(nextSlug);
-      onActiveWritingTitleChange(null);
-      scrollContainerRef.current?.scrollTo({ top: 0 });
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [onActiveWritingTitleChange, writings]);
+    setSelectedSlug(nextSlug);
+    onActiveWritingTitleChange(null);
+    scrollContainerRef.current?.scrollTo({ top: 0 });
+  }, [initialWritingSlug, onActiveWritingTitleChange, writings]);
 
   if (writings.length === 0) {
     return (

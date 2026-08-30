@@ -17,6 +17,7 @@ interface IV2WritingsPanelProps {
   initialWritingSlug?: string;
   isOpen: boolean;
   onClose: () => void;
+  onWritingSlugChange: (slug: string | undefined) => void;
   settings: V2WorkPanelSettings;
   workHoverStyle: CSSProperties;
   writings: IV2Writing[];
@@ -57,6 +58,7 @@ export default function V2WritingsPanel({
   initialWritingSlug,
   isOpen,
   onClose,
+  onWritingSlugChange,
   settings,
   workHoverStyle,
   writings
@@ -278,6 +280,7 @@ export default function V2WritingsPanel({
               <V2WritingsPanelContent
                 initialWritingSlug={initialWritingSlug}
                 onActiveWritingTitleChange={setActiveWritingTitle}
+                onWritingSlugChange={onWritingSlugChange}
                 writings={writings}
               />
             </div>

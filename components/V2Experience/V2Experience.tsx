@@ -202,6 +202,9 @@ export default function V2Experience({
   const [isWorkPanelOpen, setIsWorkPanelOpen] = useState(false);
   const [hasWritingsPanelOpened, setHasWritingsPanelOpened] = useState(false);
   const [isWritingsPanelOpen, setIsWritingsPanelOpen] = useState(false);
+  const [requestedWritingSlug, setRequestedWritingSlug] = useState<
+    string | undefined
+  >(initialWritingSlug);
 
   const handleIntroStart = useCallback(() => {
     if (!isFullIntroEnabled) {
@@ -318,9 +321,51 @@ export default function V2Experience({
     trackEvent(ANALYTICS_EVENTS.v2WritingsPanelOpened);
   }, []);
 
+  const handleWritingsNavigationOpen = useCallback(() => {
+    setRequestedWritingSlug(undefined);
+
+    if (window.location.pathname !== '/writings') {
+      window.history.pushState(null, '', '/writings');
+    }
+
+    handleWritingsPanelOpen();
+  }, [handleWritingsPanelOpen]);
+
   const handleWritingsPanelClose = useCallback(() => {
     setIsWritingsPanelOpen(false);
+    setRequestedWritingSlug(undefined);
+
+    if (window.location.pathname.startsWith('/writings')) {
+      window.history.pushState(null, '', '/');
+    }
+
     trackEvent(ANALYTICS_EVENTS.v2WritingsPanelClosed);
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const slugMatch = window.location.pathname.match(
+        /^\/writings\/([^/]+)\/?$/
+      );
+      const isWritingsPath =
+        window.location.pathname === '/writings' || slugMatch !== null;
+
+      if (!isWritingsPath) {
+        setIsWritingsPanelOpen(false);
+        setRequestedWritingSlug(undefined);
+        return;
+      }
+
+      setRequestedWritingSlug(
+        slugMatch ? decodeURIComponent(slugMatch[1]) : undefined
+      );
+      setHasWritingsPanelOpened(true);
+      setIsWritingsPanelOpen(true);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
@@ -596,11 +641,11 @@ export default function V2Experience({
             areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={{ ...renderedWritingsRevealStyle, lineHeight: '100%' }}
-          onClick={handleWritingsPanelOpen}
+          onClick={handleWritingsNavigationOpen}
           onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault();
-              handleWritingsPanelOpen();
+              handleWritingsNavigationOpen();
             }
           }}
           role='button'
@@ -719,9 +764,10 @@ export default function V2Experience({
       {hasWritingsPanelOpened ? (
         <V2WritingsPanel
           fontClassName={outfit.className}
-          initialWritingSlug={initialWritingSlug}
+          initialWritingSlug={requestedWritingSlug}
           isOpen={isWritingsPanelOpen}
           onClose={handleWritingsPanelClose}
+          onWritingSlugChange={setRequestedWritingSlug}
           settings={workPanelSettings}
           workHoverStyle={workHoverStyle}
           writings={writings}

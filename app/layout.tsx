@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import LenisProvider from '@/components/LenisProvider/LenisProvider';
 import Analytics from '@/components/Analytics/Analytics';
+import MobileSiteBlocker from '@/components/MobileSiteBlocker/MobileSiteBlocker';
 
 // import components
 import { AppNav, Footer } from '@/components/index';
@@ -39,6 +40,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LenisProvider>
+            <MobileSiteBlocker />
+
             <div className='fixed inset-0 z-[-2] bg-linear-to-b from-zinc-50 from-80% to-zinc-50 dark:from-zinc-900 dark:to-zinc-900'></div>
 
             <AppNav />

@@ -5,6 +5,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
+  useRef,
   useState
 } from 'react';
 import {
@@ -16,12 +17,17 @@ import {
   FiYoutube
 } from 'react-icons/fi';
 import { Noto_Emoji, Outfit } from 'next/font/google';
+import dynamic from 'next/dynamic';
 
 import V2Cursor from '@/components/V2Cursor/V2Cursor';
 import { ANALYTICS_EVENTS, trackEvent } from '@/lib/analytics';
 import type { IProject } from '@/types/project/project.types';
+import type { IV2Writing } from '@/types/writing/writing.types';
 
 import V2AttributionPopover from './V2AttributionPopover';
+import V2CornerPreviewDevPanel, {
+  type V2CornerPreviewMode
+} from './V2CornerPreviewDevPanel';
 import V2IntroAnimation from './V2IntroAnimation';
 import V2MusicPlayer from './V2MusicPlayer';
 import V2SocialHoverDevPanel from './V2SocialHoverDevPanel';
@@ -32,6 +38,7 @@ import V2WorkHoverDevPanel from './V2WorkHoverDevPanel';
 import {
   DEFAULT_V2_CORNER_SETTINGS,
   getV2CornerDelay,
+  IS_V2_CORNER_PREVIEW_DEV_PANEL_ENABLED,
   IS_V2_SKIP_INITIAL_ANIMATION,
   type V2CornerSettings
 } from './v2-corner.settings';
@@ -68,6 +75,10 @@ const outfit = Outfit({
 const notoEmoji = Noto_Emoji({
   subsets: ['emoji'],
   weight: '400'
+});
+
+const V2WritingsPanel = dynamic(() => import('./V2WritingsPanel'), {
+  ssr: false
 });
 
 const socialLinks = [
@@ -142,10 +153,20 @@ function cornerRevealStyle(
 }
 
 interface IV2ExperienceProps {
+  initialWritingSlug?: string;
+  initialWritingsPanelOpen?: boolean;
+  playInitialAnimation?: boolean;
   projects: IProject[];
+  writings: IV2Writing[];
 }
 
-export default function V2Experience({ projects }: IV2ExperienceProps) {
+export default function V2Experience({
+  initialWritingSlug,
+  initialWritingsPanelOpen = false,
+  playInitialAnimation,
+  projects,
+  writings
+}: IV2ExperienceProps) {
   const cornerSettings = DEFAULT_V2_CORNER_SETTINGS;
   const [socialHoverSettings, setSocialHoverSettings] =
     useState<V2SocialHoverSettings>(() => ({
@@ -160,23 +181,27 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
       ...DEFAULT_V2_WORK_PANEL_SETTINGS
     }));
   const spotlightSettings: V2SpotlightSettings = DEFAULT_V2_SPOTLIGHT_SETTINGS;
-  const isFullIntroEnabled = !IS_V2_SKIP_INITIAL_ANIMATION;
+  const isFullIntroEnabled =
+    playInitialAnimation ?? !IS_V2_SKIP_INITIAL_ANIMATION;
   const introReplayToken = 0;
+  const hasAutoOpenedWritingsRef = useRef(false);
   const [areCornersSettled, setAreCornersSettled] = useState(
-    IS_V2_SKIP_INITIAL_ANIMATION
+    !isFullIntroEnabled
   );
-  const [isIntroComplete, setIsIntroComplete] = useState(
-    IS_V2_SKIP_INITIAL_ANIMATION
-  );
+  const [isIntroComplete, setIsIntroComplete] = useState(!isFullIntroEnabled);
   const [isIntroInteractionReady, setIsIntroInteractionReady] = useState(
-    IS_V2_SKIP_INITIAL_ANIMATION
+    !isFullIntroEnabled
   );
   const [isHeadlineDimmed, setIsHeadlineDimmed] = useState(false);
   const [isIdeaChaseActive, setIsIdeaChaseActive] = useState(false);
   const [isQuestionHovered, setIsQuestionHovered] = useState(false);
   const [isSpotlightSuppressed, setIsSpotlightSuppressed] = useState(false);
   const [isWorkZoneHovered, setIsWorkZoneHovered] = useState(false);
+  const [cornerPreviewMode, setCornerPreviewMode] =
+    useState<V2CornerPreviewMode>('live');
   const [isWorkPanelOpen, setIsWorkPanelOpen] = useState(false);
+  const [hasWritingsPanelOpened, setHasWritingsPanelOpened] = useState(false);
+  const [isWritingsPanelOpen, setIsWritingsPanelOpen] = useState(false);
 
   const handleIntroStart = useCallback(() => {
     if (!isFullIntroEnabled) {
@@ -201,7 +226,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
   }, [isFullIntroEnabled]);
 
   const cornerSettleDelay =
-    getV2CornerDelay(cornerSettings, 2) +
+    getV2CornerDelay(cornerSettings, 3) +
     cornerSettings.duration +
     cornerSettings.finalDelay;
 
@@ -287,6 +312,34 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     trackEvent(ANALYTICS_EVENTS.v2WorkPanelClosed);
   }, []);
 
+  const handleWritingsPanelOpen = useCallback(() => {
+    setHasWritingsPanelOpened(true);
+    setIsWritingsPanelOpen(true);
+    trackEvent(ANALYTICS_EVENTS.v2WritingsPanelOpened);
+  }, []);
+
+  const handleWritingsPanelClose = useCallback(() => {
+    setIsWritingsPanelOpen(false);
+    trackEvent(ANALYTICS_EVENTS.v2WritingsPanelClosed);
+  }, []);
+
+  useEffect(() => {
+    if (
+      !initialWritingsPanelOpen ||
+      !isIntroInteractionReady ||
+      hasAutoOpenedWritingsRef.current
+    ) {
+      return;
+    }
+
+    hasAutoOpenedWritingsRef.current = true;
+    handleWritingsPanelOpen();
+  }, [
+    handleWritingsPanelOpen,
+    initialWritingsPanelOpen,
+    isIntroInteractionReady
+  ]);
+
   const handleWorkPanelNumericSettingChange = useCallback(
     (key: V2WorkPanelNumericSettingKey, value: number) => {
       setWorkPanelSettings((currentSettings) => ({
@@ -336,28 +389,80 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     ...workRevealStyle,
     opacity: areCornersSettled ? 1 : workRevealStyle.opacity
   };
-  const socialsRevealStyle = cornerRevealStyle(
+  const writingsRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
     areCornersSettled,
     1,
     1
   );
-  const settledSocialsRevealStyle = {
-    ...socialsRevealStyle,
-    opacity: areCornersSettled ? 1 : socialsRevealStyle.opacity
+  const settledWritingsRevealStyle = {
+    ...writingsRevealStyle,
+    opacity: areCornersSettled ? 1 : writingsRevealStyle.opacity
   };
-  const musicRevealStyle = cornerRevealStyle(
+  const isWorkInitialPreview =
+    cornerPreviewMode === 'work' || cornerPreviewMode === 'both';
+  const isWritingsInitialPreview =
+    cornerPreviewMode === 'writings' || cornerPreviewMode === 'both';
+  const isInitialCornerPhase = isIntroComplete && !areCornersSettled;
+  const isCornerSettling = areCornersSettled && !isIntroInteractionReady;
+  const isWorkAtInitialScale = isWorkInitialPreview || isInitialCornerPhase;
+  const isWritingsAtInitialScale =
+    isWritingsInitialPreview || isInitialCornerPhase;
+  const initialPreviewSpacingOffset =
+    (cornerSettings.revealScale - 1) * 24 * 1.75;
+  const initialCornerPreviewStyle = {
+    opacity: 1,
+    scale: 1,
+    translate: '0 0',
+    transition: 'none'
+  } as CSSProperties;
+  const renderedWorkRevealStyle = isWorkInitialPreview
+    ? initialCornerPreviewStyle
+    : { ...settledWorkRevealStyle, scale: 1 };
+  const renderedWritingsRevealStyle = isWritingsInitialPreview
+    ? initialCornerPreviewStyle
+    : { ...settledWritingsRevealStyle, scale: 1 };
+  const socialsRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
     areCornersSettled,
     2,
+    1
+  );
+  const settledSocialsRevealStyle = {
+    ...socialsRevealStyle,
+    opacity: areCornersSettled ? 1 : socialsRevealStyle.opacity
+  };
+  const renderedSocialsRevealStyle: CSSProperties =
+    cornerPreviewMode === 'both'
+      ? {
+          ...settledSocialsRevealStyle,
+          opacity: 0,
+          pointerEvents: 'none',
+          transition: 'none'
+        }
+      : settledSocialsRevealStyle;
+  const musicRevealStyle = cornerRevealStyle(
+    cornerSettings,
+    isIntroComplete,
+    areCornersSettled,
+    3,
     -1
   );
   const settledMusicRevealStyle = {
     ...musicRevealStyle,
     opacity: areCornersSettled ? 1 : musicRevealStyle.opacity
   };
+  const renderedMusicRevealStyle: CSSProperties =
+    cornerPreviewMode === 'both'
+      ? {
+          ...settledMusicRevealStyle,
+          opacity: 0,
+          pointerEvents: 'none',
+          transition: 'none'
+        }
+      : settledMusicRevealStyle;
   const cornerContentOpacity = areCornersSettled
     ? cornerSettings.finalOpacity
     : 1;
@@ -368,6 +473,45 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
     '--v2-work-underline-gap': `${workHoverSettings.underlineGap}px`,
     '--v2-work-underline-width': `${workHoverSettings.underlineWidth}%`
   } as CSSProperties;
+  const workLabelStyle = {
+    ...workHoverStyle,
+    ...(isWorkAtInitialScale
+      ? {
+          scale: cornerSettings.revealScale,
+          transformOrigin: 'top right'
+        }
+      : {}),
+    ...(isCornerSettling
+      ? {
+          transitionDuration: `${cornerSettings.finalTransitionDuration}ms`,
+          transitionProperty: 'scale, translate',
+          transitionTimingFunction: cornerSettings.easing
+        }
+      : {})
+  } as CSSProperties;
+  const writingsLabelStyle = {
+    ...workHoverStyle,
+    ...(isWritingsAtInitialScale
+      ? {
+          scale: cornerSettings.revealScale,
+          transformOrigin: 'top right'
+        }
+      : {}),
+    ...(isWorkAtInitialScale
+      ? { translate: `0 ${initialPreviewSpacingOffset}px` }
+      : {}),
+    ...(isCornerSettling
+      ? {
+          transitionDuration: `${cornerSettings.finalTransitionDuration}ms`,
+          transitionProperty: 'scale, translate',
+          transitionTimingFunction: cornerSettings.easing
+        }
+      : {})
+  } as CSSProperties;
+  const workContentOpacity = isWorkInitialPreview ? 1 : cornerContentOpacity;
+  const writingsContentOpacity = isWritingsInitialPreview
+    ? 1
+    : cornerContentOpacity;
   const socialHoverStyle = {
     '--v2-social-hover-duration': `${socialHoverSettings.duration}ms`,
     '--v2-social-hover-scale': socialHoverSettings.scale,
@@ -406,7 +550,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
           } v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-work absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-zinc-300 motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
             areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
-          style={{ ...settledWorkRevealStyle, lineHeight: '100%' }}
+          style={{ ...renderedWorkRevealStyle, lineHeight: '100%' }}
           onClick={handleWorkPanelOpen}
           onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') {
@@ -420,8 +564,10 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
           <span
             className='v2-corner-visual inline-block'
             style={{
-              opacity: cornerContentOpacity,
-              transitionDuration: `${cornerSettings.finalTransitionDuration}ms`,
+              opacity: workContentOpacity,
+              transitionDuration: isWorkInitialPreview
+                ? '0ms'
+                : `${cornerSettings.finalTransitionDuration}ms`,
               transitionProperty: 'opacity',
               transitionTimingFunction: cornerSettings.easing
             }}
@@ -431,9 +577,52 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
               className={`relative inline-block ${
                 isWorkZoneHovered ? 'v2-work-zone-hovered' : ''
               }`}
-              style={workHoverStyle}
+              style={workLabelStyle}
             >
               work
+            </span>
+          </span>
+        </span>
+
+        <span
+          aria-haspopup='dialog'
+          aria-label='Open writings'
+          data-v2-content-cursor='true'
+          data-v2-hide-cursor='true'
+          data-v2-spotlight-exclusion-zone='true'
+          className={`${
+            outfit.className
+          } v2-corner-item v2-spotlight-exclusion-zone absolute top-[66px] right-2.5 z-[1] origin-top-right text-[24px] font-extralight text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-zinc-300 motion-reduce:transition-none sm:top-[74px] sm:right-4.5 lg:top-[80px] lg:right-6 ${
+            areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
+          }`}
+          style={{ ...renderedWritingsRevealStyle, lineHeight: '100%' }}
+          onClick={handleWritingsPanelOpen}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleWritingsPanelOpen();
+            }
+          }}
+          role='button'
+          tabIndex={areCornersSettled ? 0 : -1}
+        >
+          <span
+            className='v2-corner-visual inline-block'
+            style={{
+              opacity: writingsContentOpacity,
+              transitionDuration: isWritingsInitialPreview
+                ? '0ms'
+                : `${cornerSettings.finalTransitionDuration}ms`,
+              transitionProperty: 'opacity',
+              transitionTimingFunction: cornerSettings.easing
+            }}
+          >
+            <span
+              data-v2-top-right-corner={areCornersSettled ? 'true' : undefined}
+              className='relative inline-block'
+              style={writingsLabelStyle}
+            >
+              writings
             </span>
           </span>
         </span>
@@ -454,13 +643,13 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
 
         <V2MusicPlayer
           autoplayDelayMs={
-            getV2CornerDelay(cornerSettings, 2) + cornerSettings.duration
+            getV2CornerDelay(cornerSettings, 3) + cornerSettings.duration
           }
           fontClassName={outfit.className}
           contentOpacity={cornerContentOpacity}
           contentOpacityTransitionMs={cornerSettings.finalTransitionDuration}
           isRevealed={isIntroComplete}
-          revealStyle={settledMusicRevealStyle}
+          revealStyle={renderedMusicRevealStyle}
         />
 
         <div
@@ -468,7 +657,7 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
           className={`v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-socials absolute right-2.5 bottom-2.5 flex origin-bottom-right flex-col items-end gap-3 motion-reduce:transition-none sm:right-4.5 sm:bottom-4.5 lg:right-6 lg:bottom-6 ${
             isIntroComplete ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
-          style={settledSocialsRevealStyle}
+          style={renderedSocialsRevealStyle}
         >
           <div
             aria-label='Social media'
@@ -527,6 +716,18 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
         workHoverStyle={workHoverStyle}
       />
 
+      {hasWritingsPanelOpened ? (
+        <V2WritingsPanel
+          fontClassName={outfit.className}
+          initialWritingSlug={initialWritingSlug}
+          isOpen={isWritingsPanelOpen}
+          onClose={handleWritingsPanelClose}
+          settings={workPanelSettings}
+          workHoverStyle={workHoverStyle}
+          writings={writings}
+        />
+      ) : null}
+
       {IS_V2_WORK_PANEL_DEV_PANEL_ENABLED ? (
         <V2WorkPanelDevPanel
           settings={workPanelSettings}
@@ -549,6 +750,15 @@ export default function V2Experience({ projects }: IV2ExperienceProps) {
           settings={socialHoverSettings}
           onChange={handleSocialHoverSettingChange}
           onReset={handleSocialHoverReset}
+        />
+      ) : null}
+
+      {process.env.NODE_ENV !== 'production' &&
+      IS_V2_CORNER_PREVIEW_DEV_PANEL_ENABLED ? (
+        <V2CornerPreviewDevPanel
+          mode={cornerPreviewMode}
+          onChange={setCornerPreviewMode}
+          revealScale={cornerSettings.revealScale}
         />
       ) : null}
     </main>

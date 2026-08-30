@@ -54,6 +54,7 @@ export const V2_CORNER_EASINGS = [
 ];
 
 export const IS_V2_CORNER_DEV_PANEL_ENABLED = false;
+export const IS_V2_CORNER_PREVIEW_DEV_PANEL_ENABLED = false;
 
 export const IS_V2_SKIP_INITIAL_ANIMATION = true;
 

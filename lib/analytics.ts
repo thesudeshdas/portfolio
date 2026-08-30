@@ -12,6 +12,8 @@ export const ANALYTICS_EVENTS = {
   v2IntroCompleted: 'V2 Intro Completed',
   v2MusicControlUsed: 'V2 Music Control Used',
   v2SocialLinkClicked: 'V2 Social Link Clicked',
+  v2WritingsPanelClosed: 'V2 Writings Panel Closed',
+  v2WritingsPanelOpened: 'V2 Writings Panel Opened',
   v2WorkCategoryViewed: 'V2 Work Category Viewed',
   v2WorkPanelClosed: 'V2 Work Panel Closed',
   v2WorkPanelOpened: 'V2 Work Panel Opened'

@@ -42,4 +42,6 @@ export const DEFAULT_V2_CHASE_BAR_SETTINGS: V2ChaseBarSettings = {
 
 export const IS_V2_CHASE_BAR_DEV_PANEL_ENABLED = false;
 
+export const IS_V2_IDEA_CHASE_ENABLED = false;
+
 export const IS_V2_IDEA_RETURN_DEV_PANEL_ENABLED = false;

@@ -28,6 +28,7 @@ import V2IdeaReturnDevPanel, {
 import {
   DEFAULT_V2_CHASE_BAR_SETTINGS,
   IS_V2_CHASE_BAR_DEV_PANEL_ENABLED,
+  IS_V2_IDEA_CHASE_ENABLED,
   IS_V2_IDEA_RETURN_DEV_PANEL_ENABLED,
   type V2ChaseBarNumericSettingKey,
   type V2ChaseBarSettings
@@ -577,6 +578,7 @@ export default function V2AttributionPopover({
       data-v2-content-cursor='true'
       data-v2-hide-cursor='true'
       type='button'
+      disabled={!IS_V2_IDEA_CHASE_ENABLED}
       className={`${fontClassName} v2-social-attribution v2-expanded-hit-target text-[10px] leading-none font-extralight text-zinc-500 hover:text-zinc-300 focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 sm:text-xs ${
         displayedCalloutMode === 'mock' || !isSettled
           ? 'opacity-100'

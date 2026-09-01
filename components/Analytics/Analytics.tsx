@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
-import { trackPageView } from '@/lib/analytics';
+import { startPageEngagement, trackPageView } from '@/lib/analytics';
 
 export default function Analytics() {
   const pathname = usePathname();
@@ -16,6 +16,8 @@ export default function Analytics() {
 
     lastTrackedPathRef.current = pathname;
     trackPageView(pathname, document.title);
+
+    return startPageEngagement(pathname);
   }, [pathname]);
 
   return null;

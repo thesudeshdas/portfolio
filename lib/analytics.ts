@@ -21,6 +21,8 @@ type ModuleEvent = `${TrackingModule}.${
   | 'element.clicked'
   | 'form.submitted'
   | 'input.changed'
+  | 'link.clicked'
+  | 'page.engaged'
   | 'page.scrolled'
   | 'page.viewed'}`;
 
@@ -46,6 +48,7 @@ export type AnalyticsEventName =
   | ModuleEvent;
 
 const SCROLL_CHECKPOINTS = [25, 50, 75, 100] as const;
+const ENGAGEMENT_REPORT_INTERVAL_MS = 15_000;
 const TRACKING_VERSION = 1;
 const UUID_SEGMENT =
   /\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?=\/|$)/gi;
@@ -80,6 +83,62 @@ export function trackPageView(pathname: string, pageTitle: string) {
   });
 }
 
+export function startPageEngagement(pathname: string) {
+  const path = sanitizeAnalyticsPath(pathname);
+  const trackingModule = getTrackingModule(path);
+  let activeStartedAt =
+    document.visibilityState === 'visible' ? performance.now() : null;
+  let engagedMilliseconds = 0;
+  let lastReportedSeconds = 0;
+
+  const collectActiveTime = () => {
+    if (activeStartedAt === null) return;
+
+    engagedMilliseconds += performance.now() - activeStartedAt;
+    activeStartedAt = performance.now();
+  };
+
+  const reportEngagement = (reason: string) => {
+    collectActiveTime();
+
+    const engagedSeconds = Math.floor(engagedMilliseconds / 1000);
+    if (engagedSeconds <= lastReportedSeconds) return;
+
+    lastReportedSeconds = engagedSeconds;
+    trackEvent(`${trackingModule}.page.engaged`, {
+      engaged_seconds: engagedSeconds,
+      engagement_reason: reason,
+      path
+    });
+  };
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      reportEngagement('visibility_hidden');
+      activeStartedAt = null;
+      return;
+    }
+
+    activeStartedAt = performance.now();
+  };
+
+  const handlePageHide = () => reportEngagement('page_hidden');
+  const interval = window.setInterval(
+    () => reportEngagement('interval'),
+    ENGAGEMENT_REPORT_INTERVAL_MS
+  );
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('pagehide', handlePageHide);
+
+  return () => {
+    reportEngagement('route_changed');
+    window.clearInterval(interval);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('pagehide', handlePageHide);
+  };
+}
+
 export function getTrackingModule(pathname: string): TrackingModule {
   if (pathname.startsWith('/stories')) return 'stories';
   if (pathname.startsWith('/blogs')) return 'blogs';
@@ -96,6 +155,17 @@ export function getTrackingModule(pathname: string): TrackingModule {
 
 export function sanitizeAnalyticsPath(pathname: string) {
   return pathname.split(/[?#]/, 1)[0].replace(UUID_SEGMENT, '/:id');
+}
+
+export function getScrollDepthPercentage(
+  scrollPosition: number,
+  scrollSize: number,
+  viewportSize: number
+) {
+  const scrollableSize = scrollSize - viewportSize;
+  if (scrollableSize <= 0) return 0;
+
+  return Math.min(100, Math.round((scrollPosition / scrollableSize) * 100));
 }
 
 export function sanitizeAnalyticsEvent<
@@ -194,14 +264,42 @@ function registerInteractionTracking() {
 
       const trackingModule = getTrackingModule(window.location.pathname);
       const properties: AnalyticsProperties = {
+        element_label:
+          interactiveElement.getAttribute('aria-label') ??
+          interactiveElement.textContent
+            ?.trim()
+            .replace(/\s+/g, ' ')
+            .slice(0, 80),
+        element_location: interactiveElement
+          .closest('[data-analytics-section]')
+          ?.getAttribute('data-analytics-section'),
         element_type: getElementType(interactiveElement)
       };
 
       if (interactiveElement instanceof HTMLAnchorElement) {
         properties.link_destination = getLinkDestination(interactiveElement);
+        properties.link_hostname = interactiveElement.hostname;
+        properties.link_label =
+          interactiveElement.dataset.analyticsLinkLabel ??
+          interactiveElement.textContent
+            ?.trim()
+            .replace(/\s+/g, ' ')
+            .slice(0, 80);
+        properties.link_location =
+          interactiveElement.dataset.analyticsLinkLocation ??
+          interactiveElement
+            .closest('[data-analytics-section]')
+            ?.getAttribute('data-analytics-section');
       }
 
-      trackEvent(`${trackingModule}.element.clicked`, properties);
+      trackEvent(
+        `${trackingModule}.${
+          interactiveElement instanceof HTMLAnchorElement
+            ? 'link.clicked'
+            : 'element.clicked'
+        }`,
+        properties
+      );
     },
     true
   );
@@ -257,14 +355,12 @@ function registerInteractionTracking() {
 }
 
 function trackScrollDepth() {
-  const scrollableHeight =
-    document.documentElement.scrollHeight - window.innerHeight;
-  if (scrollableHeight <= 0) return;
-
-  const percentage = Math.min(
-    100,
-    Math.round((window.scrollY / scrollableHeight) * 100)
+  const percentage = getScrollDepthPercentage(
+    window.scrollY,
+    document.documentElement.scrollHeight,
+    window.innerHeight
   );
+  if (percentage === 0) return;
   const path = sanitizeAnalyticsPath(window.location.pathname);
   const trackingModule = getTrackingModule(path);
 

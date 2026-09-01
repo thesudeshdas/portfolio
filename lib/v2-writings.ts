@@ -49,6 +49,25 @@ function parseTags(value: string | undefined) {
     .filter(Boolean);
 }
 
+function extractMarkdownLinks(...sources: Array<string | undefined>) {
+  const linksByUrl = new Map<string, string>();
+  const markdownLinkPattern = /\[([^\]]+)]\((https?:\/\/[^)]+)\)/g;
+
+  for (const source of sources) {
+    if (!source) continue;
+
+    for (const match of Array.from(source.matchAll(markdownLinkPattern))) {
+      const [, label, url] = match;
+
+      if (!linksByUrl.has(url)) {
+        linksByUrl.set(url, label.replace(/[*_`]/g, ''));
+      }
+    }
+  }
+
+  return Array.from(linksByUrl, ([url, label]) => ({ label, url }));
+}
+
 export async function getAllV2Writings(): Promise<IV2Writing[]> {
   const filenames = (await fs.readdir(writingsDirectory)).filter((filename) =>
     filename.endsWith('.md')
@@ -68,6 +87,7 @@ export async function getAllV2Writings(): Promise<IV2Writing[]> {
         description: metadata.description,
         image: metadata.image,
         imageAlt: metadata.imageAlt,
+        links: extractMarkdownLinks(markdown, metadata.attribution),
         markdown,
         readingMinutes: Math.max(1, Math.ceil(wordCount / 220)),
         slug: filename.replace(/\.md$/, ''),

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -55,7 +56,8 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react-icons": "^4.11.0",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^3.2.4"
   },
   "lint-staged": {
     "apps/*.{js,jsx,ts,tsx}": "eslint .",

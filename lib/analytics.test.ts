@@ -1,0 +1,66 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  ANALYTICS_EVENTS,
+  getTrackingModule,
+  sanitizeAnalyticsEvent,
+  sanitizeAnalyticsPath
+} from './analytics';
+
+describe('analytics event taxonomy', () => {
+  it('uses dot-separated snake_case event names', () => {
+    for (const eventName of Object.values(ANALYTICS_EVENTS)) {
+      expect(eventName).toMatch(/^[a-z0-9_]+(?:\.[a-z0-9_]+)+$/);
+    }
+  });
+});
+
+describe('getTrackingModule', () => {
+  it.each([
+    ['/', 'home'],
+    ['/stories', 'stories'],
+    ['/stories/launch-notes', 'stories'],
+    ['/blogs/design-systems', 'blogs'],
+    ['/writings/quiet-software', 'writings'],
+    ['/projects/portfolio', 'projects'],
+    ['/code', 'work'],
+    ['/me', 'about'],
+    ['/v2', 'v2'],
+    ['/v3', 'v3'],
+    ['/unknown', 'app']
+  ] as const)('maps %s to %s', (path, module) => {
+    expect(getTrackingModule(path)).toBe(module);
+  });
+});
+
+describe('sanitizeAnalyticsPath', () => {
+  it('removes query strings, hashes, and UUID route segments', () => {
+    expect(
+      sanitizeAnalyticsPath(
+        '/projects/123e4567-e89b-42d3-a456-426614174000?preview=secret#work'
+      )
+    ).toBe('/projects/:id');
+  });
+});
+
+describe('sanitizeAnalyticsEvent', () => {
+  it('removes private URL parts from tracked properties', () => {
+    expect(
+      sanitizeAnalyticsEvent({
+        event: 'stories.page.viewed',
+        properties: {
+          path: '/stories/launch?draft=secret',
+          referrer: 'https://example.com/source?token=secret#section',
+          url: 'https://heywhoisdash.com/stories/launch?draft=secret'
+        }
+      })
+    ).toEqual({
+      event: 'stories.page.viewed',
+      properties: {
+        path: '/stories/launch',
+        referrer: 'https://example.com/source',
+        url: 'https://heywhoisdash.com/stories/launch'
+      }
+    });
+  });
+});

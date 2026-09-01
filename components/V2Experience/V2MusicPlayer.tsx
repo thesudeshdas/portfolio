@@ -116,22 +116,32 @@ export default function V2MusicPlayer({
       }
 
       audio.volume = initialVolume;
+      trackEvent(ANALYTICS_EVENTS.v2MusicPlaybackInitiated, {
+        track_title: currentTrack.title
+      });
 
       try {
         await audio.play();
         setHasPlaybackError(false);
+        trackEvent(ANALYTICS_EVENTS.v2MusicPlaybackSuccess, {
+          track_title: currentTrack.title
+        });
         return true;
-      } catch {
+      } catch (error) {
         continuePlaybackRef.current = false;
         if (showPlaybackError) {
           setHasPlaybackError(true);
         }
         setIsPlaying(false);
         hideMetadata();
+        trackEvent(ANALYTICS_EVENTS.v2MusicPlaybackFailure, {
+          error_name: error instanceof Error ? error.name : 'PlaybackError',
+          track_title: currentTrack.title
+        });
         return false;
       }
     },
-    [hideMetadata]
+    [currentTrack.title, hideMetadata]
   );
 
   useEffect(() => {
@@ -354,6 +364,10 @@ export default function V2MusicPlayer({
               setHasPlaybackError(true);
               setIsPlaying(false);
               hideMetadata();
+              trackEvent(ANALYTICS_EVENTS.v2MusicMediaFailed, {
+                media_error_code: audioRef.current?.error?.code ?? null,
+                track_title: currentTrack.title
+              });
             }}
             onPause={() => {
               setIsPlaying(false);

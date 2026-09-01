@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ANALYTICS_EVENTS,
+  getScrollDepthPercentage,
   getTrackingModule,
   sanitizeAnalyticsEvent,
   sanitizeAnalyticsPath
@@ -12,6 +13,17 @@ describe('analytics event taxonomy', () => {
     for (const eventName of Object.values(ANALYTICS_EVENTS)) {
       expect(eventName).toMatch(/^[a-z0-9_]+(?:\.[a-z0-9_]+)+$/);
     }
+  });
+});
+
+describe('getScrollDepthPercentage', () => {
+  it('measures progress through nested and window scrollers', () => {
+    expect(getScrollDepthPercentage(500, 1500, 500)).toBe(50);
+    expect(getScrollDepthPercentage(1000, 1500, 500)).toBe(100);
+  });
+
+  it('returns zero when content does not scroll', () => {
+    expect(getScrollDepthPercentage(0, 500, 500)).toBe(0);
   });
 });
 
@@ -30,6 +42,16 @@ describe('getTrackingModule', () => {
     ['/unknown', 'app']
   ] as const)('maps %s to %s', (path, module) => {
     expect(getTrackingModule(path)).toBe(module);
+  });
+});
+
+describe('module event coverage', () => {
+  it('supports writing engagement and link click events', () => {
+    const writingEvents = ['writings.link.clicked', 'writings.page.engaged'];
+
+    for (const eventName of writingEvents) {
+      expect(eventName).toMatch(/^[a-z0-9_]+(?:\.[a-z0-9_]+)+$/);
+    }
   });
 });
 

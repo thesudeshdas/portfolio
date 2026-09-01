@@ -13,6 +13,7 @@ import {
 } from 'react';
 import ReactMarkdown from 'react-markdown';
 
+import { getScrollDepthPercentage, trackEvent } from '@/lib/analytics';
 import type { IV2Writing } from '@/types/writing/writing.types';
 
 interface IV2WritingsPanelContentProps {
@@ -28,6 +29,11 @@ const writingDateFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'UTC',
   year: 'numeric'
 });
+const SCROLL_CHECKPOINTS = [25, 50, 75, 100] as const;
+const OPEN_IN_NEW_TAB_PROPS = {
+  referrerPolicy: 'strict-origin-when-cross-origin' as const,
+  target: '_blank'
+};
 
 function getOrdinalSuffix(day: number) {
   const lastTwoDigits = day % 100;
@@ -66,31 +72,31 @@ function WritingMeta({ writing }: { writing: IV2Writing }) {
   );
 }
 
-function ReadMore({
-  onSelect,
-  writings
-}: {
-  onSelect: (writing: IV2Writing) => void;
-  writings: IV2Writing[];
-}) {
+function RelatedWritings({ writings }: { writings: IV2Writing[] }) {
   if (writings.length === 0) {
     return null;
   }
 
   return (
-    <section className='mt-16 border-t border-zinc-800 pt-10'>
+    <section
+      className='mt-16 border-t border-zinc-800 pt-10'
+      data-analytics-section='related'
+    >
       <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-zinc-100'>
-        more by yours truly
+        related
       </h2>
 
       <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
         {writings.map((writing) => (
-          <button
+          <a
             key={writing.slug}
             aria-label={`Read ${writing.title}`}
             className='group text-left transition-transform duration-300 focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 active:scale-[0.98]'
-            onClick={() => onSelect(writing)}
-            type='button'
+            data-analytics-link-label={writing.title}
+            data-analytics-link-location='related'
+            href={`/writings/${writing.slug}`}
+            rel='noopener'
+            {...OPEN_IN_NEW_TAB_PROPS}
           >
             <span className='relative block aspect-video w-full overflow-hidden'>
               <Image
@@ -111,7 +117,7 @@ function ReadMore({
             >
               {formatDate(writing.date)}
             </time>
-          </button>
+          </a>
         ))}
       </div>
     </section>
@@ -120,13 +126,11 @@ function ReadMore({
 
 function MarkdownArticle({
   onHeaderTitleChange,
-  onSelect,
   scrollRootRef,
   writing,
   writings
 }: {
   onHeaderTitleChange: (title: string | null) => void;
-  onSelect: (writing: IV2Writing) => void;
   scrollRootRef: RefObject<HTMLDivElement | null>;
   writing: IV2Writing;
   writings: IV2Writing[];
@@ -166,7 +170,10 @@ function MarkdownArticle({
   }, [onHeaderTitleChange, scrollRootRef, writing.title]);
 
   return (
-    <article className='v2-writing-article mx-auto w-full max-w-[800px] pb-20'>
+    <article
+      className='v2-writing-article mx-auto w-full max-w-[800px] pb-20'
+      data-analytics-section='writing'
+    >
       <header className='mb-12 sm:mb-16'>
         <WritingMeta writing={writing} />
         <h3
@@ -194,8 +201,9 @@ function MarkdownArticle({
                 <a
                   className='underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-zinc-200'
                   href={href}
-                  rel='noopener noreferrer'
-                  target='_blank'
+                  rel='noopener external'
+                  {...OPEN_IN_NEW_TAB_PROPS}
+                  data-analytics-link-location='attribution'
                 >
                   {children}
                 </a>
@@ -210,6 +218,17 @@ function MarkdownArticle({
 
       <ReactMarkdown
         components={{
+          a: ({ children, href }) => (
+            <a
+              className='underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-zinc-100'
+              data-analytics-link-location='writing'
+              href={href}
+              rel='noopener external'
+              {...OPEN_IN_NEW_TAB_PROPS}
+            >
+              {children}
+            </a>
+          ),
           blockquote: ({ children }) => (
             <blockquote className='my-10 border-l border-zinc-500 pl-6 text-xl leading-8 font-light text-zinc-300 sm:text-2xl sm:leading-9'>
               {children}
@@ -268,10 +287,35 @@ function MarkdownArticle({
         {writing.markdown}
       </ReactMarkdown>
 
-      <ReadMore
-        onSelect={onSelect}
-        writings={writings}
-      />
+      {writing.links.length > 0 ? (
+        <section
+          className='mt-16 border-t border-zinc-800 pt-10'
+          data-analytics-section='links'
+        >
+          <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-zinc-100'>
+            links
+          </h2>
+
+          <ul className='space-y-4'>
+            {writing.links.map((link) => (
+              <li key={link.url}>
+                <a
+                  className='text-sm text-zinc-300 underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-white sm:text-base'
+                  data-analytics-link-label={link.label}
+                  data-analytics-link-location='links'
+                  href={link.url}
+                  rel='noopener external'
+                  {...OPEN_IN_NEW_TAB_PROPS}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <RelatedWritings writings={writings} />
     </article>
   );
 }
@@ -288,6 +332,7 @@ export default function V2WritingsPanelContent({
       : null
   );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const trackedScrollCheckpointsRef = useRef(new Set<number>());
   const shouldReduceMotion = useReducedMotion();
   const activeWriting = useMemo(
     () => writings.find((writing) => writing.slug === selectedSlug) ?? null,
@@ -321,6 +366,31 @@ export default function V2WritingsPanelContent({
       window.history.pushState(null, '', '/writings');
     }
   }, [onActiveWritingTitleChange, onWritingSlugChange]);
+  const handleScroll = useCallback(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || !activeWriting) return;
+
+    const percentage = getScrollDepthPercentage(
+      scrollContainer.scrollTop,
+      scrollContainer.scrollHeight,
+      scrollContainer.clientHeight
+    );
+
+    for (const checkpoint of SCROLL_CHECKPOINTS) {
+      if (
+        percentage < checkpoint ||
+        trackedScrollCheckpointsRef.current.has(checkpoint)
+      ) {
+        continue;
+      }
+
+      trackedScrollCheckpointsRef.current.add(checkpoint);
+      trackEvent('writings.page.scrolled', {
+        scroll_depth_percentage: checkpoint,
+        writing_slug: activeWriting.slug
+      });
+    }
+  }, [activeWriting]);
 
   useEffect(() => {
     const nextSlug = writings.some(
@@ -330,6 +400,7 @@ export default function V2WritingsPanelContent({
       : null;
 
     setSelectedSlug(nextSlug);
+    trackedScrollCheckpointsRef.current.clear();
     onActiveWritingTitleChange(null);
     scrollContainerRef.current?.scrollTo({ top: 0 });
   }, [initialWritingSlug, onActiveWritingTitleChange, writings]);
@@ -346,6 +417,8 @@ export default function V2WritingsPanelContent({
     <div
       ref={scrollContainerRef}
       className='h-full overflow-y-auto px-5 py-6 sm:px-8 lg:px-16 lg:py-8'
+      data-analytics-section={activeWriting ? 'writing' : 'writings-index'}
+      onScroll={handleScroll}
     >
       <AnimatePresence
         initial={false}
@@ -373,7 +446,6 @@ export default function V2WritingsPanelContent({
 
             <MarkdownArticle
               onHeaderTitleChange={onActiveWritingTitleChange}
-              onSelect={handleSelect}
               scrollRootRef={scrollContainerRef}
               writing={activeWriting}
               writings={writings.filter(

@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 import { getAllV2Writings } from '@/lib/v2-writings';
 
-const siteUrl = 'https://heywhoisdash.com';
+const siteUrl = 'https://www.heywhoisdash.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const writings = await getAllV2Writings();

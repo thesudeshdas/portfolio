@@ -1,6 +1,12 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    '/writings/*/opengraph-image': [
+      './assets/writings/**/*',
+      './public/writings/**/*'
+    ]
+  },
   skipTrailingSlashRedirect: true,
   images: {
     remotePatterns: [

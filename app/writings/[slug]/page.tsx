@@ -35,7 +35,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalPath
     },
-    authors: [{ name: 'Sudesh Das', url: 'https://heywhoisdash.com' }],
+    authors: [{ name: 'Sudesh Das', url: 'https://www.heywhoisdash.com' }],
     description: writing.description,
     keywords: writing.tags,
     openGraph: {
@@ -80,19 +80,19 @@ export default async function WritingsSlugPage({
     notFound();
   }
 
-  const canonicalUrl = `https://heywhoisdash.com/writings/${slug}`;
+  const canonicalUrl = `https://www.heywhoisdash.com/writings/${slug}`;
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     author: {
       '@type': 'Person',
       name: 'Sudesh Das',
-      url: 'https://heywhoisdash.com'
+      url: 'https://www.heywhoisdash.com'
     },
     datePublished: new Date(writing.date).toISOString(),
     description: writing.description,
     headline: writing.title,
-    image: new URL(writing.image, 'https://heywhoisdash.com').toString(),
+    image: new URL(writing.image, 'https://www.heywhoisdash.com').toString(),
     mainEntityOfPage: canonicalUrl,
     url: canonicalUrl
   };

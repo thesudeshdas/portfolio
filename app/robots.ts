@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       userAgent: '*'
     },
-    sitemap: 'https://heywhoisdash.com/sitemap.xml'
+    sitemap: 'https://www.heywhoisdash.com/sitemap.xml'
   };
 }

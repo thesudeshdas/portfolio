@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import LenisProvider from '@/components/LenisProvider/LenisProvider';
 import Analytics from '@/components/Analytics/Analytics';
 import MobileSiteBlocker from '@/components/MobileSiteBlocker/MobileSiteBlocker';
+import ThemeAwareFavicon from '@/components/ThemeAwareFavicon/ThemeAwareFavicon';
 
 // import components
 import { AppNav, Footer } from '@/components/index';
@@ -39,6 +40,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <ThemeAwareFavicon />
+
           <LenisProvider>
             <MobileSiteBlocker />
 

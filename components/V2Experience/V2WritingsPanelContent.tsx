@@ -29,13 +29,32 @@ const writingDateFormatter = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric'
 });
 
+function getOrdinalSuffix(day: number) {
+  const lastTwoDigits = day % 100;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+    return 'th';
+  }
+
+  switch (day % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
+}
+
 function formatDate(date: string) {
   const parts = writingDateFormatter.formatToParts(new Date(date));
   const day = parts.find((part) => part.type === 'day')?.value;
   const month = parts.find((part) => part.type === 'month')?.value;
   const year = parts.find((part) => part.type === 'year')?.value;
 
-  return `${day} ${month}, ${year}`;
+  return `${day}${getOrdinalSuffix(Number(day))} ${month}, ${year}`;
 }
 
 function WritingMeta({ writing }: { writing: IV2Writing }) {

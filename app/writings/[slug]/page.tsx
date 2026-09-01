@@ -28,10 +28,38 @@ export async function generateMetadata({
     return { title: 'Writing not found' };
   }
 
+  const canonicalPath = `/writings/${slug}`;
+  const imagePath = `${canonicalPath}/opengraph-image`;
+
   return {
+    alternates: {
+      canonical: canonicalPath
+    },
+    authors: [{ name: 'Sudesh Das', url: 'https://heywhoisdash.com' }],
     description: writing.description,
+    keywords: writing.tags,
     openGraph: {
+      authors: ['Sudesh Das'],
       description: writing.description,
+      images: [
+        {
+          alt: `${writing.title} — writing by Sudesh Das`,
+          height: 630,
+          url: imagePath,
+          width: 1200
+        }
+      ],
+      publishedTime: new Date(writing.date).toISOString(),
+      siteName: 'Dash',
+      tags: writing.tags,
+      title: writing.title,
+      type: 'article',
+      url: canonicalPath
+    },
+    twitter: {
+      card: 'summary_large_image',
+      description: writing.description,
+      images: [imagePath],
       title: writing.title
     },
     title: writing.title
@@ -46,19 +74,46 @@ export default async function WritingsSlugPage({
     getAllProjects(),
     getAllV2Writings()
   ]);
+  const writing = writings.find((entry) => entry.slug === slug);
 
-  if (!writings.some((writing) => writing.slug === slug)) {
+  if (!writing) {
     notFound();
   }
 
+  const canonicalUrl = `https://heywhoisdash.com/writings/${slug}`;
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    author: {
+      '@type': 'Person',
+      name: 'Sudesh Das',
+      url: 'https://heywhoisdash.com'
+    },
+    datePublished: new Date(writing.date).toISOString(),
+    description: writing.description,
+    headline: writing.title,
+    image: new URL(writing.image, 'https://heywhoisdash.com').toString(),
+    mainEntityOfPage: canonicalUrl,
+    url: canonicalUrl
+  };
+
   return (
-    <V2Experience
-      initialWritingSlug={slug}
-      initialWritingsPanelOpen
-      playInitialAnimation
-      projects={projects}
-      skipCornerItemsAnimation
-      writings={writings}
-    />
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, '\\u003c')
+        }}
+        type='application/ld+json'
+      />
+
+      <V2Experience
+        initialWritingSlug={slug}
+        initialWritingsPanelOpen
+        playInitialAnimation
+        projects={projects}
+        skipCornerItemsAnimation
+        writings={writings}
+      />
+    </>
   );
 }

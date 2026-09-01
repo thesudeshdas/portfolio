@@ -14,6 +14,7 @@ import { AppNav, Footer } from '@/components/index';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://heywhoisdash.com'),
   title: 'Dash',
   description: 'Personal Portfolio website of Dash'
 };

@@ -22,13 +22,20 @@ interface IV2WritingsPanelContentProps {
   writings: IV2Writing[];
 }
 
+const writingDateFormatter = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
+  year: 'numeric'
+});
+
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    timeZone: 'UTC',
-    year: 'numeric'
-  });
+  const parts = writingDateFormatter.formatToParts(new Date(date));
+  const day = parts.find((part) => part.type === 'day')?.value;
+  const month = parts.find((part) => part.type === 'month')?.value;
+  const year = parts.find((part) => part.type === 'year')?.value;
+
+  return `${day} ${month}, ${year}`;
 }
 
 function WritingMeta({ writing }: { writing: IV2Writing }) {

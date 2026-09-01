@@ -20,6 +20,7 @@ export default async function WritingsPage() {
       initialWritingsPanelOpen
       playInitialAnimation
       projects={projects}
+      skipCornerItemsAnimation
       writings={writings}
     />
   );

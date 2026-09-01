@@ -57,6 +57,7 @@ export default async function WritingsSlugPage({
       initialWritingsPanelOpen
       playInitialAnimation
       projects={projects}
+      skipCornerItemsAnimation
       writings={writings}
     />
   );

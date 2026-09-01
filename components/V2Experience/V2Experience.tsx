@@ -157,6 +157,7 @@ interface IV2ExperienceProps {
   initialWritingsPanelOpen?: boolean;
   playInitialAnimation?: boolean;
   projects: IProject[];
+  skipCornerItemsAnimation?: boolean;
   writings: IV2Writing[];
 }
 
@@ -165,6 +166,7 @@ export default function V2Experience({
   initialWritingsPanelOpen = false,
   playInitialAnimation,
   projects,
+  skipCornerItemsAnimation = false,
   writings
 }: IV2ExperienceProps) {
   const cornerSettings = DEFAULT_V2_CORNER_SETTINGS;
@@ -202,6 +204,8 @@ export default function V2Experience({
   const [isWorkPanelOpen, setIsWorkPanelOpen] = useState(false);
   const [hasWritingsPanelOpened, setHasWritingsPanelOpened] = useState(false);
   const [isWritingsPanelOpen, setIsWritingsPanelOpen] = useState(false);
+  const isSkippingInitialCornerAnimation =
+    skipCornerItemsAnimation && !hasWritingsPanelOpened;
   const [requestedWritingSlug, setRequestedWritingSlug] = useState<
     string | undefined
   >(initialWritingSlug);
@@ -223,10 +227,11 @@ export default function V2Experience({
     setIsIntroComplete(true);
     trackEvent(ANALYTICS_EVENTS.v2IntroCompleted);
 
-    if (!isFullIntroEnabled) {
+    if (!isFullIntroEnabled || skipCornerItemsAnimation) {
       setAreCornersSettled(true);
+      setIsIntroInteractionReady(true);
     }
-  }, [isFullIntroEnabled]);
+  }, [isFullIntroEnabled, skipCornerItemsAnimation]);
 
   const cornerSettleDelay =
     getV2CornerDelay(cornerSettings, 3) +
@@ -234,7 +239,7 @@ export default function V2Experience({
     cornerSettings.finalDelay;
 
   useEffect(() => {
-    if (!isFullIntroEnabled || !isIntroComplete) {
+    if (!isFullIntroEnabled || !isIntroComplete || skipCornerItemsAnimation) {
       return;
     }
 
@@ -258,7 +263,8 @@ export default function V2Experience({
     cornerSettleDelay,
     cornerSettings.finalTransitionDuration,
     isFullIntroEnabled,
-    isIntroComplete
+    isIntroComplete,
+    skipCornerItemsAnimation
   ]);
 
   const handleSpotlightZonePointerMove = useCallback(
@@ -462,12 +468,23 @@ export default function V2Experience({
     translate: '0 0',
     transition: 'none'
   } as CSSProperties;
+  const initialCornerTransitionOverride = isSkippingInitialCornerAnimation
+    ? { transitionDelay: '0ms', transitionDuration: '0ms' }
+    : {};
   const renderedWorkRevealStyle = isWorkInitialPreview
     ? initialCornerPreviewStyle
-    : { ...settledWorkRevealStyle, scale: 1 };
+    : {
+        ...settledWorkRevealStyle,
+        scale: 1,
+        ...initialCornerTransitionOverride
+      };
   const renderedWritingsRevealStyle = isWritingsInitialPreview
     ? initialCornerPreviewStyle
-    : { ...settledWritingsRevealStyle, scale: 1 };
+    : {
+        ...settledWritingsRevealStyle,
+        scale: 1,
+        ...initialCornerTransitionOverride
+      };
   const socialsRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
@@ -487,7 +504,10 @@ export default function V2Experience({
           pointerEvents: 'none',
           transition: 'none'
         }
-      : settledSocialsRevealStyle;
+      : {
+          ...settledSocialsRevealStyle,
+          ...initialCornerTransitionOverride
+        };
   const musicRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
@@ -507,7 +527,10 @@ export default function V2Experience({
           pointerEvents: 'none',
           transition: 'none'
         }
-      : settledMusicRevealStyle;
+      : {
+          ...settledMusicRevealStyle,
+          ...initialCornerTransitionOverride
+        };
   const cornerContentOpacity = areCornersSettled
     ? cornerSettings.finalOpacity
     : 1;
@@ -612,6 +635,8 @@ export default function V2Experience({
               opacity: workContentOpacity,
               transitionDuration: isWorkInitialPreview
                 ? '0ms'
+                : isSkippingInitialCornerAnimation
+                ? '0ms'
                 : `${cornerSettings.finalTransitionDuration}ms`,
               transitionProperty: 'opacity',
               transitionTimingFunction: cornerSettings.easing
@@ -657,6 +682,8 @@ export default function V2Experience({
               opacity: writingsContentOpacity,
               transitionDuration: isWritingsInitialPreview
                 ? '0ms'
+                : isSkippingInitialCornerAnimation
+                ? '0ms'
                 : `${cornerSettings.finalTransitionDuration}ms`,
               transitionProperty: 'opacity',
               transitionTimingFunction: cornerSettings.easing
@@ -692,7 +719,11 @@ export default function V2Experience({
           }
           fontClassName={outfit.className}
           contentOpacity={cornerContentOpacity}
-          contentOpacityTransitionMs={cornerSettings.finalTransitionDuration}
+          contentOpacityTransitionMs={
+            isSkippingInitialCornerAnimation
+              ? 0
+              : cornerSettings.finalTransitionDuration
+          }
           isRevealed={isIntroComplete}
           revealStyle={renderedMusicRevealStyle}
         />
@@ -728,7 +759,12 @@ export default function V2Experience({
                     });
                   }}
                   rel={opensInNewTab ? 'noopener noreferrer' : undefined}
-                  style={socialHoverStyle}
+                  style={{
+                    ...socialHoverStyle,
+                    transitionDuration: isSkippingInitialCornerAnimation
+                      ? '0ms'
+                      : undefined
+                  }}
                   target={opensInNewTab ? '_blank' : undefined}
                   title={social.label}
                 >

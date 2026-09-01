@@ -5,6 +5,7 @@ import { flushSync } from 'react-dom';
 import { useTheme } from 'next-themes';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { MoonIcon, SunIcon } from '@radix-ui/react-icons';
 
 interface ViewTransition {
@@ -12,7 +13,13 @@ interface ViewTransition {
   finished: Promise<void>;
 }
 
-export default function ModeToggle() {
+export default function ModeToggle({
+  className,
+  tabIndex
+}: {
+  className?: string;
+  tabIndex?: number;
+}) {
   const { resolvedTheme, setTheme } = useTheme();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -77,10 +84,18 @@ export default function ModeToggle() {
   return (
     <Button
       ref={buttonRef}
+      aria-label='Toggle color theme'
+      data-v2-content-cursor='true'
+      data-v2-hide-cursor='true'
       variant='ghost'
       size='icon'
+      tabIndex={tabIndex}
       onClick={handleToggle}
-      className='dark:zinc-400 hover:text-foreground text-foreground cursor-pointer hover:bg-transparent sm:text-zinc-500 dark:hover:bg-transparent'
+      className={cn(
+        'text-foreground relative cursor-pointer hover:bg-transparent sm:text-zinc-500 dark:text-zinc-400 dark:hover:bg-transparent',
+        className
+      )}
+      title='Toggle color theme'
     >
       <SunIcon className='h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90' />
 

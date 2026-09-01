@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useReducedMotion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 
-const CURSOR_COLOR = '#a1a1aa';
+const CURSOR_COLOR = 'var(--v2-cursor)';
 const CURSOR_SIZE_PX = 16;
 const CURSOR_MOVE_RESET_MS = 120;
 const MOVING_CURSOR_SCALE = 0.5;

@@ -65,24 +65,30 @@ function formatDate(date: string) {
 
 function WritingMeta({ writing }: { writing: IV2Writing }) {
   return (
-    <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500'>
+    <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--v2-text-muted)]'>
       <time dateTime={writing.date}>{formatDate(writing.date)}</time>
       <span>{writing.readingMinutes} min read</span>
     </div>
   );
 }
 
-function RelatedWritings({ writings }: { writings: IV2Writing[] }) {
+function RelatedWritings({
+  onSelect,
+  writings
+}: {
+  onSelect: (writing: IV2Writing) => void;
+  writings: IV2Writing[];
+}) {
   if (writings.length === 0) {
     return null;
   }
 
   return (
     <section
-      className='mt-16 border-t border-zinc-800 pt-10'
+      className='mt-16 border-t border-[var(--v2-border)] pt-10'
       data-analytics-section='related'
     >
-      <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-zinc-100'>
+      <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
         related
       </h2>
 
@@ -91,12 +97,14 @@ function RelatedWritings({ writings }: { writings: IV2Writing[] }) {
           <a
             key={writing.slug}
             aria-label={`Read ${writing.title}`}
-            className='group text-left transition-transform duration-300 focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 active:scale-[0.98]'
+            className='group text-left transition-transform duration-300 focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[var(--v2-focus)] active:scale-[0.98]'
             data-analytics-link-label={writing.title}
             data-analytics-link-location='related'
             href={`/writings/${writing.slug}`}
-            rel='noopener'
-            {...OPEN_IN_NEW_TAB_PROPS}
+            onClick={(event) => {
+              event.preventDefault();
+              onSelect(writing);
+            }}
           >
             <span className='relative block aspect-video w-full overflow-hidden'>
               <Image
@@ -108,11 +116,11 @@ function RelatedWritings({ writings }: { writings: IV2Writing[] }) {
               />
             </span>
 
-            <span className='mt-4 block text-xl !leading-[1.2] font-light tracking-[-0.025em] text-zinc-200 transition-colors group-hover:text-white'>
+            <span className='mt-4 block text-xl !leading-[1.2] font-light tracking-[-0.025em] text-[var(--v2-text)] transition-colors group-hover:text-[var(--v2-text-strong)]'>
               {writing.title}
             </span>
             <time
-              className='mt-2 block text-sm text-zinc-500'
+              className='mt-2 block text-sm text-[var(--v2-text-muted)]'
               dateTime={writing.date}
             >
               {formatDate(writing.date)}
@@ -126,11 +134,13 @@ function RelatedWritings({ writings }: { writings: IV2Writing[] }) {
 
 function MarkdownArticle({
   onHeaderTitleChange,
+  onSelect,
   scrollRootRef,
   writing,
   writings
 }: {
   onHeaderTitleChange: (title: string | null) => void;
+  onSelect: (writing: IV2Writing) => void;
   scrollRootRef: RefObject<HTMLDivElement | null>;
   writing: IV2Writing;
   writings: IV2Writing[];
@@ -178,7 +188,7 @@ function MarkdownArticle({
         <WritingMeta writing={writing} />
         <h3
           ref={titleRef}
-          className='mt-5 text-5xl !leading-[0.98] font-extralight tracking-[-0.055em] text-balance text-zinc-100 sm:text-7xl'
+          className='mt-5 text-5xl !leading-[0.98] font-extralight tracking-[-0.055em] text-balance text-[var(--v2-text-strong)] sm:text-7xl'
         >
           {writing.title}
         </h3>
@@ -194,12 +204,12 @@ function MarkdownArticle({
           />
         </div>
 
-        <div className='mt-3 text-sm text-zinc-500'>
+        <div className='mt-3 text-sm text-[var(--v2-text-muted)]'>
           <ReactMarkdown
             components={{
               a: ({ children, href }) => (
                 <a
-                  className='underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-zinc-200'
+                  className='underline decoration-[var(--v2-border)] underline-offset-4 transition-colors hover:text-[var(--v2-text-strong)]'
                   href={href}
                   rel='noopener external'
                   {...OPEN_IN_NEW_TAB_PROPS}
@@ -220,7 +230,7 @@ function MarkdownArticle({
         components={{
           a: ({ children, href }) => (
             <a
-              className='underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-zinc-100'
+              className='underline decoration-[var(--v2-border)] underline-offset-4 transition-colors hover:text-[var(--v2-text-strong)]'
               data-analytics-link-location='writing'
               href={href}
               rel='noopener external'
@@ -230,24 +240,26 @@ function MarkdownArticle({
             </a>
           ),
           blockquote: ({ children }) => (
-            <blockquote className='my-10 border-l border-zinc-500 pl-6 text-xl leading-8 font-light text-zinc-300 sm:text-2xl sm:leading-9'>
+            <blockquote className='my-10 border-l border-[var(--v2-text-muted)] pl-6 text-xl leading-8 font-light text-[var(--v2-text)] sm:text-2xl sm:leading-9'>
               {children}
             </blockquote>
           ),
           code: ({ children }) => (
-            <code className='font-mono text-sm text-zinc-200'>{children}</code>
+            <code className='font-mono text-sm text-[var(--v2-text)]'>
+              {children}
+            </code>
           ),
           h2: ({ children }) => (
-            <h2 className='mt-14 mb-5 text-2xl font-light tracking-[-0.03em] text-zinc-100 sm:text-3xl'>
+            <h2 className='mt-14 mb-5 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)] sm:text-3xl'>
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className='mt-10 mb-4 text-xl font-light text-zinc-100'>
+            <h3 className='mt-10 mb-4 text-xl font-light text-[var(--v2-text-strong)]'>
               {children}
             </h3>
           ),
-          hr: () => <hr className='my-10 border-zinc-800' />,
+          hr: () => <hr className='my-10 border-[var(--v2-border)]' />,
           img: ({ alt, src }) =>
             src ? (
               <span className='relative my-10 block aspect-video w-full overflow-hidden rounded-sm'>
@@ -262,7 +274,7 @@ function MarkdownArticle({
               </span>
             ) : null,
           li: ({ children }) => (
-            <li className='pl-1 text-sm leading-7 text-zinc-300 sm:text-base sm:leading-8'>
+            <li className='pl-1 text-sm leading-7 text-[var(--v2-text)] sm:text-base sm:leading-8'>
               {children}
             </li>
           ),
@@ -270,12 +282,12 @@ function MarkdownArticle({
             <ol className='my-7 list-decimal space-y-2 pl-5'>{children}</ol>
           ),
           p: ({ children }) => (
-            <p className='mb-5 text-sm leading-7 text-zinc-300 sm:text-base sm:leading-8'>
+            <p className='mb-5 text-sm leading-7 text-[var(--v2-text)] sm:text-base sm:leading-8'>
               {children}
             </p>
           ),
           pre: ({ children }) => (
-            <pre className='my-8 overflow-x-auto rounded-sm bg-zinc-950 p-5 text-sm leading-6 text-zinc-200'>
+            <pre className='my-8 overflow-x-auto rounded-sm bg-[var(--v2-surface-elevated)] p-5 text-sm leading-6 text-[var(--v2-text)]'>
               {children}
             </pre>
           ),
@@ -289,10 +301,10 @@ function MarkdownArticle({
 
       {writing.links.length > 0 ? (
         <section
-          className='mt-16 border-t border-zinc-800 pt-10'
+          className='mt-16 border-t border-[var(--v2-border)] pt-10'
           data-analytics-section='links'
         >
-          <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-zinc-100'>
+          <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
             links
           </h2>
 
@@ -300,7 +312,7 @@ function MarkdownArticle({
             {writing.links.map((link) => (
               <li key={link.url}>
                 <a
-                  className='text-sm text-zinc-300 underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-white sm:text-base'
+                  className='text-sm text-[var(--v2-text)] underline decoration-[var(--v2-border)] underline-offset-4 transition-colors hover:text-[var(--v2-text-strong)] sm:text-base'
                   data-analytics-link-label={link.label}
                   data-analytics-link-location='links'
                   href={link.url}
@@ -315,7 +327,10 @@ function MarkdownArticle({
         </section>
       ) : null}
 
-      <RelatedWritings writings={writings} />
+      <RelatedWritings
+        onSelect={onSelect}
+        writings={writings}
+      />
     </article>
   );
 }
@@ -407,7 +422,7 @@ export default function V2WritingsPanelContent({
 
   if (writings.length === 0) {
     return (
-      <div className='grid h-full place-items-center px-6 text-center text-sm text-zinc-500'>
+      <div className='grid h-full place-items-center px-6 text-center text-sm text-[var(--v2-text-muted)]'>
         Add a Markdown file to assets/writings to begin.
       </div>
     );
@@ -436,7 +451,7 @@ export default function V2WritingsPanelContent({
             }}
           >
             <button
-              className='mb-10 inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-400 active:scale-[0.98]'
+              className='mb-10 inline-flex items-center gap-2 text-sm text-[var(--v2-text-muted)] transition-colors hover:text-[var(--v2-text-strong)] focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[var(--v2-focus)] active:scale-[0.98]'
               onClick={handleBack}
               type='button'
             >
@@ -446,6 +461,7 @@ export default function V2WritingsPanelContent({
 
             <MarkdownArticle
               onHeaderTitleChange={onActiveWritingTitleChange}
+              onSelect={handleSelect}
               scrollRootRef={scrollContainerRef}
               writing={activeWriting}
               writings={writings.filter(
@@ -468,17 +484,17 @@ export default function V2WritingsPanelContent({
               {writings.map((writing) => (
                 <button
                   key={writing.slug}
-                  className='v2-writing-index-item group grid w-full gap-4 border-t border-zinc-800 py-7 text-left transition-opacity duration-300 focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-zinc-400 active:scale-[0.995] sm:grid-cols-[minmax(0,1fr)_180px_auto] sm:items-center sm:py-9'
+                  className='v2-writing-index-item group grid w-full gap-4 border-t border-[var(--v2-border)] py-7 text-left transition-opacity duration-300 focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--v2-focus)] active:scale-[0.995] sm:grid-cols-[minmax(0,1fr)_180px_auto] sm:items-center sm:py-9'
                   onClick={() => handleSelect(writing)}
                   type='button'
                 >
-                  <span className='max-w-3xl text-2xl leading-tight font-extralight tracking-[-0.035em] text-zinc-300 transition-transform duration-300 group-hover:translate-x-2 group-hover:text-white sm:text-4xl'>
+                  <span className='max-w-3xl text-2xl leading-tight font-extralight tracking-[-0.035em] text-[var(--v2-text)] transition-transform duration-300 group-hover:translate-x-2 group-hover:text-[var(--v2-text-strong)] sm:text-4xl'>
                     {writing.title}
                   </span>
-                  <span className='text-sm text-zinc-600'>
+                  <span className='text-sm text-[var(--v2-text-muted)]'>
                     {formatDate(writing.date)}
                   </span>
-                  <ArrowRightIcon className='text-zinc-600 transition-colors group-hover:text-zinc-100' />
+                  <ArrowRightIcon className='text-[var(--v2-text-muted)] transition-colors group-hover:text-[var(--v2-text-strong)]' />
                 </button>
               ))}
             </div>

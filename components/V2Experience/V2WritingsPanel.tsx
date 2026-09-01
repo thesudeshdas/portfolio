@@ -199,7 +199,7 @@ export default function V2WritingsPanel({
         >
           <motion.button
             aria-label='Close writings panel'
-            className='fixed inset-0 z-[12000] bg-black backdrop-blur-[2px]'
+            className='fixed inset-0 z-[12000] bg-[var(--v2-page-bg)] backdrop-blur-[2px]'
             onClick={onClose}
             type='button'
             variants={backdropVariants}
@@ -209,7 +209,7 @@ export default function V2WritingsPanel({
             ref={panelRef}
             aria-labelledby='v2-writings-panel-title'
             aria-modal='true'
-            className={`${fontClassName} fixed top-0 right-0 z-[12001] flex flex-col overflow-hidden bg-[#111112] text-zinc-100 shadow-[0_30px_100px_rgba(0,0,0,0.68)]`}
+            className={`${fontClassName} fixed top-0 right-0 z-[12001] flex flex-col overflow-hidden bg-[var(--v2-surface)] text-[var(--v2-text-strong)] shadow-[0_30px_100px_rgba(0,0,0,0.28)]`}
             role='dialog'
             style={{
               height: `${settings.height}dvh`,
@@ -237,7 +237,7 @@ export default function V2WritingsPanel({
                         key={activeWritingTitle}
                         animate={{ y: 0 }}
                         aria-live='polite'
-                        className='block max-w-[52vw] truncate text-base font-light text-zinc-100'
+                        className='block max-w-[52vw] truncate text-base font-light text-[var(--v2-text-strong)]'
                         exit={{ y: shouldReduceMotion ? 0 : -12 }}
                         initial={{ y: shouldReduceMotion ? 0 : 12 }}
                         transition={{
@@ -257,7 +257,7 @@ export default function V2WritingsPanel({
                 aria-label='Close writings panel'
                 data-v2-content-cursor='true'
                 data-v2-hide-cursor='true'
-                className='absolute top-[17px] right-[21.859375px] grid size-10 place-items-center text-zinc-100 opacity-55 focus-visible:opacity-100 focus-visible:outline-none sm:top-[29px] sm:right-[33.859375px] lg:top-[35px] lg:right-[39.859375px]'
+                className='absolute top-[17px] right-[21.859375px] grid size-10 place-items-center text-[var(--v2-text-strong)] opacity-55 focus-visible:opacity-100 focus-visible:outline-none sm:top-[29px] sm:right-[33.859375px] lg:top-[35px] lg:right-[39.859375px]'
                 onClick={onClose}
                 transition={{
                   duration: shouldReduceMotion ? 0 : 0.15,

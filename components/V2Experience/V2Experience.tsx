@@ -20,6 +20,7 @@ import { Noto_Emoji, Outfit } from 'next/font/google';
 import dynamic from 'next/dynamic';
 
 import V2Cursor from '@/components/V2Cursor/V2Cursor';
+import ModeToggle from '@/components/ModeToggle/ModeToggle';
 import { ANALYTICS_EVENTS, trackEvent } from '@/lib/analytics';
 import type { IProject } from '@/types/project/project.types';
 import type { IV2Writing } from '@/types/writing/writing.types';
@@ -234,7 +235,7 @@ export default function V2Experience({
   }, [isFullIntroEnabled, skipCornerItemsAnimation]);
 
   const cornerSettleDelay =
-    getV2CornerDelay(cornerSettings, 3) +
+    getV2CornerDelay(cornerSettings, 4) +
     cornerSettings.duration +
     cornerSettings.finalDelay;
 
@@ -429,11 +430,22 @@ export default function V2Experience({
     setSocialHoverSettings({ ...DEFAULT_V2_SOCIAL_HOVER_SETTINGS });
   }, []);
 
-  const workRevealStyle = cornerRevealStyle(
+  const themeRevealStyle = cornerRevealStyle(
     cornerSettings,
     isIntroComplete,
     areCornersSettled,
     0,
+    -1
+  );
+  const settledThemeRevealStyle = {
+    ...themeRevealStyle,
+    opacity: areCornersSettled ? 1 : themeRevealStyle.opacity
+  };
+  const workRevealStyle = cornerRevealStyle(
+    cornerSettings,
+    isIntroComplete,
+    areCornersSettled,
+    1,
     1
   );
   const settledWorkRevealStyle = {
@@ -444,7 +456,7 @@ export default function V2Experience({
     cornerSettings,
     isIntroComplete,
     areCornersSettled,
-    1,
+    2,
     1
   );
   const settledWritingsRevealStyle = {
@@ -471,6 +483,10 @@ export default function V2Experience({
   const initialCornerTransitionOverride = isSkippingInitialCornerAnimation
     ? { transitionDelay: '0ms', transitionDuration: '0ms' }
     : {};
+  const renderedThemeRevealStyle = {
+    ...settledThemeRevealStyle,
+    ...initialCornerTransitionOverride
+  };
   const renderedWorkRevealStyle = isWorkInitialPreview
     ? initialCornerPreviewStyle
     : {
@@ -489,7 +505,7 @@ export default function V2Experience({
     cornerSettings,
     isIntroComplete,
     areCornersSettled,
-    2,
+    3,
     1
   );
   const settledSocialsRevealStyle = {
@@ -512,7 +528,7 @@ export default function V2Experience({
     cornerSettings,
     isIntroComplete,
     areCornersSettled,
-    3,
+    4,
     -1
   );
   const settledMusicRevealStyle = {
@@ -588,7 +604,7 @@ export default function V2Experience({
   } as CSSProperties;
   return (
     <main
-      className='v2-page min-h-[100dvh] overflow-hidden bg-black p-1.5 text-zinc-200 sm:p-2.5'
+      className='v2-page min-h-[100dvh] overflow-hidden bg-[var(--v2-page-bg)] p-1.5 text-[var(--v2-text)] sm:p-2.5'
       onPointerLeave={() => {
         setIsQuestionHovered(false);
         setIsSpotlightSuppressed(false);
@@ -606,6 +622,31 @@ export default function V2Experience({
           settings={spotlightSettings}
         />
 
+        <div
+          data-v2-spotlight-exclusion-zone='true'
+          className={`v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-theme absolute top-2.5 left-2.5 motion-reduce:transition-none sm:top-4.5 sm:left-4.5 lg:top-6 lg:left-6 ${
+            areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
+          }`}
+          style={{ ...renderedThemeRevealStyle, ...workHoverStyle }}
+        >
+          <span
+            className='v2-corner-visual block'
+            style={{
+              opacity: cornerContentOpacity,
+              transitionDuration: isSkippingInitialCornerAnimation
+                ? '0ms'
+                : `${cornerSettings.finalTransitionDuration}ms`,
+              transitionProperty: 'opacity',
+              transitionTimingFunction: cornerSettings.easing
+            }}
+          >
+            <ModeToggle
+              className='v2-theme-toggle size-10 text-[var(--v2-text-strong)] hover:text-[var(--v2-text-strong)]'
+              tabIndex={areCornersSettled ? 0 : -1}
+            />
+          </span>
+        </div>
+
         <span
           aria-haspopup='dialog'
           aria-label='Open work'
@@ -615,7 +656,7 @@ export default function V2Experience({
           data-v2-work-exclusion-zone='true'
           className={`${
             outfit.className
-          } v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-work absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-zinc-300 motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
+          } v2-corner-item v2-spotlight-exclusion-zone v2-spotlight-exclusion-work absolute top-2.5 right-2.5 origin-top-right text-[24px] font-extralight text-[var(--v2-text-strong)] focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--v2-focus)] motion-reduce:transition-none sm:top-4.5 sm:right-4.5 lg:top-6 lg:right-6 ${
             areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={{ ...renderedWorkRevealStyle, lineHeight: '100%' }}
@@ -662,7 +703,7 @@ export default function V2Experience({
           data-v2-spotlight-exclusion-zone='true'
           className={`${
             outfit.className
-          } v2-corner-item v2-spotlight-exclusion-zone absolute top-[66px] right-2.5 z-[1] origin-top-right text-[24px] font-extralight text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-zinc-300 motion-reduce:transition-none sm:top-[74px] sm:right-4.5 lg:top-[80px] lg:right-6 ${
+          } v2-corner-item v2-spotlight-exclusion-zone absolute top-[66px] right-2.5 z-[1] origin-top-right text-[24px] font-extralight text-[var(--v2-text-strong)] focus-visible:outline-1 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--v2-focus)] motion-reduce:transition-none sm:top-[74px] sm:right-4.5 lg:top-[80px] lg:right-6 ${
             areCornersSettled ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
           style={{ ...renderedWritingsRevealStyle, lineHeight: '100%' }}
@@ -715,7 +756,7 @@ export default function V2Experience({
 
         <V2MusicPlayer
           autoplayDelayMs={
-            getV2CornerDelay(cornerSettings, 3) + cornerSettings.duration
+            getV2CornerDelay(cornerSettings, 4) + cornerSettings.duration
           }
           fontClassName={outfit.className}
           contentOpacity={cornerContentOpacity}
@@ -737,7 +778,7 @@ export default function V2Experience({
         >
           <div
             aria-label='Social media'
-            className='flex items-center gap-3 text-xl leading-none font-medium text-zinc-100 sm:gap-5 sm:text-2xl'
+            className='flex items-center gap-3 text-xl leading-none font-medium text-[var(--v2-text-strong)] sm:gap-5 sm:text-2xl'
           >
             {socialLinks.map((social) => {
               const Icon = social.icon;

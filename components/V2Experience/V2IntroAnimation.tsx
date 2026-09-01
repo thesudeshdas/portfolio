@@ -688,7 +688,7 @@ export default function V2IntroAnimation({
         aria-label='hey, who is Dash?'
         className={`${styles.spotlightExclusion} ${
           fontClassName ?? ''
-        } text-[5rem] leading-none font-medium text-zinc-100`}
+        } text-[5rem] leading-none font-medium text-[var(--v2-text-strong)]`}
       >
         <span
           ref={heyTargetRef}

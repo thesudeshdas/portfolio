@@ -579,7 +579,7 @@ export default function V2AttributionPopover({
       data-v2-hide-cursor='true'
       type='button'
       disabled={!IS_V2_IDEA_CHASE_ENABLED}
-      className={`${fontClassName} v2-social-attribution v2-expanded-hit-target text-[10px] leading-none font-extralight text-zinc-500 hover:text-zinc-300 focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 sm:text-xs ${
+      className={`${fontClassName} v2-social-attribution v2-expanded-hit-target text-[10px] leading-none font-extralight text-[var(--v2-text-muted)] hover:text-[var(--v2-text-strong)] focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[var(--v2-focus)] sm:text-xs ${
         displayedCalloutMode === 'mock' || !isSettled
           ? 'opacity-100'
           : 'opacity-20'
@@ -599,7 +599,11 @@ export default function V2AttributionPopover({
       </span>
       <span
         ref={ideaOriginRef}
-        className={displayedCalloutMode === 'mock' ? 'text-white' : undefined}
+        className={
+          displayedCalloutMode === 'mock'
+            ? 'text-[var(--v2-text-strong)]'
+            : undefined
+        }
       >
         idea
       </span>
@@ -614,7 +618,7 @@ export default function V2AttributionPopover({
   const attributionPlaceholder = (
     <span
       aria-hidden='true'
-      className={`${fontClassName} v2-social-attribution text-[10px] leading-none font-extralight text-zinc-500 opacity-100 sm:text-xs`}
+      className={`${fontClassName} v2-social-attribution text-[10px] leading-none font-extralight text-[var(--v2-text-muted)] opacity-100 sm:text-xs`}
     >
       steal my <span className='invisible'>idea</span>, not my creativity
     </span>
@@ -632,7 +636,7 @@ export default function V2AttributionPopover({
           x: chasePosition.x,
           y: chasePosition.y
         }}
-        className={`${fontClassName} v2-social-attribution-chasing fixed top-0 left-0 z-[13000] text-[10px] leading-none font-medium text-zinc-300 focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300 sm:text-xs ${
+        className={`${fontClassName} v2-social-attribution-chasing fixed top-0 left-0 z-[13000] text-[10px] leading-none font-medium text-[var(--v2-text)] focus-visible:rounded-sm focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[var(--v2-focus)] sm:text-xs ${
           isReturning ? 'pointer-events-none' : ''
         }`}
         initial={{ scale: 1, x: chaseOrigin.x, y: chaseOrigin.y }}
@@ -689,16 +693,16 @@ export default function V2AttributionPopover({
               }}
             >
               <span
-                className={`${fontClassName} shrink-0 text-xs leading-none font-medium tracking-[0.12em] text-zinc-300`}
+                className={`${fontClassName} shrink-0 text-xs leading-none font-medium tracking-[0.12em] text-[var(--v2-text)]`}
               >
                 keep chasing creativity
               </span>
               <span
-                className='flex-1 overflow-hidden bg-white/15'
+                className='flex-1 overflow-hidden bg-[color-mix(in_srgb,var(--v2-text-strong)_15%,transparent)]'
                 style={{ height: chaseBarSettings.trackHeight }}
               >
                 <span
-                  className='block h-full bg-zinc-100 transition-[width] ease-out motion-reduce:transition-none'
+                  className='block h-full bg-[var(--v2-text-strong)] transition-[width] ease-out motion-reduce:transition-none'
                   style={{
                     transitionDuration: `${chaseBarSettings.transitionDuration}ms`,
                     width: `${(chaseClicks / CHASE_CLICKS_REQUIRED) * 100}%`
@@ -807,7 +811,7 @@ export default function V2AttributionPopover({
         >
           <motion.div
             data-v2-steal-modal-card='true'
-            className='relative rounded-2xl border border-zinc-700 bg-zinc-950 p-6 text-zinc-100 shadow-2xl sm:p-7'
+            className='relative rounded-2xl border border-[var(--v2-border)] bg-[var(--v2-surface-elevated)] p-6 text-[var(--v2-text-strong)] shadow-2xl sm:p-7'
             initial={
               shouldReduceMotion ? false : { opacity: 0, scale: 0.88, y: 16 }
             }
@@ -821,7 +825,7 @@ export default function V2AttributionPopover({
               A small request
             </Dialog.Title>
 
-            <Dialog.Description className='mt-3 text-sm leading-relaxed text-zinc-400 sm:text-base'>
+            <Dialog.Description className='mt-3 text-sm leading-relaxed text-[var(--v2-text-muted)] sm:text-base'>
               Feel free to use this site as inspiration for your own ideas. If
               you use my work, please attribute Sudesh Das and link back to this
               site.
@@ -831,7 +835,7 @@ export default function V2AttributionPopover({
               <button
                 type='button'
                 aria-label='Close'
-                className='absolute top-5 right-5 rounded-md p-1 text-zinc-500 hover:text-zinc-100 focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-300'
+                className='absolute top-5 right-5 rounded-md p-1 text-[var(--v2-text-muted)] hover:text-[var(--v2-text-strong)] focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[var(--v2-focus)]'
               >
                 <Cross2Icon className='size-4' />
               </button>

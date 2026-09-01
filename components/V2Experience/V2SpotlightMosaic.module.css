@@ -22,7 +22,7 @@
   grid-template-rows: repeat(6, minmax(0, 1fr));
   gap: var(--v2-spotlight-gap);
   overflow: hidden;
-  background: #000;
+  background: var(--v2-page-bg);
   mask-image: radial-gradient(
       circle var(--v2-spotlight-effective-radius) at var(--v2-spotlight-x)
         var(--v2-spotlight-y),
@@ -83,7 +83,7 @@
   min-width: 0;
   overflow: hidden;
   border-radius: var(--v2-spotlight-tile-radius);
-  background: #18181b;
+  background: var(--v2-surface-elevated);
 }
 
 .tile:nth-child(-n + 12) {

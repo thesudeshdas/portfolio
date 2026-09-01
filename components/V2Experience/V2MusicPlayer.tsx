@@ -384,7 +384,7 @@ export default function V2MusicPlayer({
             aria-pressed={isPlaying}
             data-v2-content-cursor='true'
             data-v2-hide-cursor='true'
-            className='v2-expanded-hit-target relative h-16 w-[104px] shrink-0 cursor-pointer focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-zinc-400'
+            className='v2-expanded-hit-target relative h-16 w-[104px] shrink-0 cursor-pointer focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[var(--v2-focus)]'
             type='button'
             onClick={toggleAudio}
           >
@@ -455,13 +455,13 @@ export default function V2MusicPlayer({
               }}
             >
               <span
-                className='block truncate text-base leading-none text-zinc-100 sm:text-lg'
+                className='block truncate text-base leading-none text-[var(--v2-text-strong)] sm:text-lg'
                 style={{ fontWeight: settings.songWeight }}
               >
                 {currentTrack.title}
               </span>
               <span
-                className='block truncate text-[11px] leading-none text-zinc-300 sm:text-xs'
+                className='block truncate text-[11px] leading-none text-[var(--v2-text-muted)] sm:text-xs'
                 style={{ fontWeight: settings.artistWeight }}
               >
                 {currentTrack.artist}

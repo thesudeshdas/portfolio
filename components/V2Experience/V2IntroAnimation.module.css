@@ -10,7 +10,7 @@
   display: grid;
   width: max-content;
   max-width: 85vw;
-  color: #f4f4f5;
+  color: var(--v2-text-strong);
   font-size: clamp(1rem, 1.75vw, 1.5rem);
   font-weight: 300;
   letter-spacing: 0.02em;
@@ -39,7 +39,7 @@
   z-index: 0;
   inset: -0.32em -0.42em;
   border-radius: 42% / 55%;
-  background: #000;
+  background: var(--v2-page-bg);
   content: '';
   filter: blur(18px);
   pointer-events: none;
@@ -136,7 +136,7 @@
 
 .handGlyph {
   display: block;
-  color: #f4f4f5;
+  color: var(--v2-text-strong);
   font-size: 100cqh;
   font-variant-emoji: text;
   font-weight: 400;
@@ -157,7 +157,7 @@
   translate: 0 0;
   transform: translate(-50%, -50%);
   transform-origin: 50% 58%;
-  color: #f4f4f5;
+  color: var(--v2-text-strong);
   transition:
     color 160ms ease-out,
     filter 180ms ease-out,
@@ -168,7 +168,7 @@
 
 .questionShellHovered {
   animation: question-hover-glitch 460ms steps(2, end) infinite;
-  color: #f4f4f5;
+  color: var(--v2-text-strong);
 }
 
 @keyframes question-hover-glitch {

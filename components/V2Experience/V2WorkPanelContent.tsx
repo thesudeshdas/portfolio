@@ -390,7 +390,7 @@ function BentoProjectCard({
 
   return (
     <BentoProjectShell
-      className='group absolute isolate overflow-hidden bg-[#151516] p-3 focus-visible:z-10 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-zinc-200 sm:p-4'
+      className='group absolute isolate overflow-hidden bg-[var(--v2-surface-elevated)] p-3 focus-visible:z-10 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-[var(--v2-focus)] sm:p-4'
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
       project={project}
@@ -451,13 +451,13 @@ function BentoProjectCard({
             : ''
         }`}
       >
-        <span className='text-[8px] tracking-[0.13em] text-zinc-600 uppercase'>
+        <span className='text-[8px] tracking-[0.13em] text-[var(--v2-text-muted)] uppercase'>
           <span>{project.organisation ?? project.year}</span>
         </span>
 
         <span>
           <span
-            className={`block leading-[0.98] font-extralight tracking-[-0.045em] text-zinc-200 ${
+            className={`block leading-[0.98] font-extralight tracking-[-0.045em] text-[var(--v2-text-strong)] ${
               isFeatureCard
                 ? 'text-xl sm:text-2xl lg:text-3xl'
                 : 'text-sm sm:text-base lg:text-lg'
@@ -466,11 +466,11 @@ function BentoProjectCard({
             {project.title}
           </span>
           {isFeatureCard && isMobileProject ? (
-            <span className='mt-4 hidden max-w-xl text-xs leading-relaxed text-zinc-500 sm:block'>
+            <span className='mt-4 hidden max-w-xl text-xs leading-relaxed text-[var(--v2-text-muted)] sm:block'>
               {project.description}
             </span>
           ) : null}
-          <span className='mt-3 flex items-center justify-between gap-2 text-[9px] text-zinc-600'>
+          <span className='mt-3 flex items-center justify-between gap-2 text-[9px] text-[var(--v2-text-muted)]'>
             <span className='truncate'>
               {project.slug === 'dryve'
                 ? 'Mobile app · coming soon'
@@ -509,7 +509,7 @@ function BentoTrack({
             {category.labels?.map((label) => (
               <span
                 key={`${category.id}-${label.text}`}
-                className='pointer-events-none absolute z-10 text-[10px] leading-none text-zinc-300'
+                className='pointer-events-none absolute z-10 text-[10px] leading-none text-[var(--v2-text)]'
                 style={{
                   left: `${(label.x / category.width) * 100}%`,
                   top: `${(label.y / category.height) * 100}%`
@@ -534,11 +534,11 @@ function BentoTrack({
 
       <span
         aria-hidden='true'
-        className='pointer-events-none absolute inset-y-0 left-0 z-20 w-12 bg-gradient-to-r from-[#111112] via-[#111112]/85 to-transparent'
+        className='pointer-events-none absolute inset-y-0 left-0 z-20 w-12 bg-gradient-to-r from-[var(--v2-surface)] via-[var(--v2-surface)]/85 to-transparent'
       />
       <span
         aria-hidden='true'
-        className='pointer-events-none absolute inset-y-0 right-0 z-20 w-12 bg-gradient-to-l from-[#111112] via-[#111112]/85 to-transparent'
+        className='pointer-events-none absolute inset-y-0 right-0 z-20 w-12 bg-gradient-to-l from-[var(--v2-surface)] via-[var(--v2-surface)]/85 to-transparent'
       />
     </div>
   );

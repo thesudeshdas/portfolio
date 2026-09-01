@@ -30,6 +30,7 @@ export async function generateMetadata({
 
   const canonicalPath = `/writings/${slug}`;
   const imagePath = `${canonicalPath}/opengraph-image`;
+  const twitterImagePath = `${canonicalPath}/twitter-image`;
 
   return {
     alternates: {
@@ -59,7 +60,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       description: writing.description,
-      images: [imagePath],
+      images: [twitterImagePath],
       title: writing.title
     },
     title: writing.title

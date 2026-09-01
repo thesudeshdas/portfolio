@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     description: 'Writing by Sudesh Das about software, products, and craft.',
-    images: ['/writings/opengraph-image'],
+    images: ['/writings/twitter-image'],
     title: 'Writings by Sudesh Das'
   },
   title: 'Writings'

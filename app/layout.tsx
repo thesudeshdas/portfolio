@@ -3,13 +3,9 @@ import 'lenis/dist/lenis.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
-import LenisProvider from '@/components/LenisProvider/LenisProvider';
 import Analytics from '@/components/Analytics/Analytics';
 import MobileSiteBlocker from '@/components/MobileSiteBlocker/MobileSiteBlocker';
 import ThemeAwareFavicon from '@/components/ThemeAwareFavicon/ThemeAwareFavicon';
-
-// import components
-import { AppNav, Footer } from '@/components/index';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -43,21 +39,8 @@ export default function RootLayout({
         >
           <ThemeAwareFavicon />
 
-          <LenisProvider>
-            <MobileSiteBlocker />
-
-            <div className='fixed inset-0 z-[-2] bg-linear-to-b from-zinc-50 from-80% to-zinc-50 dark:from-zinc-900 dark:to-zinc-900'></div>
-
-            <AppNav />
-
-            <div className='app-shell overflow mx-auto flex w-full max-w-[1000px] grow flex-col'>
-              <div className='app-content h-full flex-1 flex-col items-center px-4'>
-                {children}
-              </div>
-
-              <Footer />
-            </div>
-          </LenisProvider>
+          <MobileSiteBlocker />
+          {children}
         </ThemeProvider>
       </body>
     </html>

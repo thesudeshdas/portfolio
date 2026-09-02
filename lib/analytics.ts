@@ -140,15 +140,8 @@ export function startPageEngagement(pathname: string) {
 }
 
 export function getTrackingModule(pathname: string): TrackingModule {
-  if (pathname.startsWith('/stories')) return 'stories';
-  if (pathname.startsWith('/blogs')) return 'blogs';
   if (pathname.startsWith('/writings')) return 'writings';
-  if (pathname.startsWith('/projects')) return 'projects';
-  if (pathname.startsWith('/code')) return 'work';
-  if (pathname.startsWith('/me')) return 'about';
-  if (pathname.startsWith('/v2')) return 'v2';
-  if (pathname.startsWith('/v3')) return 'v3';
-  if (pathname === '/' || pathname.startsWith('/home')) return 'home';
+  if (pathname === '/') return 'home';
 
   return 'app';
 }

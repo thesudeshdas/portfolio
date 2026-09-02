@@ -30,15 +30,7 @@ describe('getScrollDepthPercentage', () => {
 describe('getTrackingModule', () => {
   it.each([
     ['/', 'home'],
-    ['/stories', 'stories'],
-    ['/stories/launch-notes', 'stories'],
-    ['/blogs/design-systems', 'blogs'],
     ['/writings/quiet-software', 'writings'],
-    ['/projects/portfolio', 'projects'],
-    ['/code', 'work'],
-    ['/me', 'about'],
-    ['/v2', 'v2'],
-    ['/v3', 'v3'],
     ['/unknown', 'app']
   ] as const)('maps %s to %s', (path, module) => {
     expect(getTrackingModule(path)).toBe(module);
@@ -59,9 +51,9 @@ describe('sanitizeAnalyticsPath', () => {
   it('removes query strings, hashes, and UUID route segments', () => {
     expect(
       sanitizeAnalyticsPath(
-        '/projects/123e4567-e89b-42d3-a456-426614174000?preview=secret#work'
+        '/writings/123e4567-e89b-42d3-a456-426614174000?preview=secret#entry'
       )
-    ).toBe('/projects/:id');
+    ).toBe('/writings/:id');
   });
 });
 
@@ -71,17 +63,17 @@ describe('sanitizeAnalyticsEvent', () => {
       sanitizeAnalyticsEvent({
         event: 'stories.page.viewed',
         properties: {
-          path: '/stories/launch?draft=secret',
+          path: '/writings/launch?draft=secret',
           referrer: 'https://example.com/source?token=secret#section',
-          url: 'https://heywhoisdash.com/stories/launch?draft=secret'
+          url: 'https://heywhoisdash.com/writings/launch?draft=secret'
         }
       })
     ).toEqual({
       event: 'stories.page.viewed',
       properties: {
-        path: '/stories/launch',
+        path: '/writings/launch',
         referrer: 'https://example.com/source',
-        url: 'https://heywhoisdash.com/stories/launch'
+        url: 'https://heywhoisdash.com/writings/launch'
       }
     });
   });

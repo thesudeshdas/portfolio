@@ -19,32 +19,36 @@ This is a personal portfolio site built with **Next.js 15 (App Router)**, **Reac
 
 App Router file-based routing under `app/`. Key routes:
 
-- `/` — Homepage with hero and latest content
-- `/stories` and `/stories/[entry]` — Blog/story listing and individual entries
-- `/code` — Dev projects showcase
-- `/me` — About page with journey timeline, skill bank, FAQ
-- `/work` — Work experience
+- `/` — Canonical V2 portfolio experience
+- `/writings` — Writing index inside the V2 interface
+- `/writings/[slug]` — Direct writing entry inside the V2 interface
+
+`archive/legacy-portfolio/` is historical reference only. Do not inspect,
+import, copy, or use it as implementation context unless the user explicitly
+asks about legacy behavior.
 
 ### Content System
 
-Stories are **static markdown files** in `assets/stories/` with YAML frontmatter (`title`, `date`, `tags`, `description`, `cover`). Parsed server-side by `lib/stories.ts` which exports `getAllStories()` and `getStoryBySlug(slug)`. Rendered with `react-markdown`.
+Project metadata lives in `assets/projects/` and is parsed server-side by
+`lib/projects.ts`. Published writings live in `assets/writings/` and are parsed
+by `lib/v2-writings.ts` before being rendered with `react-markdown`.
 
-Other content (projects, career timeline, skills, FAQ) lives in co-located `.data.ts` files next to their page sections (e.g., `app/code/dev.data.ts`, `app/me/sections/journey/journey.data.ts`).
-
-Story pages use ISR with `revalidate = 300` (5 minutes).
+Treat every new essay, post, article, or blog as a writing. Add one Markdown
+file to `assets/writings/`; never recreate `/blogs`, `/stories`, or another
+content route.
 
 ### Component Patterns
 
-- **UI primitives**: shadcn/ui (new-york style, zinc base) in `components/ui/` — built on Radix UI
-- **Feature components**: `components/` with folder-per-component pattern (e.g., `StoryCard/StoryCard.tsx`)
-- **Barrel exports**: `components/index.ts` re-exports all components
-- **Client vs Server**: Pages are async server components. Components needing interactivity (nav, theme toggle, hover states) use `'use client'`. `lib/stories.ts` is server-only.
+- **UI primitive**: shadcn-style button in `components/ui/button.tsx`
+- **Feature components**: V2 experience, globe, cursor, loader, analytics, theme, and mobile blocker live under `components/`
+- **Client vs Server**: Route pages load project/writing data server-side. Interactive experience components use `'use client'`.
 - **Class merging**: Use `cn()` from `lib/utils.ts` (clsx + tailwind-merge)
 - **Component variants**: `class-variance-authority` for variant props
 
 ### Types
 
-Type definitions in `types/` organized by domain (e.g., `types/story/story.types.ts`). Interfaces prefixed with `I` (e.g., `IStory`).
+Type definitions in `types/` are organized by active domain. Interfaces use an
+`I` prefix.
 
 ### Path Alias
 

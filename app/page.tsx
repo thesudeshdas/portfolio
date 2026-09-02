@@ -1,13 +1,22 @@
 import V2BodyClass from '@/components/V2BodyClass/V2BodyClass';
+import V2Experience from '@/components/V2Experience/V2Experience';
+import { getAllProjects } from '@/lib/projects';
+import { getAllV2Writings } from '@/lib/v2-writings';
 
-import V2Page from './v2/page';
+export default async function HomePage() {
+  const [projects, writings] = await Promise.all([
+    getAllProjects(),
+    getAllV2Writings()
+  ]);
 
-export default function HomePage() {
   return (
     <>
       <V2BodyClass />
 
-      <V2Page />
+      <V2Experience
+        projects={projects}
+        writings={writings}
+      />
     </>
   );
 }

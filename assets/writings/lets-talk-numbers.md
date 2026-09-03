@@ -27,7 +27,7 @@ this helps me have a peace of mind, keep myself grounded on what I can or cannot
 here are some crazy (and boring) stats
 
 - I have spent around ₹ 1.8 lakhs on junk food
-- motorcycling is event costlier that that, more than twice. but that’s what money is for, get that bike
+- motorcycling is even costlier than that, more than twice. but that’s what money is for, get that bike
 - my salary has sextupled from february 2023 (that’s when I started my job)
 - january and july are the most expensive months. january because most annual payments and july because birthday
 - roughly one-sixth of everything I have earned has gone straight to rent (shoutout to Bangalore)

@@ -16,6 +16,8 @@ import ReactMarkdown from 'react-markdown';
 import { getScrollDepthPercentage, trackEvent } from '@/lib/analytics';
 import type { IV2Writing } from '@/types/writing/writing.types';
 
+import V2WritingShare from './V2WritingShare';
+
 interface IV2WritingsPanelContentProps {
   initialWritingSlug?: string;
   onActiveWritingTitleChange: (title: string | null) => void;
@@ -65,9 +67,16 @@ function formatDate(date: string) {
 
 function WritingMeta({ writing }: { writing: IV2Writing }) {
   return (
-    <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--v2-text-muted)]'>
-      <time dateTime={writing.date}>{formatDate(writing.date)}</time>
-      <span>{writing.readingMinutes} min read</span>
+    <div className='flex items-center justify-between gap-4 text-sm text-[var(--v2-text-muted)]'>
+      <div className='flex flex-wrap items-center gap-x-4 gap-y-1'>
+        <time dateTime={writing.date}>{formatDate(writing.date)}</time>
+        <span>{writing.readingMinutes} min read</span>
+      </div>
+
+      <V2WritingShare
+        slug={writing.slug}
+        title={writing.title}
+      />
     </div>
   );
 }
@@ -304,11 +313,18 @@ function MarkdownArticle({
           className='mt-16 border-t border-[var(--v2-border)] pt-10'
           data-analytics-section='links'
         >
-          <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
-            links
-          </h2>
+          <div className='mb-7 flex items-center justify-between gap-4'>
+            <h2 className='text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
+              links
+            </h2>
 
-          <ul className='space-y-4'>
+            <V2WritingShare
+              slug={writing.slug}
+              title={writing.title}
+            />
+          </div>
+
+          <ul className='flex flex-wrap gap-x-6 gap-y-3'>
             {writing.links.map((link) => (
               <li key={link.url}>
                 <a

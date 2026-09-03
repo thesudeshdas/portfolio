@@ -93,6 +93,13 @@ export default function V2WritingsPanel({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        if (
+          event.target instanceof Element &&
+          event.target.closest('[data-v2-writing-share-dialog]')
+        ) {
+          return;
+        }
+
         onClose();
         return;
       }

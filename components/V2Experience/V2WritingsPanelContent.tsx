@@ -17,6 +17,7 @@ import { getScrollDepthPercentage, trackEvent } from '@/lib/analytics';
 import type { IV2Writing } from '@/types/writing/writing.types';
 
 import V2WritingShare from './V2WritingShare';
+import V2WritingVisitorOrdinal from './V2WritingVisitorOrdinal';
 
 interface IV2WritingsPanelContentProps {
   initialWritingSlug?: string;
@@ -67,16 +68,20 @@ function formatDate(date: string) {
 
 function WritingMeta({ writing }: { writing: IV2Writing }) {
   return (
-    <div className='flex items-center justify-between gap-4 text-sm text-[var(--v2-text-muted)]'>
+    <div className='text-sm text-[var(--v2-text-muted)]'>
+      <div className='mb-4 flex items-center justify-between gap-4'>
+        <V2WritingVisitorOrdinal slug={writing.slug} />
+
+        <V2WritingShare
+          slug={writing.slug}
+          title={writing.title}
+        />
+      </div>
+
       <div className='flex flex-wrap items-center gap-x-4 gap-y-1'>
         <time dateTime={writing.date}>{formatDate(writing.date)}</time>
         <span>{writing.readingMinutes} min read</span>
       </div>
-
-      <V2WritingShare
-        slug={writing.slug}
-        title={writing.title}
-      />
     </div>
   );
 }

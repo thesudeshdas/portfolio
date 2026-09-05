@@ -31,3 +31,12 @@ pnpm build
 ```
 
 Development runs at [http://localhost:3003](http://localhost:3003).
+
+## Newsletter
+
+Newsletter subscriptions use Resend with double opt-in. Create a Resend
+segment for newsletter readers, verify the sending domain, then configure the
+four newsletter variables shown in `.env.example`.
+
+Send marketing emails to that segment using Resend Broadcasts. Include
+`{{{RESEND_UNSUBSCRIBE_URL}}}` in every broadcast so Resend can manage opt-outs.

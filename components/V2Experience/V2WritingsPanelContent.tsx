@@ -16,6 +16,7 @@ import ReactMarkdown from 'react-markdown';
 import { getScrollDepthPercentage, trackEvent } from '@/lib/analytics';
 import type { IV2Writing } from '@/types/writing/writing.types';
 
+import V2RevealGroup from './V2RevealGroup';
 import V2WritingShare from './V2WritingShare';
 import V2WritingVisitorOrdinal from './V2WritingVisitorOrdinal';
 
@@ -88,9 +89,11 @@ function WritingMeta({ writing }: { writing: IV2Writing }) {
 
 function RelatedWritings({
   onSelect,
+  scrollRootRef,
   writings
 }: {
   onSelect: (writing: IV2Writing) => void;
+  scrollRootRef: RefObject<HTMLDivElement | null>;
   writings: IV2Writing[];
 }) {
   if (writings.length === 0) {
@@ -102,9 +105,11 @@ function RelatedWritings({
       className='mt-16 border-t border-[var(--v2-border)] pt-10'
       data-analytics-section='related'
     >
-      <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
-        related
-      </h2>
+      <V2RevealGroup rootRef={scrollRootRef}>
+        <h2 className='mb-7 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
+          related
+        </h2>
+      </V2RevealGroup>
 
       <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
         {writings.map((writing) => (
@@ -130,15 +135,20 @@ function RelatedWritings({
               />
             </span>
 
-            <span className='mt-4 block text-xl !leading-[1.2] font-light tracking-[-0.025em] text-[var(--v2-text)] transition-colors group-hover:text-[var(--v2-text-strong)]'>
-              {writing.title}
-            </span>
-            <time
-              className='mt-2 block text-sm text-[var(--v2-text-muted)]'
-              dateTime={writing.date}
+            <V2RevealGroup
+              as='span'
+              rootRef={scrollRootRef}
             >
-              {formatDate(writing.date)}
-            </time>
+              <span className='mt-4 block text-xl !leading-[1.2] font-light tracking-[-0.025em] text-[var(--v2-text)] transition-colors group-hover:text-[var(--v2-text-strong)]'>
+                {writing.title}
+              </span>
+              <time
+                className='mt-2 block text-sm text-[var(--v2-text-muted)]'
+                dateTime={writing.date}
+              >
+                {formatDate(writing.date)}
+              </time>
+            </V2RevealGroup>
           </a>
         ))}
       </div>
@@ -199,45 +209,51 @@ function MarkdownArticle({
       data-analytics-section='writing'
     >
       <header className='mb-12 sm:mb-16'>
-        <WritingMeta writing={writing} />
-        <h3
-          ref={titleRef}
-          className='mt-5 text-5xl !leading-[0.98] font-extralight tracking-[-0.055em] text-balance text-[var(--v2-text-strong)] sm:text-7xl'
-        >
-          {writing.title}
-        </h3>
-
-        <div className='relative mt-8 aspect-video w-full overflow-hidden'>
-          <Image
-            fill
-            alt={writing.imageAlt}
-            className='object-cover'
-            priority
-            sizes='(max-width: 900px) 100vw, 800px'
-            src={writing.image}
-          />
-        </div>
-
-        <div className='mt-3 text-sm text-[var(--v2-text-muted)]'>
-          <ReactMarkdown
-            components={{
-              a: ({ children, href }) => (
-                <a
-                  className='underline decoration-[var(--v2-border)] underline-offset-4 transition-colors hover:text-[var(--v2-text-strong)]'
-                  href={href}
-                  rel='noopener external'
-                  {...OPEN_IN_NEW_TAB_PROPS}
-                  data-analytics-link-location='attribution'
-                >
-                  {children}
-                </a>
-              ),
-              p: ({ children }) => <span>{children}</span>
-            }}
+        <V2RevealGroup rootRef={scrollRootRef}>
+          <WritingMeta writing={writing} />
+          <h3
+            ref={titleRef}
+            className='mt-5 text-5xl !leading-[0.98] font-extralight tracking-[-0.055em] text-balance text-[var(--v2-text-strong)] sm:text-7xl'
           >
-            {writing.attribution}
-          </ReactMarkdown>
-        </div>
+            {writing.title}
+          </h3>
+        </V2RevealGroup>
+
+        <V2RevealGroup rootRef={scrollRootRef}>
+          <div className='relative mt-8 aspect-video w-full overflow-hidden'>
+            <Image
+              fill
+              alt={writing.imageAlt}
+              className='object-cover'
+              priority
+              sizes='(max-width: 900px) 100vw, 800px'
+              src={writing.image}
+            />
+          </div>
+        </V2RevealGroup>
+
+        <V2RevealGroup rootRef={scrollRootRef}>
+          <div className='mt-3 text-sm text-[var(--v2-text-muted)]'>
+            <ReactMarkdown
+              components={{
+                a: ({ children, href }) => (
+                  <a
+                    className='underline decoration-[var(--v2-border)] underline-offset-4 transition-colors hover:text-[var(--v2-text-strong)]'
+                    href={href}
+                    rel='noopener external'
+                    {...OPEN_IN_NEW_TAB_PROPS}
+                    data-analytics-link-location='attribution'
+                  >
+                    {children}
+                  </a>
+                ),
+                p: ({ children }) => <span>{children}</span>
+              }}
+            >
+              {writing.attribution}
+            </ReactMarkdown>
+          </div>
+        </V2RevealGroup>
       </header>
 
       <ReactMarkdown
@@ -254,9 +270,11 @@ function MarkdownArticle({
             </a>
           ),
           blockquote: ({ children }) => (
-            <blockquote className='my-10 border-l border-[var(--v2-text-muted)] pl-6 text-xl leading-8 font-light text-[var(--v2-text)] sm:text-2xl sm:leading-9'>
-              {children}
-            </blockquote>
+            <V2RevealGroup rootRef={scrollRootRef}>
+              <blockquote className='my-10 border-l border-[var(--v2-text-muted)] pl-6 text-xl leading-8 font-light text-[var(--v2-text)] sm:text-2xl sm:leading-9'>
+                {children}
+              </blockquote>
+            </V2RevealGroup>
           ),
           code: ({ children }) => (
             <code className='font-mono text-sm text-[var(--v2-text)]'>
@@ -264,14 +282,18 @@ function MarkdownArticle({
             </code>
           ),
           h2: ({ children }) => (
-            <h2 className='mt-14 mb-5 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)] sm:text-3xl'>
-              {children}
-            </h2>
+            <V2RevealGroup rootRef={scrollRootRef}>
+              <h2 className='mt-14 mb-5 text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)] sm:text-3xl'>
+                {children}
+              </h2>
+            </V2RevealGroup>
           ),
           h3: ({ children }) => (
-            <h3 className='mt-10 mb-4 text-xl font-light text-[var(--v2-text-strong)]'>
-              {children}
-            </h3>
+            <V2RevealGroup rootRef={scrollRootRef}>
+              <h3 className='mt-10 mb-4 text-xl font-light text-[var(--v2-text-strong)]'>
+                {children}
+              </h3>
+            </V2RevealGroup>
           ),
           hr: () => <hr className='my-10 border-[var(--v2-border)]' />,
           img: ({ alt, src }) =>
@@ -293,20 +315,28 @@ function MarkdownArticle({
             </li>
           ),
           ol: ({ children }) => (
-            <ol className='my-7 list-decimal space-y-2 pl-5'>{children}</ol>
+            <V2RevealGroup rootRef={scrollRootRef}>
+              <ol className='my-7 list-decimal space-y-2 pl-5'>{children}</ol>
+            </V2RevealGroup>
           ),
           p: ({ children }) => (
-            <p className='mb-5 text-sm leading-7 text-[var(--v2-text)] sm:text-base sm:leading-8'>
-              {children}
-            </p>
+            <V2RevealGroup rootRef={scrollRootRef}>
+              <p className='mb-5 text-sm leading-7 text-[var(--v2-text)] sm:text-base sm:leading-8'>
+                {children}
+              </p>
+            </V2RevealGroup>
           ),
           pre: ({ children }) => (
-            <pre className='my-8 overflow-x-auto rounded-sm bg-[var(--v2-surface-elevated)] p-5 text-sm leading-6 text-[var(--v2-text)]'>
-              {children}
-            </pre>
+            <V2RevealGroup rootRef={scrollRootRef}>
+              <pre className='my-8 overflow-x-auto rounded-sm bg-[var(--v2-surface-elevated)] p-5 text-sm leading-6 text-[var(--v2-text)]'>
+                {children}
+              </pre>
+            </V2RevealGroup>
           ),
           ul: ({ children }) => (
-            <ul className='my-7 list-disc space-y-2 pl-5'>{children}</ul>
+            <V2RevealGroup rootRef={scrollRootRef}>
+              <ul className='my-7 list-disc space-y-2 pl-5'>{children}</ul>
+            </V2RevealGroup>
           )
         }}
       >
@@ -318,38 +348,43 @@ function MarkdownArticle({
           className='mt-16 border-t border-[var(--v2-border)] pt-10'
           data-analytics-section='links'
         >
-          <div className='mb-7 flex items-center justify-between gap-4'>
-            <h2 className='text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
-              links
-            </h2>
+          <V2RevealGroup rootRef={scrollRootRef}>
+            <div className='mb-7 flex items-center justify-between gap-4'>
+              <h2 className='text-2xl font-light tracking-[-0.03em] text-[var(--v2-text-strong)]'>
+                links
+              </h2>
 
-            <V2WritingShare
-              slug={writing.slug}
-              title={writing.title}
-            />
-          </div>
+              <V2WritingShare
+                slug={writing.slug}
+                title={writing.title}
+              />
+            </div>
+          </V2RevealGroup>
 
-          <ul className='flex flex-wrap gap-x-6 gap-y-3'>
-            {writing.links.map((link) => (
-              <li key={link.url}>
-                <a
-                  className='text-sm text-[var(--v2-text)] underline decoration-[var(--v2-border)] underline-offset-4 transition-colors hover:text-[var(--v2-text-strong)] sm:text-base'
-                  data-analytics-link-label={link.label}
-                  data-analytics-link-location='links'
-                  href={link.url}
-                  rel='noopener external'
-                  {...OPEN_IN_NEW_TAB_PROPS}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
+          <V2RevealGroup rootRef={scrollRootRef}>
+            <ul className='flex flex-wrap gap-x-6 gap-y-3'>
+              {writing.links.map((link) => (
+                <li key={link.url}>
+                  <a
+                    className='text-sm text-[var(--v2-text)] underline decoration-[var(--v2-border)] underline-offset-4 transition-colors hover:text-[var(--v2-text-strong)] sm:text-base'
+                    data-analytics-link-label={link.label}
+                    data-analytics-link-location='links'
+                    href={link.url}
+                    rel='noopener external'
+                    {...OPEN_IN_NEW_TAB_PROPS}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </V2RevealGroup>
         </section>
       ) : null}
 
       <RelatedWritings
         onSelect={onSelect}
+        scrollRootRef={scrollRootRef}
         writings={writings}
       />
     </article>
@@ -509,12 +544,22 @@ export default function V2WritingsPanelContent({
                   onClick={() => handleSelect(writing)}
                   type='button'
                 >
-                  <span className='max-w-3xl text-2xl leading-tight font-extralight tracking-[-0.035em] text-[var(--v2-text)] transition-transform duration-300 group-hover:translate-x-2 group-hover:text-[var(--v2-text-strong)] sm:text-4xl'>
-                    {writing.title}
-                  </span>
-                  <span className='text-sm text-[var(--v2-text-muted)]'>
-                    {formatDate(writing.date)}
-                  </span>
+                  <V2RevealGroup
+                    as='span'
+                    rootRef={scrollContainerRef}
+                  >
+                    <span className='max-w-3xl text-2xl leading-tight font-extralight tracking-[-0.035em] text-[var(--v2-text)] transition-transform duration-300 group-hover:translate-x-2 group-hover:text-[var(--v2-text-strong)] sm:text-4xl'>
+                      {writing.title}
+                    </span>
+                  </V2RevealGroup>
+                  <V2RevealGroup
+                    as='span'
+                    rootRef={scrollContainerRef}
+                  >
+                    <span className='text-sm text-[var(--v2-text-muted)]'>
+                      {formatDate(writing.date)}
+                    </span>
+                  </V2RevealGroup>
                   <ArrowRightIcon className='text-[var(--v2-text-muted)] transition-colors group-hover:text-[var(--v2-text-strong)]' />
                 </button>
               ))}

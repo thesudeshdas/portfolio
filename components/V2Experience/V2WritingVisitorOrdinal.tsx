@@ -52,15 +52,20 @@ export default function V2WritingVisitorOrdinal({ slug }: { slug: string }) {
     };
   }, [slug]);
 
-  if (ordinal === null) return null;
-
   return (
-    <span aria-live='polite'>
-      You’re the{' '}
-      <span className='text-[var(--v2-text-strong)]'>
-        {formatOrdinal(ordinal)}
-      </span>{' '}
-      visitor
+    <span
+      aria-live='polite'
+      className='inline-block min-w-36'
+    >
+      {ordinal === null ? null : (
+        <>
+          You’re the{' '}
+          <span className='text-[var(--v2-text-strong)]'>
+            {formatOrdinal(ordinal)}
+          </span>{' '}
+          visitor
+        </>
+      )}
     </span>
   );
 }

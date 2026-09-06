@@ -3,7 +3,6 @@
 import { motion, useMotionValue, useReducedMotion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 
-const CURSOR_COLOR = 'var(--v2-cursor)';
 const CURSOR_SIZE_PX = 16;
 const CURSOR_MOVE_RESET_MS = 120;
 const MOVING_CURSOR_SCALE = 0.5;
@@ -67,9 +66,8 @@ export default function V2Cursor() {
   return (
     <motion.span
       aria-hidden='true'
-      className='pointer-events-none fixed top-0 left-0 z-[15000] rounded-full border transition-[opacity,transform] duration-150 ease-out'
+      className='pointer-events-none fixed top-0 left-0 z-[15500] rounded-full border border-white mix-blend-difference transition-[opacity,transform] duration-150 ease-out'
       style={{
-        borderColor: CURSOR_COLOR,
         height: `${CURSOR_SIZE_PX}px`,
         opacity,
         scale,

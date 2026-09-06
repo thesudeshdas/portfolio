@@ -110,7 +110,7 @@ export default async function WritingsSlugPage({
       <V2Experience
         initialWritingSlug={slug}
         initialWritingsPanelOpen
-        playInitialAnimation
+        playInitialAnimation={process.env.NODE_ENV === 'production'}
         projects={projects}
         skipCornerItemsAnimation
         writings={writings}

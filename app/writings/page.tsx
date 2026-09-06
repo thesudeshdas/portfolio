@@ -42,7 +42,7 @@ export default async function WritingsPage() {
   return (
     <V2Experience
       initialWritingsPanelOpen
-      playInitialAnimation
+      playInitialAnimation={process.env.NODE_ENV === 'production'}
       projects={projects}
       skipCornerItemsAnimation
       writings={writings}

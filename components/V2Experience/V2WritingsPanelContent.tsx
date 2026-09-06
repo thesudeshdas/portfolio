@@ -17,7 +17,7 @@ import { getScrollDepthPercentage, trackEvent } from '@/lib/analytics';
 import type { IV2Writing } from '@/types/writing/writing.types';
 
 import V2RevealGroup from './V2RevealGroup';
-import V2NewsletterForm from './V2NewsletterForm';
+import V2Newsletter from './V2Newsletter';
 import V2WritingShare from './V2WritingShare';
 import V2WritingVisitorOrdinal from './V2WritingVisitorOrdinal';
 
@@ -383,13 +383,13 @@ function MarkdownArticle({
         </section>
       ) : null}
 
+      <V2Newsletter />
+
       <RelatedWritings
         onSelect={onSelect}
         scrollRootRef={scrollRootRef}
         writings={writings}
       />
-
-      <V2NewsletterForm />
     </article>
   );
 }
@@ -567,8 +567,6 @@ export default function V2WritingsPanelContent({
                 </button>
               ))}
             </div>
-
-            <V2NewsletterForm />
           </motion.div>
         )}
       </AnimatePresence>

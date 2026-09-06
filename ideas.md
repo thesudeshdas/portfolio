@@ -24,6 +24,8 @@
 - Write a blog post breaking down how this portfolio site was conceived, designed, built, and evolved, including its technical and creative decisions.
 - Create an AI workflow section showing how I use AI, the files and systems behind my workflows, and the roles played by assistants such as Delilah and Cortana.
 - Add a Pink Panther character running somewhere in the background. Visitors can chase and catch it to unlock a reward.
+- Redesign the share modal with the existing Unsplash component as its visual and interaction reference.
+- Create one reusable modal shell component with a shared transition for opening and closing.
 
 ## V2 animation ledger
 
